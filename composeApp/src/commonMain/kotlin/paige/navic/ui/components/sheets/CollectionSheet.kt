@@ -141,7 +141,7 @@ fun CollectionSheet(
 			},
 			colors = colors
 		)
-		if (rating != null && onSetRating != null) {
+		if (rating != null && onSetRating != null && preferenceManager.showRatings) {
 			RatingRow(
 				rating = rating,
 				setRating = onSetRating

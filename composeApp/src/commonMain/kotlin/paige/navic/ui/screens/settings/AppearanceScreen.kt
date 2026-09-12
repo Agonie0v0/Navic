@@ -36,8 +36,10 @@ import navic.composeapp.generated.resources.option_choose_theme
 import navic.composeapp.generated.resources.option_cover_art_size
 import navic.composeapp.generated.resources.option_dynamic_theming
 import navic.composeapp.generated.resources.option_grid_items_per_row
+import navic.composeapp.generated.resources.option_show_ratings
 import navic.composeapp.generated.resources.option_use_marquee_text
 import navic.composeapp.generated.resources.subtitle_dynamic_theming
+import navic.composeapp.generated.resources.subtitle_show_ratings
 import navic.composeapp.generated.resources.title_appearance
 import navic.composeapp.generated.resources.title_choose_font
 import navic.composeapp.generated.resources.title_layout
@@ -209,13 +211,20 @@ fun SettingsAppearanceScreen() {
 						supportingContent = { Text(stringResource(Res.string.subtitle_dynamic_theming)) },
 						checked = preferenceManager.dynamicTheming,
 						onCheckedChange = { preferenceManager.dynamicTheming = it },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 4)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 5)
 					)
 					SettingsToggleItem(
 						content = { Text(stringResource(Res.string.option_alphabetical_scroll)) },
 						checked = preferenceManager.alphabeticalScroll,
 						onCheckedChange = { preferenceManager.alphabeticalScroll = it },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 4)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 5)
+					)
+					SettingsToggleItem(
+						content = { Text(stringResource(Res.string.option_show_ratings)) },
+						supportingContent = { Text(stringResource(Res.string.subtitle_show_ratings)) },
+						checked = preferenceManager.showRatings,
+						onCheckedChange = { preferenceManager.showRatings = it },
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 5)
 					)
 					SettingsChoiceItem(
 						content = { Text(stringResource(Res.string.option_use_marquee_text)) },
@@ -223,7 +232,7 @@ fun SettingsAppearanceScreen() {
 						selectedChoice = preferenceManager.marqueeSpeed,
 						onChoiceSelected = { preferenceManager.marqueeSpeed = it },
 						label = { it.name },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 4)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 3, count = 5)
 					)
 					SettingsChoiceItem(
 						content = { Text(stringResource(Res.string.option_animation_style)) },
@@ -231,7 +240,7 @@ fun SettingsAppearanceScreen() {
 						selectedChoice = preferenceManager.animationStyle,
 						onChoiceSelected = { preferenceManager.animationStyle = it },
 						label = { it.name },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 3, count = 4)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 4, count = 5)
 					)
 				}
 			}
