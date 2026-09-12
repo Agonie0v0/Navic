@@ -187,7 +187,7 @@ fun SongSheet(
 				},
 				colors = colors
 			)
-			if (rating != null && onSetRating != null && preferenceManager.showRatings) {
+			if (rating != null && onSetRating != null && preferenceManager.enableRatings) {
 				RatingRow(
 					rating = rating,
 					setRating = onSetRating
@@ -198,7 +198,7 @@ fun SongSheet(
 			HorizontalDivider(Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
 
 			Column(Modifier.verticalScroll(rememberScrollState())) {
-				if (onShare != null) {
+				if (onShare != null && preferenceManager.enableSharing) {
 					ListItem(
 						content = { Text(stringResource(Res.string.action_share)) },
 						leadingContent = { Icon(Icons.Outlined.Share, null) },
