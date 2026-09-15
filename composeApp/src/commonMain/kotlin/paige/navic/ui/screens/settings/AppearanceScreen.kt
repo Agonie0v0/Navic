@@ -57,6 +57,7 @@ import paige.navic.domain.models.settings.MarqueeSpeed
 import paige.navic.ui.components.common.SegmentedListItem
 import paige.navic.ui.components.common.SegmentedListItemDefaults
 import paige.navic.ui.components.layouts.NestedTopBar
+import paige.navic.ui.components.layouts.NestedTopBarDefaults
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screens.settings.components.SettingsChoiceItem
 import paige.navic.ui.screens.settings.components.SettingsGroup
@@ -75,6 +76,7 @@ fun SettingsAppearanceScreen() {
 	val platformContext = LocalPlatformContext.current
 
 	val isCompact = platformContext.sizeClass.widthSizeClass <= WindowWidthSizeClass.Compact
+	val hideBack = platformContext.sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
 
 	var showArtworkShapeDialog by rememberSaveable { mutableStateOf(false) }
 	var showArtistImageShapeDialog by rememberSaveable { mutableStateOf(false) }
@@ -84,7 +86,11 @@ fun SettingsAppearanceScreen() {
 		topBar = {
 			NestedTopBar(
 				title = { Text(stringResource(Res.string.title_appearance)) },
-				hideBack = platformContext.sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
+				navigationAction = {
+					if (!hideBack) {
+						NestedTopBarDefaults.NavigationAction()
+					}
+				}
 			)
 		}
 	) { innerPadding ->

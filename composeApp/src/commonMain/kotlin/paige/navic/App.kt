@@ -86,6 +86,7 @@ import paige.navic.ui.screens.artist.ArtistListScreen
 import paige.navic.ui.screens.collection.CollectionDetailScreen
 import paige.navic.ui.screens.genre.GenreDetailScreen
 import paige.navic.ui.screens.genre.GenreListScreen
+import paige.navic.ui.screens.imageView.ImageViewScreen
 import paige.navic.ui.screens.library.LibraryScreen
 import paige.navic.ui.screens.login.LoginScreen
 import paige.navic.ui.screens.lyrics.LyricsScreen
@@ -260,7 +261,8 @@ fun App() {
 				// version check is annoying to do on iOS
 				if (preferenceManager.checkForUpdates
 					&& platformContext.platformType == PlatformType.Android
-					&& !BuildInfo.FDROID) {
+					&& !BuildInfo.FDROID
+				) {
 					ChangelogSheet()
 				}
 			}
@@ -272,15 +274,18 @@ fun App() {
 private fun entryProvider(
 	backStack: NavBackStack<NavKey>
 ): (NavKey) -> (NavEntry<NavKey>) {
+	val fadeSpec = ContentTransform(fadeIn(), fadeOut())
+
 	val navtabMetadata = if (backStack.size == 1)
-		listPane("root") + transitionSpec {
-			ContentTransform(fadeIn(), fadeOut())
-		} + popTransitionSpec {
-			ContentTransform(fadeIn(), fadeOut())
-		} + predictivePopTransitionSpec {
-			ContentTransform(fadeIn(), fadeOut())
-		}
+		listPane("root")
+			.plus(transitionSpec { fadeSpec })
+			.plus(popTransitionSpec { fadeSpec })
+			.plus(predictivePopTransitionSpec { fadeSpec })
 	else listPane("root")
+	val imageViewMetadata = transitionSpec { ContentTransform(fadeIn(), ExitTransition.None) }
+		.plus(popTransitionSpec { ContentTransform(EnterTransition.None, fadeOut()) })
+		.plus(predictivePopTransitionSpec { ContentTransform(EnterTransition.None, fadeOut()) })
+
 	return androidx.navigation3.runtime.entryProvider {
 		// tabs
 		entry<Screen.Library>(metadata = navtabMetadata) {
@@ -315,6 +320,13 @@ private fun entryProvider(
 		// misc
 		entry<Screen.Login> {
 			LoginScreen()
+		}
+		entry<Screen.ImageView>(metadata = imageViewMetadata) { key ->
+			ImageViewScreen(
+				coverArtId = key.coverArtId,
+				title = key.title,
+				sharedTransitionKey = key.sharedTransitionKey
+			)
 		}
 		entry<Screen.NowPlaying>(
 			metadata = NowPlayingSceneStrategy.bottomSheet(maxWidth = Dp.Unspecified)
