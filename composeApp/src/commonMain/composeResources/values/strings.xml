@@ -206,6 +206,7 @@
 	<string name="option_list_view_mode_list">List</string>
 	<string name="option_enable_ratings">Enable ratings</string>
 	<string name="option_enable_sharing">Enable sharing</string>
+	<string name="option_enable_predictive_back_animations">Enable predictive back animations</string>
 
 	<string name="info_status_idle">Idle</string>
 	<string name="info_status_calculating">Calculating...</string>

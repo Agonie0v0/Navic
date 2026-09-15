@@ -1,6 +1,8 @@
 package paige.navic
 
 import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.tween
@@ -225,6 +227,7 @@ fun App() {
 							}
 						},
 						entryProvider = entryProvider(backStack),
+						sharedTransitionScope = this@SharedTransitionLayout,
 						transitionSpec = {
 							Material3Transitions.SharedXAxisEnterTransition(
 								density
@@ -240,13 +243,17 @@ fun App() {
 							)
 						},
 						predictivePopTransitionSpec = {
-							slideInHorizontally(
-								animationSpec = tween(300, easing = EaseOutQuart),
-								initialOffsetX = { -it }
-							) togetherWith slideOutHorizontally(
-								animationSpec = tween(300, easing = EaseOutQuart),
-								targetOffsetX = { it }
-							)
+							if (preferenceManager.enablePredictiveBackAnimations) {
+								slideInHorizontally(
+									animationSpec = tween(300, easing = EaseOutQuart),
+									initialOffsetX = { -it }
+								) togetherWith slideOutHorizontally(
+									animationSpec = tween(300, easing = EaseOutQuart),
+									targetOffsetX = { it }
+								)
+							} else {
+								ContentTransform(EnterTransition.None, ExitTransition.None)
+							}
 						}
 					)
 				}

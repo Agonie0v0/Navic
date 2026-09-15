@@ -34,6 +34,7 @@ import navic.composeapp.generated.resources.option_choose_app_icon
 import navic.composeapp.generated.resources.option_choose_theme
 import navic.composeapp.generated.resources.option_cover_art_size
 import navic.composeapp.generated.resources.option_dynamic_theming
+import navic.composeapp.generated.resources.option_enable_predictive_back_animations
 import navic.composeapp.generated.resources.option_enable_ratings
 import navic.composeapp.generated.resources.option_enable_sharing
 import navic.composeapp.generated.resources.option_grid_items_per_row
@@ -211,27 +212,33 @@ fun SettingsAppearanceScreen() {
 						supportingContent = { Text(stringResource(Res.string.subtitle_dynamic_theming)) },
 						checked = preferenceManager.dynamicTheming,
 						onCheckedChange = { preferenceManager.dynamicTheming = it },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 7)
 					)
 					SettingsToggleItem(
 						content = { Text(stringResource(Res.string.option_alphabetical_scroll)) },
 						checked = preferenceManager.alphabeticalScroll,
 						onCheckedChange = { preferenceManager.alphabeticalScroll = it },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 7)
+					)
+					SettingsToggleItem(
+						content = { Text(stringResource(Res.string.option_enable_predictive_back_animations)) },
+						checked = preferenceManager.enablePredictiveBackAnimations,
+						onCheckedChange = { preferenceManager.enablePredictiveBackAnimations = it },
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 7)
 					)
 					SettingsToggleItem(
 						content = { Text(stringResource(Res.string.option_enable_ratings)) },
 						supportingContent = { Text(stringResource(Res.string.subtitle_enable_ratings)) },
 						checked = preferenceManager.enableRatings,
 						onCheckedChange = { preferenceManager.enableRatings = it },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 3, count = 7)
 					)
 					SettingsToggleItem(
 						content = { Text(stringResource(Res.string.option_enable_sharing)) },
 						supportingContent = { Text(stringResource(Res.string.subtitle_enable_sharing)) },
 						checked = preferenceManager.enableSharing,
 						onCheckedChange = { preferenceManager.enableSharing = it },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 3, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 4, count = 7)
 					)
 					SettingsChoiceItem(
 						content = { Text(stringResource(Res.string.option_use_marquee_text)) },
@@ -239,7 +246,7 @@ fun SettingsAppearanceScreen() {
 						selectedChoice = preferenceManager.marqueeSpeed,
 						onChoiceSelected = { preferenceManager.marqueeSpeed = it },
 						label = { it.name },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 4, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 5, count = 7)
 					)
 					SettingsChoiceItem(
 						content = { Text(stringResource(Res.string.option_animation_style)) },
@@ -247,7 +254,8 @@ fun SettingsAppearanceScreen() {
 						selectedChoice = preferenceManager.animationStyle,
 						onChoiceSelected = { preferenceManager.animationStyle = it },
 						label = { it.name },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 5, count = 6)
+						// 6767676767
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 6, count = 7)
 					)
 				}
 			}
