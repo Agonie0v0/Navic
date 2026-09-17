@@ -73,9 +73,10 @@ jobs:
 
           TAG="${{ github.event.release.tag_name }}"
           DATE="${{ github.event.release.published_at }}"
-          ASSET="$(echo '${{ github.event.release.assets }}' | jq 'first(.assets[] | select(.browser_download_url|endswith(".ipa")))')"
-          ASSET_URL="$(echo $ASSET | jq '.browser_download_url')"
-          ASSET_SIZE="$(echo $ASSET | jq '.size')"
+          ASSETS='${{ toJson(github.event.release.assets) }}'
+          ASSET=$(echo "$ASSETS" | jq -c 'map(select(.browser_download_url | endswith(".ipa"))) | first')
+          ASSET_URL=$(echo "$ASSET" | jq -r '.browser_download_url')
+          ASSET_SIZE=$(echo "$ASSET" | jq -r '.size')
           VERSION="$(cat iosApp/Configuration/Config.xcconfig \
             | grep -w 'NAVIC_PROJECT_VERSION'
             | cut -d '=' -f2)"
@@ -88,7 +89,7 @@ jobs:
             --arg build_version "$BUILD_VERSION" \
             --arg date "$DATE" \
             --arg url "$ASSET_URL" \
-            --arg size "$ASSET_SIZE" \
+            --argjson size "$ASSET_SIZE" \
             '
             .apps[0].version = $version |
             .apps[0].buildVersion = $build_version |
