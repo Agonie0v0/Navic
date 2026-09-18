@@ -2,7 +2,7 @@
 
 <img title="Navic" alt="Navic" height="140" src="https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/assets/wordmark.png">
 
-A modern Subsonic music streaming app for Android and iOS.
+A modern (Open)Subsonic music streaming app for Android and iOS.
 
 [![Add to Obtainium](https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/assets/obtainium.svg)][ADD_TO_OBTAINIUM]
 [![AltSource provides links for most sideloading apps, like Feather](https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/assets/altsource.svg)][ALTSOURCE]
@@ -31,7 +31,9 @@ A modern Subsonic music streaming app for Android and iOS.
 * **Share music**: share links to music to your friends
 * **Android Auto**: control music playback through Android Auto
 * **Pretty lightweight**: Navic is fast and small (~10MB)
-* **Compatible**: supports older devices and most music servers
+* **Compatible**: supports older devices and most Subsonic
+  servers ([LMS](https://github.com/epoupon/lms), [gonic](https://github.com/sentriz/gonic), [Navidrome](https://navidrome.org),
+  etc.)
 
 <sub>*may need an OpenSubsonic-compatible server to work fully</sub>
 
