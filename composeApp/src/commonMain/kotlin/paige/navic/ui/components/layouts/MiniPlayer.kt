@@ -325,7 +325,7 @@ fun MiniPlayer(
 					},
 					supportingContent = {
 						if (song != null) {
-							MarqueeText(song.artistName)
+							MarqueeText(song.artistName ?: "[unknown artist]")
 						} else {
 							MarqueeText(stringResource(Res.string.info_not_playing))
 						}

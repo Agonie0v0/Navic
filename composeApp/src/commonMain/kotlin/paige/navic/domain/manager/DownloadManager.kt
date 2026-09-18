@@ -397,7 +397,10 @@ class DownloadManager(
 
 		request.execute { response ->
 			Logger.i("DownloadManager", "writing download for ${song.id}")
-			val path = storageManager.getDownloadPath(song.id, extension)
+			val path = storageManager.getDownloadPath(
+				song.id,
+				extension ?: "mp3" // TODO: idk how to handle this being null lol
+			)
 			storageManager.saveFile(path, response.bodyAsChannel())
 			Logger.i("DownloadManager", "wrote download for ${song.id}")
 

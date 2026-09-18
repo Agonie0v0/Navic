@@ -209,7 +209,7 @@ fun LyricsShareSheet(
 							)
 
 							Text(
-								text = song.artistName,
+								text = song.artistName ?: "[unknown artist]",
 								style = MaterialTheme.typography.bodyMedium
 							)
 						}

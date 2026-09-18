@@ -8,8 +8,8 @@
       "name": "Navic",
       "bundleIdentifier": "paige.Navic",
       "developerName": "Paige",
-      "localizedDescription": "A modern Navidrome client for Android and iOS",
-      "subtitle": "A modern Navidrome client",
+      "localizedDescription": "Subsonic music streaming app for Android and iOS",
+      "subtitle": "Subsonic music streaming app",
       "tintColor": "ffffff",
       "iconURL": "https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/icons/ios.png",
       "versions": [
