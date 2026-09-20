@@ -187,6 +187,7 @@
 	<string name="option_cover_art_quality">Cover art quality</string>
 	<string name="option_palette_style">Palette style</string>
 	<string name="option_palette_specification">Palette specification</string>
+	<string name="option_use_amoled_theme">Use AMOLED theme</string>
 	<string name="option_explicit_playback">Explicit content playback</string>
 	<string name="option_explicit_playback_allowed">Allowed</string>
 	<string name="option_explicit_playback_skip">Skip explicit songs</string>
