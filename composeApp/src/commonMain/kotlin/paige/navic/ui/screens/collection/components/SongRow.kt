@@ -208,7 +208,9 @@ fun CollectionDetailScreenSongRow(
 						),
 						style = MaterialTheme.typography.bodySmall
 					)
-					song.userRating?.let { SmallRatingRow(rating = it) }
+					if (song.userRating != null && song.userRating != 0) {
+						SmallRatingRow(rating = song.userRating)
+					}
 				}
 			},
 			trailingContent = {
