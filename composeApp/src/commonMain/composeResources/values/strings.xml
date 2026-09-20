@@ -211,7 +211,7 @@
 
 	<string name="info_status_idle">Idle</string>
 	<string name="info_status_calculating">Calculating...</string>
-	<string name="info_status_downloading">Downloading in progress...</string>
+	<string name="info_status_downloading">Download in progress...</string>
 	<string name="info_sync_never">Never</string>
 	<string name="info_sync_just_now">Just now</string>
 	<string name="info_bulk_download_warning">Are you sure you want to download every album by %1$s?\nThis may require a significant amount of storage and data.</string>
@@ -493,4 +493,7 @@
 	<string name="info_equaliser_mode_not_builtin">Please adjust the external equaliser using its dedicated app.</string>
 	<string name="info_lyric_provider_disclaimer">Enabling LRCLIB and/or LyricsPlus will make requests to external and unaffiliated web services.</string>
 	<string name="info_duration_left">%1$s left</string>
+	<string name="dialog_notification_permission_title">Enable Notifications</string>
+	<string name="dialog_notification_permission_message">Navic needs permission to show notifications so you can track media downloads and library synchronization progress in the background.</string>
+	<string name="action_allow">Allow</string>
 </resources>
