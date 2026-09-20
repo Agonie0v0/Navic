@@ -3,6 +3,8 @@ package paige.navic.ui.components.common
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,7 +27,6 @@ fun RatingRow(
 	rating: Int,
 	setRating: (Int) -> Unit
 ) {
-
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
@@ -58,6 +59,23 @@ fun RatingRow(
 					tint = MaterialTheme.colorScheme.primary
 				)
 			}
+		}
+	}
+}
+
+@Composable
+fun SmallRatingRow(
+	rating: Int
+) {
+	Row(
+		modifier = Modifier.offset(x = (-2).dp)
+	) {
+		(1..5).forEach { idx ->
+			Icon(
+				imageVector = if (idx <= rating) Icons.Filled.Star else Icons.Outlined.Star,
+				contentDescription = pluralStringResource(Res.plurals.count_rate_stars, idx, idx),
+				modifier = Modifier.size(18.dp)
+			)
 		}
 	}
 }

@@ -64,6 +64,7 @@ import paige.navic.ui.components.common.CoverArt
 import paige.navic.ui.components.common.MarqueeText
 import paige.navic.ui.components.common.SegmentedListItem
 import paige.navic.ui.components.common.SegmentedListItemDefaults
+import paige.navic.ui.components.common.SmallRatingRow
 import paige.navic.ui.components.common.SwipeToDismissBox
 import paige.navic.ui.components.common.Waveform
 import paige.navic.ui.components.dialogs.QueueDuplicateDialog
@@ -167,6 +168,7 @@ fun CollectionDetailScreenSongRow(
 				count = count,
 				dismissDirection = dismissState.dismissDirection
 			),
+			verticalAlignment = Alignment.CenterVertically,
 			leadingContent = {
 				if (isPlaylist)
 					CoverArt(
@@ -206,6 +208,7 @@ fun CollectionDetailScreenSongRow(
 						),
 						style = MaterialTheme.typography.bodySmall
 					)
+					song.userRating?.let { SmallRatingRow(rating = it) }
 				}
 			},
 			trailingContent = {

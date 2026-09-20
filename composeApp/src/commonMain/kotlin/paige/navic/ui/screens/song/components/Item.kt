@@ -2,6 +2,7 @@ package paige.navic.ui.screens.song.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,6 +48,7 @@ import paige.navic.icons.outlined.Queue
 import paige.navic.icons.outlined.QueuePlayNext
 import paige.navic.ui.components.common.CoverArt
 import paige.navic.ui.components.common.MarqueeText
+import paige.navic.ui.components.common.SmallRatingRow
 import paige.navic.ui.components.common.SwipeToDismissBox
 import paige.navic.ui.components.sheets.SongSheet
 import paige.navic.ui.navigation.Screen
@@ -125,6 +127,7 @@ fun SongListScreenItem(
 			ListItem(
 				onClick = onClick,
 				onLongClick = onSelect,
+				verticalAlignment = Alignment.CenterVertically,
 				content = {
 					MarqueeText(
 						text = buildAnnotatedString {
@@ -138,12 +141,15 @@ fun SongListScreenItem(
 					)
 				},
 				supportingContent = {
-					MarqueeText(
-						buildSongInfoString(
-							song = song,
-							onClickArtist = { backStack.add(Screen.ArtistDetail(it)) }
+					Column {
+						MarqueeText(
+							buildSongInfoString(
+								song = song,
+								onClickArtist = { backStack.add(Screen.ArtistDetail(it)) }
+							)
 						)
-					)
+						song.userRating?.let { SmallRatingRow(rating = it) }
+					}
 				},
 				leadingContent = {
 					CoverArt(
