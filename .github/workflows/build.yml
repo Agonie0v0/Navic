@@ -49,7 +49,7 @@ jobs:
 
       - name: Build with Gradle (release)
         id: build_release
-        if: github.event_name == 'push' && env.SIGNING_KEY_ALIAS
+        if: github.repository == 'ssalggnikool/Navic' && github.event_name == 'push' && env.SIGNING_KEY_ALIAS
         env:
           SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
