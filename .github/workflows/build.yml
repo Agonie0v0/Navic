@@ -82,6 +82,7 @@ jobs:
 
   build-ios:
     name: iOS
+    if: github.repository == 'ssalggnikool/Navic'
     runs-on: macos-26
     steps:
       - name: Checkout repository
