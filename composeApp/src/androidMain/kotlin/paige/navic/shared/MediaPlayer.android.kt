@@ -18,6 +18,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.MediaMetadata.FOLDER_TYPE_MIXED
 import androidx.media3.common.PlaybackParameters
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
@@ -97,10 +98,13 @@ import paige.navic.domain.models.DomainSongCollection
 import paige.navic.domain.models.settings.EqualiserMode
 import paige.navic.domain.models.settings.ReplayGainMode
 import paige.navic.domain.repositories.PlayerStateRepository
+import paige.navic.domain.repositories.LyricsRepository
 import paige.navic.domain.repositories.SearchRepository
 import paige.navic.domain.repositories.SongRepository
 import paige.navic.exoplayer.AudioGainProcessor
 import paige.navic.exoplayer.ExoPlayerCoilBitmapLoader
+import paige.navic.statusbar.StatusBarLyricsController
+import paige.navic.statusbar.StatusBarLyricsNotificationProvider
 import paige.navic.ui.core.PlayerUiState
 import paige.navic.util.Logger
 import java.io.File
@@ -124,6 +128,7 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
 	private val preferenceManager: PreferenceManager by inject()
 	private val equaliserManager: EqualiserManager by inject()
 	private val imageLoader: ImageLoader by inject()
+	private val lyricsRepository: LyricsRepository by inject()
 
 	private val albumDao: AlbumDao by inject()
 	private val artistDao: ArtistDao by inject()
@@ -135,6 +140,8 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
 	private val searchResultsCache = mutableMapOf<String, List<Any>>()
 
 	private var equaliser: Equalizer? = null
+	private var statusBarLyricsController: StatusBarLyricsController? = null
+	private var statusBarLyricsProvider: StatusBarLyricsNotificationProvider? = null
 	private var audioEffectSessionId: Int = C.AUDIO_SESSION_ID_UNSET
 	private var currentAudioSessionId: Int = C.AUDIO_SESSION_ID_UNSET
 	private var equaliserMode: EqualiserMode = EqualiserMode.Disabled
@@ -151,10 +158,13 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
 			.setBackBuffer(10_000, true)
 			.build()
 
-		val notificationProvider = DefaultMediaNotificationProvider.Builder(this)
+		val notificationProvider = StatusBarLyricsNotificationProvider(
+			DefaultMediaNotificationProvider.Builder(this)
 			.build().apply {
 				setSmallIcon(resourceProvider.icNavic)
 			}
+		)
+		statusBarLyricsProvider = notificationProvider
 
 		val httpDataSourceFactory = KtorDataSource.Factory(sessionManager.api.httpClient)
 		val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
@@ -274,6 +284,13 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
 				applyEqualiserMode(equaliserMode, audioSessionId)
 			}
 		})
+		statusBarLyricsController = StatusBarLyricsController(
+			scope = serviceScope,
+			songDao = songDao,
+			lyricsRepository = lyricsRepository,
+			preferenceManager = preferenceManager,
+			notificationProvider = notificationProvider
+		).also { it.attach(player) }
 
 		scope.launch(Dispatchers.Main) {
 			equaliserManager.config.collect { config ->
@@ -299,6 +316,9 @@ class PlaybackService : MediaLibraryService(), KoinComponent {
 		closeAudioEffectSession(audioEffectSessionId)
 		releaseEqualiser()
 		scrobbleManager?.release()
+		statusBarLyricsController?.release()
+		statusBarLyricsController = null
+		statusBarLyricsProvider?.release()
 		serviceScope.cancel()
 		scope.cancel()
 		stopForeground(STOP_FOREGROUND_REMOVE)

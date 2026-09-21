@@ -54,6 +54,7 @@ class PreferenceManager(
 	var lyricsKeepAlive by preference(true)
 	var lyricsBlur by preference(false)
 	var lyricsBrightInactive by preference(false)
+	var statusBarLyricsOffsetMs by preference(0)
 	var enableScrobbling by preference(true)
 	var scrobblePercentage by preference(.5f)
 	var minDurationToScrobble by preference(30f)
