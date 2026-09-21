@@ -180,7 +180,8 @@ fun App() {
 		) {
 			NavicTheme {
 				Row(modifier = Modifier.fillMaxSize()) {
-					if (platformContext.sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium) {
+					if (platformContext.sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
+						&& Screen.Login !in backStack) {
 						SideBar()
 					}
 					Scaffold(
