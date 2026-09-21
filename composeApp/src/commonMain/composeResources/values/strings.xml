@@ -90,6 +90,7 @@
 	<string name="subtitle_dynamic_theming">Dynamically theme the album and artist view based on the cover art</string>
 	<string name="subtitle_app_icon_designer">Designed by: %1$s</string>
 	<string name="subtitle_local_network_denied">You need to grant Navic access to your local network in order for your server to be reachable.</string>
+	<string name="subtitle_notifications_denied">You need to grant Navic notification permissions to receive download and sync notifications.</string>
 	<string name="subtitle_equaliser">Tune &amp; enhance audio</string>
 	<string name="subtitle_equaliser_disabled">Not available when audio offload is enabled</string>
 	<string name="subtitle_configure_lyric_providers">Choose where to fetch lyrics from</string>
@@ -420,6 +421,7 @@
 	<string name="notice_login_suggestion">Did you mean...</string>
 	<string name="notice_queue_duplicate">This song is already in the queue. Do you want to add it again?</string>
 	<string name="notice_local_network_denied">Permission denied</string>
+	<string name="notice_notifications_denied">Permission denied</string>
 	<string name="notice_link_confirmation">This link is taking you to the following website:</string>
 
 	<string name="info_app_version">Navic %1$s</string>
@@ -500,7 +502,5 @@
 	<string name="info_lyric_provider_disclaimer">Enabling LRCLIB and/or LyricsPlus will make requests to external and unaffiliated web services.</string>
 	<string name="info_starred_songs">Starred songs</string>
 	<string name="info_duration_left">%1$s left</string>
-	<string name="dialog_notification_permission_title">Enable Notifications</string>
-	<string name="dialog_notification_permission_message">Navic needs permission to show notifications so you can track media downloads and library synchronization progress in the background.</string>
 	<string name="action_allow">Allow</string>
 </resources>
