@@ -1,0 +1,167 @@
+name: Sync upstream and release Android
+
+on:
+  schedule:
+    - cron: "37 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: Rebuild the latest upstream release
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-android
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'Agonie0v0/Navic'
+    runs-on: ubuntu-latest
+    outputs:
+      should_release: ${{ steps.sync.outputs.should_release }}
+      release_tag: ${{ steps.sync.outputs.release_tag }}
+      upstream_tag: ${{ steps.sync.outputs.upstream_tag }}
+      target_sha: ${{ steps.sync.outputs.target_sha }}
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Merge latest upstream release
+        id: sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE_RELEASE: ${{ inputs.force_release || false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git remote add upstream https://github.com/ssalggnikool/Navic.git
+          git fetch upstream --tags --force
+
+          upstream_tag=$(gh api 'repos/ssalggnikool/Navic/releases?per_page=20' \
+            --jq 'map(select(.draft == false))[0].tag_name')
+          if [[ -z "$upstream_tag" || "$upstream_tag" == "null" ]]; then
+            echo "No published upstream release found"
+            exit 1
+          fi
+
+          release_tag="${upstream_tag}-statusbar"
+          upstream_commit=$(git rev-parse "${upstream_tag}^{commit}")
+
+          if git merge-base --is-ancestor "$upstream_commit" HEAD \
+            && gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            && [[ "$FORCE_RELEASE" != "true" ]]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Fork already contains $upstream_tag and $release_tag exists"
+            exit 0
+          fi
+
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git merge --no-edit "$upstream_commit"
+
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "upstream_tag=$upstream_tag" >> "$GITHUB_OUTPUT"
+          echo "target_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK
+        if: steps.sync.outputs.should_release == 'true'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Set up Gradle
+        if: steps.sync.outputs.should_release == 'true'
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Build unsigned release APK
+        if: steps.sync.outputs.should_release == 'true'
+        shell: bash
+        run: |
+          ./gradlew :androidApp:assembleRelease --stacktrace
+          apk=$(find androidApp/build/outputs/apk/release -name '*.apk' -print -quit)
+          test -n "$apk"
+          cp "$apk" Navic-unsigned.apk
+
+      - name: Push merged source
+        if: steps.sync.outputs.should_release == 'true'
+        run: git push origin HEAD:master
+
+      - name: Upload unsigned APK
+        if: steps.sync.outputs.should_release == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: navic-unsigned
+          path: Navic-unsigned.apk
+          retention-days: 1
+          if-no-files-found: error
+
+  sign-and-release:
+    needs: build
+    if: needs.build.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download unsigned APK
+        uses: actions/download-artifact@v7
+        with:
+          name: navic-unsigned
+
+      - name: Sign APK
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          test -n "$KEYSTORE_PASSWORD"
+
+          printf '%s' "$KEYSTORE" | base64 --decode > release.keystore
+          apksigner=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
+          test -n "$apksigner"
+
+          "$apksigner" sign \
+            --ks release.keystore \
+            --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD \
+            --key-pass env:KEY_PASSWORD \
+            --out Navic-statusbar.apk \
+            Navic-unsigned.apk
+          "$apksigner" verify --verbose Navic-statusbar.apk
+
+      - name: Remove signing key
+        if: always()
+        run: rm -f release.keystore
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.build.outputs.release_tag }}
+          UPSTREAM_TAG: ${{ needs.build.outputs.upstream_tag }}
+          TARGET_SHA: ${{ needs.build.outputs.target_sha }}
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" Navic-statusbar.apk \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" Navic-statusbar.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$TARGET_SHA" \
+              --title "$RELEASE_TAG" \
+              --notes "Navic $UPSTREAM_TAG with status bar lyrics support."
+          fi
