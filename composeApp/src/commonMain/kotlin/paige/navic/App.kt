@@ -82,6 +82,7 @@ import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screens.album.AlbumListScreen
 import paige.navic.ui.screens.artist.ArtistDetailScreen
 import paige.navic.ui.screens.artist.ArtistListScreen
+import paige.navic.ui.screens.chat.ChatScreen
 import paige.navic.ui.screens.collection.CollectionDetailScreen
 import paige.navic.ui.screens.genre.GenreDetailScreen
 import paige.navic.ui.screens.genre.GenreListScreen
@@ -321,6 +322,9 @@ private fun entryProvider(
 				title = key.title,
 				sharedTransitionKey = key.sharedTransitionKey
 			)
+		}
+		entry<Screen.Chat> {
+			ChatScreen()
 		}
 		entry<Screen.NowPlaying>(
 			metadata = NowPlayingSceneStrategy.bottomSheet(maxWidth = Dp.Unspecified)
