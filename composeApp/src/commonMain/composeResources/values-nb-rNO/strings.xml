@@ -432,4 +432,6 @@
     <string name="option_title_preamp">Forforsterkerinnstillinger</string>
     <string name="subtitle_audio_effects">Juster lydeffekter for musikken</string>
     <string name="option_preamp_tip">Setter du forforsterker valgene til veldig høye verdier kan det føre til forvrengning av lyden.</string>
+    <string name="option_hide_bottom_bar_if_idle">Gjem minispiller hvis ingenting spilles</string>
+    <string name="action_reset_dont_show_agains">Nullstill alle «Ikke vis igjen» valg</string>
 </resources>

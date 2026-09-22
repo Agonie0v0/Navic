@@ -463,4 +463,5 @@
     <string name="option_dynamic_replaygain_tip">Impostando il ReplayGain a Dinamico userà il gain dell'album se si sta riproducendo un album. Altrimenti, verrà usato il gain della traccia.</string>
     <string name="action_scroll_down">Scendi</string>
     <string name="action_reset_dont_show_agains">Resetta il non far vedere di nuovo i popup</string>
+    <string name="option_hide_bottom_bar_if_idle">Nascondi se idle</string>
 </resources>
