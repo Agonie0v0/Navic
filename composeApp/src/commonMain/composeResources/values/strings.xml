@@ -68,6 +68,7 @@
 	<string name="title_codeberg">Codeberg</string>
 	<string name="title_link_confirmation">Leaving Navic</string>
 	<string name="title_audio_effects">Audio effects</string>
+	<string name="title_chat">Chat</string>
 
 	<string name="subtitle_appearance">Themes, colours, layout, app icon</string>
 	<string name="subtitle_now_playing">Customise the now playing &amp; lyrics views</string>
@@ -402,6 +403,7 @@
 	<string name="action_visit_site">Visit site</string>
 	<string name="action_scroll_down">Scroll down</string>
 	<string name="action_reset_dont_show_agains">Reset "don't show again" dialogs</string>
+	<string name="action_send_message">Send message</string>
 	<string name="subtitle_rebuild_database">Wipes all local metadata and forces a fresh sync</string>
 
 	<string name="notice_deleted_playlist">Playlist deleted.</string>
@@ -503,6 +505,7 @@
 	<string name="info_lyric_provider_disclaimer">Enabling LRCLIB and/or LyricsPlus will make requests to external and unaffiliated web services.</string>
 	<string name="info_starred_songs">Starred songs</string>
 	<string name="info_duration_left">%1$s left</string>
+	<string name="info_chat_unsupported">Your server does not support this feature, or you are offline</string>
 	<string name="action_allow">Allow</string>
 	<string name="option_header_key">Header key</string>
 	<string name="option_header_value">Header value</string>
