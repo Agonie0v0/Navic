@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Merge latest upstream master
+      - name: Merge latest upstream release
         id: sync
         env:
           GH_TOKEN: ${{ github.token }}
@@ -44,7 +44,6 @@ jobs:
           set -euo pipefail
 
           git remote add upstream https://github.com/ssalggnikool/Navic.git
-          git fetch upstream master --tags --force
 
           upstream_tag=$(gh api 'repos/ssalggnikool/Navic/releases?per_page=20' \
             --jq 'map(select(.draft == false))[0].tag_name')
@@ -53,16 +52,32 @@ jobs:
             exit 1
           fi
 
+          git fetch upstream tag "$upstream_tag" --force
+          upstream_commit=$(git rev-parse --verify "${upstream_tag}^{commit}")
+          release_tag="${upstream_tag}-statusbar"
+          published_tags=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[].tag_name')
+          already_published=false
+          while IFS= read -r published_tag; do
+            if [[ "$published_tag" == "$release_tag" || "$published_tag" == "$release_tag-"* ]]; then
+              already_published=true
+              break
+            fi
+          done <<< "$published_tags"
+
+          if git merge-base --is-ancestor "$upstream_commit" HEAD \
+            && [[ "$already_published" == "true" && "$FORCE_RELEASE" != "true" ]]; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Upstream release $upstream_tag is already published"
+            exit 0
+          fi
+
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git merge --no-edit upstream/master
+          git merge --no-edit "$upstream_commit"
 
-          release_tag="${upstream_tag}-statusbar-$(git rev-parse --short HEAD)"
-          if gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
-            && [[ "$FORCE_RELEASE" != "true" ]]; then
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-            echo "Fork source and $release_tag are already published"
-            exit 0
+          if [[ "$already_published" == "true" ]]; then
+            release_tag="${release_tag}-$(git rev-parse --short HEAD)"
           fi
 
           echo "should_release=true" >> "$GITHUB_OUTPUT"
@@ -170,5 +185,5 @@ jobs:
               --target "$TARGET_SHA" \
               --title "$RELEASE_TAG" \
               --latest \
-              --notes "Navic $UPSTREAM_TAG plus the latest upstream master, with status bar lyrics and complete Simplified Chinese settings translations."
+              --notes "Navic $UPSTREAM_TAG with status bar lyrics and complete Simplified Chinese settings translations."
           fi
