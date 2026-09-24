@@ -34,6 +34,8 @@ import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_delete
 import navic.composeapp.generated.resources.action_new
 import navic.composeapp.generated.resources.option_custom_headers
+import navic.composeapp.generated.resources.option_header_key
+import navic.composeapp.generated.resources.option_header_value
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import paige.navic.domain.manager.PreferenceManager
@@ -160,7 +162,7 @@ private fun HeaderRow(
 				TextField(
 					value = key,
 					onValueChange = onSetKey,
-					placeholder = { Text("Key") },
+					placeholder = { Text(stringResource(Res.string.option_header_key)) },
 					modifier = Modifier.fillMaxWidth(),
 					singleLine = true,
 					colors = TextFieldDefaults.colors(
@@ -172,7 +174,7 @@ private fun HeaderRow(
 				TextField(
 					value = value,
 					onValueChange = onSetValue,
-					placeholder = { Text("Value") },
+					placeholder = { Text(stringResource(Res.string.option_header_value)) },
 					modifier = Modifier.fillMaxWidth(),
 					singleLine = true,
 					colors = TextFieldDefaults.colors(

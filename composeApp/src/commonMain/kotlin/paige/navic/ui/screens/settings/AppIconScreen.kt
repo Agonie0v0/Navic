@@ -76,7 +76,7 @@ fun SettingsAppIconScreen() {
 									appIconManager.setVariant(variant)
 								}
 							},
-							content = { Text(variant.name) },
+							content = { Text(stringResource(variant.displayName)) },
 							supportingContent = {
 								Text(
 									text = stringResource(

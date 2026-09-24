@@ -1,0 +1,7 @@
+<resources>
+    <string name="channel_library_sync">音乐库同步</string>
+    <string name="channel_library_sync_description">音乐库同步进度通知</string>
+    <string name="channel_music_downloads">音乐下载</string>
+    <string name="channel_music_downloads_description">音乐文件和媒体下载通知</string>
+    <string name="notice_app_icon_changed">应用图标已更改，正在关闭应用。</string>
+</resources>

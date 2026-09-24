@@ -73,7 +73,7 @@ fun ArtworkShapeDialog(
 									shape.decreasedShape
 								)
 						)
-						Text(text = shape.name)
+						Text(text = stringResource(shape.displayName))
 					}
 				}
 			}

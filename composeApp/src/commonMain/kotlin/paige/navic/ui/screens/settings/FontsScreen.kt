@@ -27,6 +27,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import navic.composeapp.generated.resources.Res
+import navic.composeapp.generated.resources.info_font_preview
+import navic.composeapp.generated.resources.option_google_sans_font
+import navic.composeapp.generated.resources.option_system_font
 import navic.composeapp.generated.resources.title_choose_font
 import navic.composeapp.generated.resources.title_fonts_inbuilt
 import org.jetbrains.compose.resources.StringResource
@@ -86,7 +89,7 @@ private fun LazyListScope.inbuiltFonts(
 	heading(Res.string.title_fonts_inbuilt)
 	item {
 		FontRow(
-			fontName = "System",
+			fontName = stringResource(Res.string.option_system_font),
 			fontFamily = FontFamily.Default,
 			index = 0,
 			count = 2,
@@ -96,7 +99,7 @@ private fun LazyListScope.inbuiltFonts(
 	}
 	item {
 		FontRow(
-			fontName = "Google Sans",
+			fontName = stringResource(Res.string.option_google_sans_font),
 			fontFamily = googleSans(),
 			index = 1,
 			count = 2,
@@ -138,7 +141,7 @@ private fun FontRow(
 		},
 		supportingContent = {
 			Text(
-				"The quick brown fox jumps over the lazy dog",
+				stringResource(Res.string.info_font_preview),
 				fontFamily = fontFamily,
 				modifier = Modifier.semantics { hideFromAccessibility() }
 			)

@@ -67,6 +67,11 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git merge --no-edit "$upstream_commit"
 
+          if [[ "$FORCE_RELEASE" == "true" ]] \
+            && gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            release_tag="${release_tag}-$(git rev-parse --short HEAD)"
+          fi
+
           echo "should_release=true" >> "$GITHUB_OUTPUT"
           echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
           echo "upstream_tag=$upstream_tag" >> "$GITHUB_OUTPUT"
@@ -79,6 +84,10 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: gradle
+
+      - name: Verify Simplified Chinese coverage
+        if: steps.sync.outputs.should_release == 'true'
+        run: python3 .github/scripts/check-zh-coverage.py
 
       - name: Set up Gradle
         if: steps.sync.outputs.should_release == 'true'
@@ -163,5 +172,6 @@ jobs:
               --repo "$GITHUB_REPOSITORY" \
               --target "$TARGET_SHA" \
               --title "$RELEASE_TAG" \
-              --notes "Navic $UPSTREAM_TAG with status bar lyrics support."
+              --latest \
+              --notes "Navic $UPSTREAM_TAG with status bar lyrics and complete Simplified Chinese settings translations."
           fi

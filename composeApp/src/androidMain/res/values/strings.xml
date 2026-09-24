@@ -1,0 +1,7 @@
+<resources>
+    <string name="channel_library_sync">Library Synchronization</string>
+    <string name="channel_library_sync_description">Notifications for database synchronization updates</string>
+    <string name="channel_music_downloads">Music Downloads</string>
+    <string name="channel_music_downloads_description">Notifications for music file and media downloads</string>
+    <string name="notice_app_icon_changed">App icon changed. Closing the app.</string>
+</resources>

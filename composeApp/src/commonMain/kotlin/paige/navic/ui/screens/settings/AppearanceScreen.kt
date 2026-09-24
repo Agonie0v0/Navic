@@ -114,7 +114,7 @@ fun SettingsAppearanceScreen() {
 							backStack.add(Screen.Settings.Fonts)
 						},
 						content = { Text(stringResource(Res.string.title_choose_font)) },
-						supportingContent = { Text(preferenceManager.font.displayName) }
+						supportingContent = { Text(stringResource(preferenceManager.font.displayName)) }
 					)
 					SegmentedListItem(
 						shapes = SegmentedListItemDefaults.segmentedShapes(
@@ -137,7 +137,7 @@ fun SettingsAppearanceScreen() {
 								backStack.add(Screen.Settings.AppIcon)
 							},
 							content = { Text(stringResource(Res.string.option_choose_app_icon)) },
-							supportingContent = { Text(preferenceManager.appIconVariant.name) }
+							supportingContent = { Text(stringResource(preferenceManager.appIconVariant.displayName)) }
 						)
 					}
 				}
@@ -150,7 +150,7 @@ fun SettingsAppearanceScreen() {
 						),
 						onClick = { showArtworkShapeDialog = true },
 						content = { Text(stringResource(Res.string.option_artwork_shape)) },
-						supportingContent = { Text(preferenceManager.coverArtShape.name) },
+						supportingContent = { Text(stringResource(preferenceManager.coverArtShape.displayName)) },
 						trailingContent = {
 							val shape = preferenceManager.coverArtShape.decreasedShape
 							Box(
@@ -169,7 +169,7 @@ fun SettingsAppearanceScreen() {
 						),
 						onClick = { showArtistImageShapeDialog = true },
 						content = { Text(stringResource(Res.string.option_artist_image_shape)) },
-						supportingContent = { Text(preferenceManager.artistImageShape.name) },
+						supportingContent = { Text(stringResource(preferenceManager.artistImageShape.displayName)) },
 						trailingContent = {
 							val shape = preferenceManager.artistImageShape.decreasedShape
 							Box(
@@ -242,7 +242,7 @@ fun SettingsAppearanceScreen() {
 						choices = MarqueeSpeed.entries.toImmutableList(),
 						selectedChoice = preferenceManager.marqueeSpeed,
 						onChoiceSelected = { preferenceManager.marqueeSpeed = it },
-						label = { it.name },
+						label = { stringResource(it.displayName) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(index = 4, count = 6)
 					)
 					SettingsChoiceItem(
@@ -250,7 +250,7 @@ fun SettingsAppearanceScreen() {
 						choices = AnimationStyle.entries.toImmutableList(),
 						selectedChoice = preferenceManager.animationStyle,
 						onChoiceSelected = { preferenceManager.animationStyle = it },
-						label = { it.name },
+						label = { stringResource(it.displayName) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(index = 5, count = 6)
 					)
 				}

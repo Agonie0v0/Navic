@@ -504,4 +504,20 @@
 	<string name="info_starred_songs">Starred songs</string>
 	<string name="info_duration_left">%1$s left</string>
 	<string name="action_allow">Allow</string>
+	<string name="option_header_key">Header key</string>
+	<string name="option_header_value">Header value</string>
+	<string name="option_system_font">System</string>
+	<string name="info_font_preview">The quick brown fox jumps over the lazy dog</string>
+	<string name="option_custom_font">Custom</string>
+	<string name="option_google_sans_font">Google Sans</string>
+	<string name="option_app_icon_default">Default</string>
+	<string name="option_app_icon_inverted">Inverted</string>
+	<string name="option_shape_square">Square</string>
+	<string name="option_shape_soft">Soft</string>
+	<string name="option_shape_curved">Curved</string>
+	<string name="option_shape_circle">Circle</string>
+	<string name="option_marquee_disabled">Disabled</string>
+	<string name="option_marquee_slow">Slow</string>
+	<string name="option_marquee_medium">Medium</string>
+	<string name="option_marquee_fast">Fast</string>
 </resources>

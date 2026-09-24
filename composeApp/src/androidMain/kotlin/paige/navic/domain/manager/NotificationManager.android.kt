@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import paige.navic.R
 import paige.navic.di.ActivityProvider
 import paige.navic.di.ResourceProvider
 
@@ -29,18 +30,18 @@ actual class NotificationManager(
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			val syncChannel = NotificationChannel(
 				CHANNEL_SYNC_ID,
-				"Library Synchronization",
+				context.getString(R.string.channel_library_sync),
 				AndroidNotificationManager.IMPORTANCE_LOW
 			).apply {
-				description = "Notifications for database synchronization updates"
+				description = context.getString(R.string.channel_library_sync_description)
 			}
 
 			val downloadChannel = NotificationChannel(
 				CHANNEL_DOWNLOAD_ID,
-				"Music Downloads",
+				context.getString(R.string.channel_music_downloads),
 				AndroidNotificationManager.IMPORTANCE_LOW
 			).apply {
-				description = "Notifications for music file and media downloads"
+				description = context.getString(R.string.channel_music_downloads_description)
 			}
 
 			notificationManager.createNotificationChannel(syncChannel)

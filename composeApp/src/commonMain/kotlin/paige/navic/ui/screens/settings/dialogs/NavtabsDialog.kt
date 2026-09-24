@@ -131,7 +131,7 @@ private fun NavtabRow(
 					onToggleVisibility()
 				}
 			)
-			Text(tab.id.name.lowercase().replaceFirstChar { it.uppercase() })
+			Text(stringResource(tab.id.displayName))
 			IconButton(
 				modifier = Modifier.dragHandle(
 					state = state,
