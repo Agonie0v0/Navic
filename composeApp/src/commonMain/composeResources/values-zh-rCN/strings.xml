@@ -470,4 +470,7 @@
     <string name="option_marquee_slow">慢速</string>
     <string name="option_marquee_medium">中速</string>
     <string name="option_marquee_fast">快速</string>
+    <string name="title_chat">聊天</string>
+    <string name="action_send_message">发送消息</string>
+    <string name="info_chat_unsupported">服务器不支持此功能，或您当前处于离线状态</string>
 </resources>

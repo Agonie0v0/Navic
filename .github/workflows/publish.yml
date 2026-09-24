@@ -12,6 +12,7 @@ concurrency:
 jobs:
   testflight:
     name: TestFlight
+    if: github.repository == 'ssalggnikool/Navic'
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -57,6 +58,7 @@ jobs:
 
   altstore:
     name: AltStore
+    if: github.repository == 'ssalggnikool/Navic'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
