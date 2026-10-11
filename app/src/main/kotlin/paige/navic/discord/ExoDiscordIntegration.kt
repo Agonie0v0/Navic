@@ -6,13 +6,19 @@
 
 package paige.navic.discord
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.PowerManager
 import android.util.Log
 import androidx.compose.runtime.snapshotFlow
+import androidx.core.content.getSystemService
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import night.milkyway.antisocialcord.DiscordRpcClient
 import night.milkyway.antisocialcord.model.Activity
@@ -36,6 +42,9 @@ class ExoDiscordIntegration(
 	private val songRepository: SongRepository by inject()
 	private val albumRepository: AlbumRepository by inject()
 
+	private val powerManager =
+		context.getSystemService<PowerManager>()!! // idk why this would ever be null but yk
+
 	companion object {
 		const val DISCORD_APPLICATION_ID = "1554936646405984446"
 		const val INVISIBLE_CHARACTER = '\u00A0'
@@ -47,11 +56,23 @@ class ExoDiscordIntegration(
 
 	init {
 		scope.launch {
-			snapshotFlow { preferenceManager.enableDiscordIntegration }.collect { enabled ->
-				println(enabled)
+			combine(
+				snapshotFlow { preferenceManager.enableDiscordIntegration },
+				snapshotFlow { preferenceManager.disableRpcWhenPowerSaving }
+			) { it }.collect {
 				setCurrentActivity(player.currentMediaItem)
 			}
 		}
+		context.registerReceiver(
+			object : BroadcastReceiver() {
+				override fun onReceive(p0: Context?, p1: Intent?) {
+					scope.launch {
+						setCurrentActivity(player.currentMediaItem)
+					}
+				}
+			},
+			IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+		)
 	}
 
 	override fun onPlaybackStateChanged(playbackState: @Player.State Int) {
@@ -94,7 +115,10 @@ class ExoDiscordIntegration(
 
 	private suspend fun setCurrentActivity(mediaItem: MediaItem?) {
 		try {
-			if (preferenceManager.enableDiscordIntegration) {
+			val cock = preferenceManager.enableDiscordIntegration
+			val balls = !preferenceManager.disableRpcWhenPowerSaving
+				|| !powerManager.isPowerSaveMode
+			if (cock && balls) {
 				if (!client.isConnectionReady) {
 					client.connect(preferenceManager.discordAppId)
 				}
