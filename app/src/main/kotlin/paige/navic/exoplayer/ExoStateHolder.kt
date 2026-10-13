@@ -11,6 +11,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -18,7 +19,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.ktor.KtorDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.decoder.ffmpeg.FfmpegAudioRenderer
 import androidx.media3.exoplayer.BaseRenderer
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -56,7 +57,10 @@ import paige.navic.discord.ExoDiscordIntegration
 import paige.navic.domain.manager.PreferenceManager
 import paige.navic.exoplayer.impl.ExoArtworkLoader
 import paige.navic.exoplayer.impl.ExoAudioGainProcessor
-import paige.navic.util.createHttpClientWithPreferences
+import paige.navic.util.NoopTrustManager
+import java.security.SecureRandom
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
 
 @OptIn(UnstableApi::class)
 class ExoStateHolder: KoinComponent {
@@ -128,11 +132,22 @@ class ExoStateHolder: KoinComponent {
         )
     }
 
-	private val httpDataSourceFactory = KtorDataSource.Factory(
-        createHttpClientWithPreferences(
-            preferenceManager
-        )
-    )
+	// TODO: figure out why KtorDataSource causes #650
+	// afaik cant set a proxy url without Ktor
+	private val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+		.setDefaultRequestProperties(preferenceManager.customHeadersMap())
+		.also {
+			if (preferenceManager.dangerousSslNoopEnabled) {
+				try {
+					val noopTrustManager = NoopTrustManager()
+					val sslContext = SSLContext.getInstance("SSL")
+					sslContext.init(null, arrayOf(noopTrustManager), SecureRandom())
+					HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.socketFactory)
+				} catch (ex: Exception) {
+					Log.e("ExoStateHolder", "Ouuu shii", ex)
+				}
+			}
+		}
 
 	private fun createRenderers(context: Context): RenderersFactory {
 		return RenderersFactory { handler, _, audioListener, _, _ ->
