@@ -22,11 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
 import paige.navic.domain.model.DomainSong
-import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.filled.Note
-import paige.navic.ui.icons.outlined.Radio
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.component.common.CoverArt
+import paige.navic.ui.icons.Icons
+import paige.navic.ui.icons.filled.Note
 
 @Composable
 fun NowPlayingArtwork(
@@ -37,8 +36,6 @@ fun NowPlayingArtwork(
 ) {
 	val player = koinInject<MediaPlayerViewModel>()
 	val playerState by player.uiState.collectAsState()
-
-	val isRadio = song.id.startsWith("radio_")
 
 	val padding by animateDpAsState(
 		targetValue = if (playerState.isPaused || playerState.currentSong?.id != song.id)
@@ -57,9 +54,9 @@ fun NowPlayingArtwork(
 			shadowElevation = 8.dp,
 			onClick = onClick
 		)
-		if (song.coverArtId.isNullOrEmpty()) {
+		if (song.coverArtId == null) {
 			Icon(
-				imageVector = if (isRadio) Icons.Outlined.Radio else Icons.Filled.Note,
+				imageVector = Icons.Filled.Note,
 				contentDescription = null,
 				tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .38f),
 				modifier = Modifier.size(96.dp)

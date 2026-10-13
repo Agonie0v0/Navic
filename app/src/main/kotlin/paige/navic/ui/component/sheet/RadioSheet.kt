@@ -82,7 +82,7 @@ fun RadioSheet(
 			supportingContent = { MarqueeText(text = radio.streamUrl) },
 			leadingContent = {
 				CoverArt(
-					coverArtId = null, // TODO
+					coverArtId = radio.coverArtId,
 					modifier = Modifier.size(50.dp),
 					shape = preferenceManager.coverArtShape.decreasedShape
 				)
