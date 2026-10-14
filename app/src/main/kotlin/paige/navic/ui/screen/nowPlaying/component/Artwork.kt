@@ -8,6 +8,7 @@ package paige.navic.ui.screen.nowPlaying.component
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,6 +50,7 @@ fun NowPlayingArtwork(
 		CoverArt(
 			coverArtId = song.coverArtId,
 			modifier = Modifier
+				.aspectRatio(1f)
 				.then(if (isLandscape) Modifier.fillMaxHeight() else Modifier.fillMaxSize())
 				.padding(padding),
 			shadowElevation = 8.dp,
