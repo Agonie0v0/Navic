@@ -159,7 +159,7 @@ private fun SideBarMiniPlayer(
 					contentDescription = song?.title,
 					shape = ContinuousRoundedRectangle(12.dp)
 				)
-				if (song?.coverArtId.isNullOrEmpty()) {
+				if (song?.coverArtId == null) {
 					Icon(
 						imageVector = Icons.Filled.Note,
 						contentDescription = null,
