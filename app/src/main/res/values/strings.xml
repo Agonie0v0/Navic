@@ -481,7 +481,7 @@
 	<string name="info_dynamic_replay_gain">Dynamic ReplayGain</string>
 	<string name="info_total_plays">Total plays</string>
 	<string name="info_total_listening_time">Total listening time</string>
-	<string name="info_listening_stats_ratio">%1$s of total listening time</string>
+	<string name="info_listening_stats_ratio">%1$s%% of total listening time</string>
 	<string name="info_track_replay_gain_effective">ReplayGain effective value</string>
 	<string name="info_update">Version "%1$s" has been released</string>
 	<string name="info_shared_by">Shared by %1$s</string>
