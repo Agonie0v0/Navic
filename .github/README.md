@@ -1,6 +1,6 @@
 <div align="center">
 
-<img alt="Navic" height="140" src="https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/assets/wordmark.png">
+<img alt="Navic 应用图标" width="112" height="112" src="../fastlane/metadata/android/en-US/images/icon.png">
 
 # Navic · Android 增强版
 
