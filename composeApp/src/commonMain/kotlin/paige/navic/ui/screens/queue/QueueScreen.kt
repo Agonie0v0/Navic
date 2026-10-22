@@ -14,7 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -25,6 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.coroutines.launch
+import navic.composeapp.generated.resources.label_search_queue
+import navic.composeapp.generated.resources.action_clear_queue_search
+import navic.composeapp.generated.resources.info_no_queue_matches
 import navic.composeapp.generated.resources.Res
 import navic.composeapp.generated.resources.action_clear_queue
 import navic.composeapp.generated.resources.count_remaining_songs
@@ -51,6 +63,8 @@ import paige.navic.di.LocalSheetState
 import paige.navic.domain.manager.PreferenceManager
 import paige.navic.domain.models.settings.QueueInfoType
 import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Search
+import paige.navic.domain.models.DomainSong
 import paige.navic.icons.outlined.PlaylistRemove
 import paige.navic.shared.MediaPlayerViewModel
 import paige.navic.ui.components.common.ContentUnavailable
@@ -72,6 +86,11 @@ fun QueueScreen() {
 	val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 	val downloadedSongs by viewModel.downloadedSongs.collectAsStateWithLifecycle()
 	val queue = playerState.queue
+	var query by rememberSaveable { mutableStateOf("") }
+	val searching = query.isNotBlank()
+	val results = remember(queue, query) { filterQueue(queue, query) }
+	val searchListState = rememberLazyListState()
+	LaunchedEffect(query) { searchListState.scrollToItem(0) }
 
 	val haptic = LocalHapticFeedback.current
 	val draggableState = rememberDraggableListState(viewModel.listState) { from, to ->
@@ -79,9 +98,9 @@ fun QueueScreen() {
 		haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
 	}
 
-	LaunchedEffect(playerState.currentIndex) {
+	LaunchedEffect(playerState.currentIndex, searching) {
 		runCatching {
-			if (queue.isNotEmpty()) {
+			if (queue.isNotEmpty() && !searching) {
 				draggableState.listState.scrollToItem(
 					playerState.currentIndex.coerceAtLeast(0)
 				)
@@ -153,7 +172,49 @@ fun QueueScreen() {
 		}
 	}
 
-	Column(modifier = Modifier.fillMaxSize()) {
+	val queueItem: @Composable (Int, Int, DomainSong, Boolean, Int) -> Unit = { index, displayIndex, song, isDragging, displayCount ->
+		QueueScreenItem(
+			index = displayIndex,
+			count = displayCount,
+			song = song,
+			isPlaying = playerState.currentIndex == index
+				&& !playerState.isPaused,
+			isSelected = playerState.currentIndex == index,
+			isDragging = isDragging,
+			draggableState = draggableState,
+			canReorder = !searching,
+			onClick = dropUnlessResumed {
+				if (player.uiState.value.queue != queue) return@dropUnlessResumed
+				if (playerState.currentIndex != index || playerState.isPaused) {
+					player.playAt(index)
+					animateToDismiss()
+				}
+			},
+			onRemove = {
+				haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+				if (player.uiState.value.queue == queue) player.removeFromQueue(index)
+			},
+			isOffline = !isOnline,
+			isDownloaded = downloadedSongs.containsKey(song.id)
+		)
+	}
+
+	Column(modifier = Modifier.fillMaxSize().imePadding()) {
+		if (queue.isNotEmpty() || query.isNotEmpty()) {
+			OutlinedTextField(
+				value = query,
+				onValueChange = { query = it },
+				modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp),
+				singleLine = true,
+				label = { Text(stringResource(Res.string.label_search_queue)) },
+				leadingIcon = { Icon(Icons.Outlined.Search, null) },
+				trailingIcon = {
+					if (query.isNotEmpty()) TextButton(onClick = { query = "" }) {
+						Text(stringResource(Res.string.action_clear_queue_search))
+					}
+				}
+			)
+		}
 		if (queue.isNotEmpty()) {
 			Row(
 				modifier = Modifier
@@ -198,47 +259,32 @@ fun QueueScreen() {
 			modifier = Modifier
 				.padding(horizontal = 12.dp)
 				.fillMaxSize(),
-			state = draggableState.listState,
+			state = if (searching) searchListState else draggableState.listState,
 			contentPadding = WindowInsets.systemBars
 				.only(WindowInsetsSides.Bottom)
 				.asPaddingValues(),
-			verticalArrangement = if (queue.isNotEmpty())
+			verticalArrangement = if (results.isNotEmpty())
 				Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
 			else Arrangement.Center
 		) {
-			draggableItemsIndexed(
-				state = draggableState,
-				items = queue,
-				key = { index, _ -> index }
-			) { index, song, isDragging ->
-				QueueScreenItem(
-					index = index,
-					count = queue.count(),
-					song = song,
-					isPlaying = playerState.currentIndex == index
-						&& !playerState.isPaused,
-					isSelected = playerState.currentIndex == index,
-					isDragging = isDragging,
-					draggableState = draggableState,
-					onClick = dropUnlessResumed {
-						if (playerState.currentIndex != index) {
-							player.playAt(index)
-							animateToDismiss()
-						}
-					},
-					onRemove = {
-						haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-						player.removeFromQueue(index)
-					},
-					isOffline = !isOnline,
-					isDownloaded = downloadedSongs.containsKey(song.id)
-				)
+			if (searching) {
+				itemsIndexed(results, key = { _, entry -> entry.index }) { displayIndex, entry ->
+					queueItem(entry.index, displayIndex, entry.value, false, results.size)
+				}
+			} else {
+				draggableItemsIndexed(
+					state = draggableState,
+					items = queue,
+					key = { index, _ -> index }
+				) { index, song, isDragging ->
+					queueItem(index, index, song, isDragging, queue.size)
+				}
 			}
-			if (queue.isEmpty()) {
+			if (results.isEmpty()) {
 				item {
 					ContentUnavailable(
 						icon = Icons.Outlined.PlaylistRemove,
-						label = stringResource(Res.string.info_no_queue)
+						label = stringResource(if (queue.isEmpty()) Res.string.info_no_queue else Res.string.info_no_queue_matches)
 					)
 				}
 			}

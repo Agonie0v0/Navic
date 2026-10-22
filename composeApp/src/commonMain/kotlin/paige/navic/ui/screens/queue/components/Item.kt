@@ -64,7 +64,8 @@ fun QueueScreenItem(
 	onClick: () -> Unit,
 	onRemove: () -> Unit,
 	isOffline: Boolean = false,
-	isDownloaded: Boolean = false
+	isDownloaded: Boolean = false,
+	canReorder: Boolean = true
 ) {
 	val preferenceManager = koinInject<PreferenceManager>()
 	val isExplicit = song.explicitStatus == DomainExplicitStatus.Explicit
@@ -175,7 +176,7 @@ fun QueueScreenItem(
 							if (isSelected) {
 								Waveform(isPlaying = isPlaying)
 							}
-							IconButton(
+							if (canReorder) IconButton(
 								modifier = Modifier.dragHandle(
 									state = draggableState,
 									index = index
