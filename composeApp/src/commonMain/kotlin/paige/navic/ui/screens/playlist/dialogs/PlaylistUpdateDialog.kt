@@ -57,6 +57,7 @@ import dev.zt64.subsonic.api.model.Playlist as ApiPlaylist
 fun PlaylistUpdateDialog(
 	songs: ImmutableList<DomainSong>,
 	playlistToExclude: String? = null,
+	onSuccess: () -> Unit = {},
 	onDismissRequest: () -> Unit
 ) {
 	val viewModel = koinViewModel<PlaylistUpdateDialogViewModel>(
@@ -81,6 +82,7 @@ fun PlaylistUpdateDialog(
 					modifier = Modifier
 						.toggleable(
 							value = isSelected,
+							enabled = confirmState !is UiState.Loading,
 							onValueChange = {
 								viewModel.togglePlaylistSelection(playlist)
 							},
@@ -102,6 +104,7 @@ fun PlaylistUpdateDialog(
 		viewModel.events.collect { event ->
 			when (event) {
 				PlaylistUpdateDialogViewModel.Event.Dismiss -> {
+					onSuccess()
 					onDismissRequest()
 				}
 			}
@@ -109,7 +112,7 @@ fun PlaylistUpdateDialog(
 	}
 
 	FormDialog(
-		onDismissRequest = onDismissRequest,
+		onDismissRequest = { if (confirmState !is UiState.Loading) onDismissRequest() },
 		icon = { Icon(Icons.Outlined.PlaylistAdd, null) },
 		title = { Text(stringResource(Res.string.action_add_to_playlist)) },
 		action = {
@@ -117,7 +120,7 @@ fun PlaylistUpdateDialog(
 				onClick = {
 					viewModel.refreshResults()
 				},
-				enabled = state !is UiState.Loading,
+				enabled = state !is UiState.Loading && confirmState !is UiState.Loading,
 				content = {
 					Icon(
 						Icons.Outlined.Refresh,
@@ -132,7 +135,7 @@ fun PlaylistUpdateDialog(
 					modifier = Modifier.fillMaxWidth(),
 					onClick = viewModel::confirm,
 					enabled = confirmState !is UiState.Loading && selectedPlaylists.isNotEmpty(),
-					shapes = SegmentedListButtonDefaults.shapes(index = 0, count = 2),
+					shapes = SegmentedListButtonDefaults.shapes(index = 0, count = 3),
 					colors = SegmentedListButtonDefaults.primaryColors()
 				) {
 					if (confirmState is UiState.Loading) {
@@ -140,25 +143,29 @@ fun PlaylistUpdateDialog(
 					}
 					Text(stringResource(Res.string.action_ok))
 				}
-			} else {
-				SegmentedListButton(
-					modifier = Modifier.fillMaxWidth(),
-					onClick = { createDialogShown = true },
-					shapes = SegmentedListButtonDefaults.shapes(index = 0, count = 2)
-				) {
-					Text(stringResource(Res.string.action_new))
-				}
+			}
+			SegmentedListButton(
+				modifier = Modifier.fillMaxWidth(),
+				enabled = confirmState !is UiState.Loading,
+				onClick = { createDialogShown = true },
+				shapes = SegmentedListButtonDefaults.shapes(
+					index = if (state.data?.isNotEmpty() == true || state is UiState.Loading) 1 else 0,
+					count = if (state.data?.isNotEmpty() == true || state is UiState.Loading) 3 else 2
+				)
+			) {
+				Text(stringResource(Res.string.action_new))
 			}
 			SegmentedListButton(
 				modifier = Modifier.fillMaxWidth(),
 				onClick = onDismissRequest,
-				enabled = state !is UiState.Loading,
-				shapes = SegmentedListButtonDefaults.shapes(index = 1, count = 2)
+				enabled = state !is UiState.Loading && confirmState !is UiState.Loading,
+				shapes = SegmentedListButtonDefaults.shapes(index = 2, count = 3)
 			) {
 				Text(stringResource(Res.string.action_cancel))
 			}
 		},
 		content = {
+			(confirmState as? UiState.Error)?.let { ErrorBox(it) }
 			when (val state = state) {
 				is UiState.Loading -> Box(
 					modifier = Modifier.fillMaxWidth(),
@@ -194,9 +201,10 @@ fun PlaylistUpdateDialog(
 
 	if (createDialogShown) {
 		PlaylistCreateDialog(
+			songs = songs,
 			navigateAfterwards = false,
 			onDismissRequest = { createDialogShown = false },
-			onRefresh = { viewModel.refreshResults() }
+			onRefresh = { onSuccess(); onDismissRequest() }
 		)
 	}
 }

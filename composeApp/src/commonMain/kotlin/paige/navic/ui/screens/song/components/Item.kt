@@ -7,6 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.Checkbox
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -61,6 +67,8 @@ fun SongListScreenItem(
 	modifier: Modifier,
 	song: DomainSong,
 	selected: Boolean,
+	selectionMode: Boolean,
+	checked: Boolean,
 	starred: Boolean,
 	rating: Int,
 	onSelect: () -> Unit,
@@ -85,6 +93,7 @@ fun SongListScreenItem(
 	SwipeToDismissBox(
 		modifier = modifier,
 		state = dismissState,
+		gesturesEnabled = !selectionMode,
 		onDismiss = {
 			if (it == SwipeToDismissBoxValue.StartToEnd) onAddToQueue()
 			if (it == SwipeToDismissBoxValue.EndToStart) onPlayNext()
@@ -125,6 +134,10 @@ fun SongListScreenItem(
 	) {
 		Box {
 			ListItem(
+				modifier = if (selectionMode) Modifier.semantics {
+					role = Role.Checkbox
+					toggleableState = ToggleableState(checked)
+				} else Modifier,
 				onClick = onClick,
 				onLongClick = onSelect,
 				verticalAlignment = Alignment.CenterVertically,
@@ -146,7 +159,7 @@ fun SongListScreenItem(
 							buildSongInfoString(
 								song = song,
 								onClickArtist = { backStack.add(Screen.ArtistDetail(it)) }
-							)
+							).let { if (selectionMode) androidx.compose.ui.text.AnnotatedString(it.text) else it }
 						)
 						if (song.userRating != null && song.userRating != 0) {
 							SmallRatingRow(rating = song.userRating)
@@ -154,6 +167,8 @@ fun SongListScreenItem(
 					}
 				},
 				leadingContent = {
+					if (selectionMode) Checkbox(checked = checked, onCheckedChange = null)
+					else
 					CoverArt(
 						coverArtId = song.coverArtId,
 						modifier = Modifier.size(50.dp),

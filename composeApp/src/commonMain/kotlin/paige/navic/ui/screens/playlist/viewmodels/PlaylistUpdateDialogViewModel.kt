@@ -62,6 +62,7 @@ class PlaylistUpdateDialogViewModel(
 	}
 
 	fun confirm() {
+		if (confirmState.value is UiState.Loading || selectedPlaylists.value.isEmpty()) return
 		viewModelScope.launch {
 			confirmState.value = UiState.Loading()
 			try {
@@ -71,6 +72,8 @@ class PlaylistUpdateDialogViewModel(
 						playlist.id,
 						songIdsToAdd = songs.map { it.id }
 					)
+					// Only retry unfinished playlists after a partial failure.
+					selectedPlaylists.value = selectedPlaylists.value - playlist
 				}
 				confirmState.value = UiState.Success(null)
 				if (selected.size == 1) {

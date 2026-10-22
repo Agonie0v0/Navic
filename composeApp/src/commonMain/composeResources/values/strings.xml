@@ -523,4 +523,11 @@
 	<string name="option_marquee_slow">Slow</string>
 	<string name="option_marquee_medium">Medium</string>
 	<string name="option_marquee_fast">Fast</string>
+    <string name="action_select_songs">Select</string>
+    <string name="action_select_all_songs">Select all</string>
+    <string name="action_deselect_all_songs">Deselect all</string>
+    <string name="info_selected_songs">%1$d selected</string>
+    <string name="label_search_queue">Search title, artist or album</string>
+    <string name="action_clear_queue_search">Clear search</string>
+    <string name="info_no_queue_matches">No matching songs in this queue</string>
 </resources>
