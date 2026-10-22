@@ -1,65 +1,123 @@
 <div align="center">
 
-<img title="Navic" alt="Navic" height="140" src="https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/assets/wordmark.png">
+<img alt="Navic" height="140" src="https://raw.githubusercontent.com/NavicApp/Branding/refs/heads/main/assets/wordmark.png">
 
-# Navic 状态栏歌词版
+# Navic · Android 增强版
 
-[下载最新版](https://github.com/Agonie0v0/Navic/releases/latest) · [原项目](https://github.com/ssalggnikool/Navic)
+状态栏歌词 · 曲目多选 · 歌单批量管理 · 播放队列搜索
+
+[下载 APK](https://github.com/Agonie0v0/Navic/releases) · [构建状态](https://github.com/Agonie0v0/Navic/actions/workflows/sync-upstream-android.yml) · [上游项目](https://github.com/ssalggnikool/Navic)
 
 </div>
 
-这是 [Navic](https://github.com/ssalggnikool/Navic) 的 Android 衍生版本，在尽量保持上游代码不变的基础上增加了状态栏歌词支持，并补全了简体中文界面文案。
+基于 [Navic](https://github.com/ssalggnikool/Navic) 的个人 Android 定制版本。在原有音乐播放体验上，加入状态栏歌词、曲目批量操作和队列搜索，并补全简体中文文案。
 
-> 本项目不是 Navic 官方版本。状态栏歌词依赖系统 ROM 支持魅族 / Flyme 状态栏歌词协议，普通 ROM 可能不会显示。
+本仓库专注于 **Android**，不提供 iOS 构建。它是非官方衍生版本，保留上游项目的署名与许可证。
 
-## 下载与安装
+## 下载与使用
 
-前往 [Releases](https://github.com/Agonie0v0/Navic/releases/latest) 下载 `Navic-statusbar.apk`。
+1. 打开 [Releases](https://github.com/Agonie0v0/Navic/releases)，选择需要的版本，下载 `Navic-statusbar.apk`。
+2. 安装后，连接自己的 Subsonic / OpenSubsonic 兼容音乐服务。
+3. 同一签名的本仓库版本可以覆盖更新。
 
-本项目使用独立证书签名，无法直接覆盖安装原作者发布的 APK。首次切换到本版本时需要先卸载原版；之后本仓库发布的新版本可以直接覆盖更新。卸载前请自行备份应用数据。
+应用是音乐客户端，不提供音乐资源或服务器。APK 文件名保留 `statusbar`，其中也包含本仓库的多选、歌单管理和队列搜索功能；具体以对应版本的代码为准。
 
-## 新增功能
+**从官方版切换：** 本仓库使用独立签名，与原作者 APK 的签名不同，不能直接覆盖安装。需要卸载原版时，请先备份数据。
 
-- 播放歌曲时将当前歌词发送给支持该协议的系统状态栏。
-- 暂停、切歌、拖动进度和改变播放速度时自动同步歌词。
-- 保留 Navic 原有的媒体通知、封面、控制按钮和 Android Auto 行为。
-- 支持 `-2000 ms` 至 `+2000 ms` 的歌词时间校准，步进为 `100 ms`。
-- 补齐简体中文设置及相关对话框文案。
+本地 Debug 构建名为 **Navic (Dev)**，使用独立包名，可与正式版并存。
 
-歌词校准入口：
+## 本版本增加了什么
 
-`设置 → 正在播放 → 歌词 → 状态栏歌词时间`
+| 功能 | 使用方式 |
+| --- | --- |
+| 状态栏歌词 | 在支持相应协议的系统状态栏显示当前歌词，并随播放状态与进度同步 |
+| 曲目多选 | 在曲目页点击勾选列表图标，选择多首歌曲，支持全选、取消全选和退出选择 |
+| 批量加入播放队列 | 将选中的曲目按页面顺序追加到当前队列；遇到重复歌曲时沿用重复提示设置 |
+| 批量加入歌单 | 添加到已有歌单，或直接创建包含所选曲目的新歌单 |
+| 播放队列搜索 | 按歌曲名、歌手或专辑查找当前队列中的歌曲 |
+| 搜索结果下一首播放 | 点击结果右侧的下一首图标，在当前歌曲之后插入一份，不打断正在播放的歌曲 |
+| 简体中文 | 补全设置、对话框和新增功能的简体中文文案 |
 
-- 负数：歌词延后显示。
-- 正数：歌词提前显示。
+### 曲目多选与歌单管理
 
-## 自动更新
+曲目页顶部的勾选列表图标用于进入多选模式。进入后，点击歌曲或复选框切换选中状态，顶部显示已选数量。
 
-GitHub Actions 每 6 小时检查一次上游 Release。发现新版本后会自动：
+- **全选图标：** 选中当前列表中的全部曲目，再次点击取消全选。
+- **队列图标：** 将所选曲目追加到当前播放队列。
+- **歌单添加图标：** 选择已有歌单，或点击「新建」创建包含这些曲目的歌单。
+- **关闭图标或系统返回：** 退出多选模式。
 
-1. 将上游版本合并到本仓库。
-2. 构建 Android Release APK（不构建 iOS）。
-3. 使用本仓库专用证书签名。
-4. 发布为 `${上游版本号}-statusbar`，附件名为 `Navic-statusbar.apk`。同一上游版本已发布时会跳过，不会因为本仓库更新而重复构建。
+图标支持长按提示。普通模式保留原有的点击播放、长按菜单和滑动快捷操作；多选期间停用滑动快捷操作，避免误触。取消歌单弹窗或提交失败时，保留当前曲目选择。
 
-手动强制重建已发布的上游版本时，会在发布标签后附加本仓库提交短哈希。
+### 搜索当前播放队列
 
-普通更新无需人工操作。发布前会检查简体中文资源覆盖情况；如果上游新增了尚未翻译的文案，发布会暂停，直到补齐翻译。如果上游修改了与状态栏歌词相同的代码并产生合并冲突，或大幅重构播放模块，也需要人工适配。
+在播放界面打开队列，使用顶部搜索框筛选歌曲。搜索只筛选当前队列，不会搜索整个音乐库，也不会改变队列顺序。
 
-## 本地构建
+- **点击歌曲：** 立即播放该结果对应的队列曲目。
+- **点击右侧下一首图标：** 将该歌曲新增到当前歌曲之后，保留它在队列中的原有位置。
+- **清空搜索：** 恢复完整队列和拖动排序。
 
-需要 JDK 21 和 Android SDK。在 Windows PowerShell 中运行：
+搜索时仍可移除结果对应的曲目。队列中同一首歌曲出现多次时，各个位置分别处理；筛选期间隐藏拖动排序入口，避免误改顺序。
+
+### 状态栏歌词
+
+状态栏歌词依赖系统 ROM 支持魅族 / Flyme 状态栏歌词协议。普通 ROM 可能无法显示，不代表应用内歌词不可用。
+
+时间校准入口：**设置 → 正在播放 → 歌词 → 状态栏歌词时间**。
+
+- 调整范围为 `−2000 ms` 至 `+2000 ms`，步进 `100 ms`。
+- 负数让歌词延后显示，正数让歌词提前显示。
+
+## 自动同步与发布
+
+[Sync upstream and release Android](https://github.com/Agonie0v0/Navic/actions/workflows/sync-upstream-android.yml) 每 6 小时检查一次上游已发布的 Release，包含预发布版本。计划时间为北京时间 **02:37、08:37、14:37、20:37**，实际运行时间以 GitHub Actions 为准。
+
+发现需要更新的版本后，工作流会：
+
+1. 合并对应的上游版本，保留本仓库已有的定制提交。
+2. 检查简体中文资源覆盖情况。
+3. 构建 Android Release APK。
+4. 将合并后的代码推送到 `master`，使用仓库配置的证书签名并发布 APK。
+
+它跟随上游 **Release**，不会因为上游每次提交代码就更新。同一上游版本已合并并发布时，定时任务会跳过；仅修改本仓库代码也不会自动重新发布该版本。
+
+需要立即发布本仓库的新改动时，在上述工作流页面选择 **Run workflow → master**，勾选 **Rebuild the latest upstream release**（`force_release`）后运行。
+
+发布标签通常为 `<上游版本号>-statusbar`；强制重建已发布的上游版本时，会追加当前提交的短哈希。构建成功后，在 Releases 下载 `Navic-statusbar.apk`。
+
+自动发布依赖 Actions 启用及签名密钥配置有效。出现合并冲突、中文资源缺失、依赖下载或编译失败时，任务会停止，需要修复后重新运行。这里的自动更新指**仓库同步与 APK 发布**，手机上的应用仍需下载安装新版。
+
+## 本地构建与检查
+
+准备 **JDK 21** 和项目要求的 **Android SDK**。当前配置使用 Android API 37 和 Build Tools 37.0.0。
+
+Windows PowerShell：
 
 ```powershell
 .\gradlew.bat :androidApp:assembleDebug
 ```
 
-Debug APK 位于 `androidApp/build/outputs/apk/debug/`。
+macOS / Linux：
+
+```bash
+./gradlew :androidApp:assembleDebug
+```
+
+测试 APK 输出到 `androidApp/build/outputs/apk/debug/Navic.apk`。
+
+构建后可运行队列搜索回归检查与中文覆盖检查（需要 Python 3.11+）：
+
+```bash
+python checks/check_queue_search.py
+python .github/scripts/check-zh-coverage.py
+```
+
+更多实机验收项目见 [Android 功能检查清单](../checks/README.md)。命令行检查不替代实际设备上的播放、交互和歌单服务端验证。
 
 ## 上游与许可
 
 - 上游项目：[ssalggnikool/Navic](https://github.com/ssalggnikool/Navic)
-- 状态栏歌词版：[Agonie0v0/Navic](https://github.com/Agonie0v0/Navic)
+- 本仓库：[Agonie0v0/Navic](https://github.com/Agonie0v0/Navic)
 - 许可证：[GNU GPL v3](../LICENSE)
 
-感谢 Navic 原作者及所有贡献者。
+感谢 Navic 原作者及所有贡献者。本仓库的改动建立在他们的工作之上。
