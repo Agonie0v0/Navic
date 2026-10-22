@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,6 +54,14 @@ import paige.navic.domain.models.DomainSong
 import paige.navic.domain.models.DomainSongListType
 import paige.navic.domain.models.settings.BottomBarVisibilityMode
 import paige.navic.shared.MediaPlayerViewModel
+import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Check
+import paige.navic.icons.outlined.Checklist
+import paige.navic.icons.outlined.Close
+import paige.navic.icons.outlined.Queue
+import paige.navic.icons.outlined.PlaylistAdd
+import paige.navic.ui.components.common.TooltipBox
+import paige.navic.ui.components.layouts.TopBarButton
 import paige.navic.ui.components.dialogs.QueueDuplicateDialog
 import paige.navic.ui.components.layouts.NestedTopBar
 import paige.navic.ui.components.layouts.PullToRefreshBox
@@ -121,10 +131,20 @@ fun SongListScreen(
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	val actions: @Composable RowScope.() -> Unit = {
-		TextButton(
-			onClick = { viewModel.clearSelection(); selecting = true },
-			enabled = songs.isNotEmpty()
-		) { Text(stringResource(Res.string.action_select_songs)) }
+		val selectLabel = stringResource(Res.string.action_select_songs)
+		TooltipBox(selectLabel) {
+			if (nested) {
+				TopBarButton(
+					onClick = { viewModel.clearSelection(); selecting = true },
+					enabled = songs.isNotEmpty()
+				) { Icon(Icons.Outlined.Checklist, selectLabel) }
+			} else {
+				IconButton(
+					onClick = { viewModel.clearSelection(); selecting = true },
+					enabled = songs.isNotEmpty()
+				) { Icon(Icons.Outlined.Checklist, selectLabel) }
+			}
+		}
 		SongListScreenSortButton(
 			nested = nested,
 			selectedSorting = selectedSorting,
@@ -153,31 +173,47 @@ fun SongListScreen(
 					NestedTopBar(
 						title = { Text(stringResource(Res.string.info_selected_songs, selectedSongs.size)) },
 						navigationAction = {
-							TextButton(onClick = finishSelection) { Text(stringResource(Res.string.action_cancel)) }
+							TooltipBox(stringResource(Res.string.action_cancel)) {
+								TopBarButton(
+									modifier = Modifier.padding(start = 20.dp, end = 13.dp),
+									onClick = finishSelection
+								) { Icon(Icons.Outlined.Close, stringResource(Res.string.action_cancel)) }
+							}
 						},
 						actions = {
 							val allSelected = songs.isNotEmpty() && songs.all { it.id in selectedIdSet }
-							TextButton(onClick = {
-								selectedIds = if (allSelected) emptyList() else songs.map { it.id }.distinct()
-							}) { Text(stringResource(if (allSelected) Res.string.action_deselect_all_songs else Res.string.action_select_all_songs)) }
+							val selectAllLabel = stringResource(if (allSelected) Res.string.action_deselect_all_songs else Res.string.action_select_all_songs)
+							TooltipBox(selectAllLabel) {
+								IconToggleButton(
+									checked = allSelected,
+									enabled = songs.isNotEmpty(),
+									onCheckedChange = {
+										selectedIds = if (allSelected) emptyList() else songs.map { it.id }.distinct()
+									}
+								) { Icon(if (allSelected) Icons.Outlined.Check else Icons.Outlined.Checklist, selectAllLabel) }
+							}
 						}
 					)
 					FlowRow(
 						modifier = Modifier.padding(horizontal = 16.dp),
 						horizontalArrangement = Arrangement.spacedBy(8.dp)
 					) {
-						FilledTonalButton(enabled = selectedSongs.isNotEmpty(), onClick = {
-							val queuedIds = player.uiState.value.queue.map { it.id }.toSet()
-							if (!preferenceManager.shushQueueDuplicateDialog && selectedSongs.any { it.id in queuedIds }) {
-								queueSongs = selectedSongs
-							} else {
-								player.addToQueue(selectedSongs)
-								finishSelection()
-							}
-						}) { Text(stringResource(Res.string.action_add_to_queue)) }
-						FilledTonalButton(enabled = selectedSongs.isNotEmpty(), onClick = {
-							playlistSongs = selectedSongs
-						}) { Text(stringResource(Res.string.action_add_to_playlist)) }
+						TooltipBox(stringResource(Res.string.action_add_to_queue)) {
+							FilledTonalIconButton(enabled = selectedSongs.isNotEmpty(), onClick = {
+								val queuedIds = player.uiState.value.queue.map { it.id }.toSet()
+								if (!preferenceManager.shushQueueDuplicateDialog && selectedSongs.any { it.id in queuedIds }) {
+									queueSongs = selectedSongs
+								} else {
+									player.addToQueue(selectedSongs)
+									finishSelection()
+								}
+							}) { Icon(Icons.Outlined.Queue, stringResource(Res.string.action_add_to_queue)) }
+						}
+						TooltipBox(stringResource(Res.string.action_add_to_playlist)) {
+							FilledTonalIconButton(enabled = selectedSongs.isNotEmpty(), onClick = {
+								playlistSongs = selectedSongs
+							}) { Icon(Icons.Outlined.PlaylistAdd, stringResource(Res.string.action_add_to_playlist)) }
+						}
 					}
 				}
 			} else if (!nested) {

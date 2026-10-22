@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import com.kyant.capsule.ContinuousRoundedRectangle
 import kotlinx.coroutines.launch
 import navic.composeapp.generated.resources.Res
+import navic.composeapp.generated.resources.action_play_next
 import navic.composeapp.generated.resources.action_remove_from_queue
 import navic.composeapp.generated.resources.action_reorder
 import navic.composeapp.generated.resources.info_explicit
@@ -40,6 +41,8 @@ import paige.navic.icons.Icons
 import paige.navic.icons.outlined.Delete
 import paige.navic.icons.outlined.DragHandle
 import paige.navic.icons.outlined.Lock
+import paige.navic.icons.outlined.QueuePlayNext
+import paige.navic.ui.components.common.TooltipBox
 import paige.navic.icons.outlined.Offline
 import paige.navic.ui.components.common.CoverArt
 import paige.navic.ui.components.common.MarqueeText
@@ -65,7 +68,8 @@ fun QueueScreenItem(
 	onRemove: () -> Unit,
 	isOffline: Boolean = false,
 	isDownloaded: Boolean = false,
-	canReorder: Boolean = true
+	canReorder: Boolean = true,
+	onPlayNext: (() -> Unit)? = null
 ) {
 	val preferenceManager = koinInject<PreferenceManager>()
 	val isExplicit = song.explicitStatus == DomainExplicitStatus.Explicit
@@ -175,6 +179,13 @@ fun QueueScreenItem(
 							}
 							if (isSelected) {
 								Waveform(isPlaying = isPlaying)
+							}
+							onPlayNext?.let { playNext ->
+								TooltipBox(stringResource(Res.string.action_play_next)) {
+									IconButton(onClick = playNext, enabled = !isExplicit) {
+										Icon(Icons.Outlined.QueuePlayNext, stringResource(Res.string.action_play_next))
+									}
+								}
 							}
 							if (canReorder) IconButton(
 								modifier = Modifier.dragHandle(

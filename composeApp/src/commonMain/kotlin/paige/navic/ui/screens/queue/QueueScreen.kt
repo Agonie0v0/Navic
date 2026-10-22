@@ -19,7 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,6 +63,8 @@ import paige.navic.di.LocalSheetState
 import paige.navic.domain.manager.PreferenceManager
 import paige.navic.domain.models.settings.QueueInfoType
 import paige.navic.icons.Icons
+import paige.navic.icons.outlined.Close
+import paige.navic.ui.components.common.TooltipBox
 import paige.navic.icons.outlined.Search
 import paige.navic.domain.models.DomainSong
 import paige.navic.icons.outlined.PlaylistRemove
@@ -183,6 +185,13 @@ fun QueueScreen() {
 			isDragging = isDragging,
 			draggableState = draggableState,
 			canReorder = !searching,
+			onPlayNext = if (searching) {
+				{
+					if (player.uiState.value.queue == queue) {
+						player.playNextSingle(song)
+					}
+				}
+			} else null,
 			onClick = dropUnlessResumed {
 				if (player.uiState.value.queue != queue) return@dropUnlessResumed
 				if (playerState.currentIndex != index || playerState.isPaused) {
@@ -209,8 +218,10 @@ fun QueueScreen() {
 				label = { Text(stringResource(Res.string.label_search_queue)) },
 				leadingIcon = { Icon(Icons.Outlined.Search, null) },
 				trailingIcon = {
-					if (query.isNotEmpty()) TextButton(onClick = { query = "" }) {
-						Text(stringResource(Res.string.action_clear_queue_search))
+					if (query.isNotEmpty()) TooltipBox(stringResource(Res.string.action_clear_queue_search)) {
+						IconButton(onClick = { query = "" }) {
+							Icon(Icons.Outlined.Close, stringResource(Res.string.action_clear_queue_search))
+						}
 					}
 				}
 			)

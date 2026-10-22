@@ -22,6 +22,11 @@ Device acceptance (requires a connected Android device and a test music account)
   Cancel or fail a request and verify the selection remains available.
 - Search a queue containing a repeated song; play and remove the second occurrence.
   Check paused playback, shuffle, an empty queue, no matches and clearing the query.
+- In queue search, tap the next-play icon: the current song and progress must remain
+  unchanged, and a copy of the chosen song must appear immediately after it. The
+  original occurrence must remain. Tapping the row must still play immediately.
+- Check selection, cancel, select-all and queue/playlist icons, including long-press
+  tooltips and screen-reader labels. Select-all must visibly toggle its state.
 - Check keyboard, large text and landscape layouts. Reordering is available only after
   clearing the search; active playback and offline markers remain correct.
 
