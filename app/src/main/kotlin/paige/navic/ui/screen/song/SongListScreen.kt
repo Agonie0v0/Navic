@@ -46,13 +46,13 @@ import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
 import paige.navic.ui.component.layout.RootTopBar
 import paige.navic.ui.core.UiState
 import paige.navic.ui.navigation.PersistentViewModelStoreOwner
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.screen.song.component.SongListScreenItem
 import paige.navic.ui.screen.song.component.SongListScreenSortButton
 import paige.navic.ui.screen.song.viewmodel.SongListViewModel
@@ -133,7 +133,8 @@ fun SongListScreen(
 			val preferVisible =
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
-				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
+				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)
+			) {
 				RootBottomBar(scrolled = scrollManager.isTriggered)
 			}
 		}
@@ -148,7 +149,9 @@ fun SongListScreen(
 		) {
 			LazyColumn(
 				modifier = if (!nested)
-					Modifier.fillMaxSize().nestedScroll(scrollBehavior.nestedScrollConnection)
+					Modifier
+						.fillMaxSize()
+						.nestedScroll(scrollBehavior.nestedScrollConnection)
 				else Modifier.fillMaxSize(),
 				contentPadding = innerPadding.withoutTop(),
 				verticalArrangement = if (lazyPagingItems == null || lazyPagingItems.itemCount == 0)

@@ -9,7 +9,7 @@ package paige.navic.ui.screen.radio.viewmodel
 import androidx.compose.foundation.text.input.TextFieldState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainRadio
 import paige.navic.ui.viewmodel.AsyncViewModel
 

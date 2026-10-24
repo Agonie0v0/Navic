@@ -15,6 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import paige.navic.database.entity.SyncActionType
+import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.SessionManager
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 

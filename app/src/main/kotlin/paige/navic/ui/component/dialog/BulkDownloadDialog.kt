@@ -50,6 +50,7 @@ fun BulkDownloadDialog(
 					target.name
 				)
 			}
+
 			is BulkDownloadTarget.Library -> {
 				stringResource(R.string.title_library_download) to stringResource(
 					R.string.info_library_download_warning
@@ -71,6 +72,7 @@ fun BulkDownloadDialog(
 								is BulkDownloadTarget.Artist -> {
 									downloadManager.downloadCollection(target.songIds)
 								}
+
 								is BulkDownloadTarget.Library -> {
 									downloadManager.downloadEntireLibrary()
 								}

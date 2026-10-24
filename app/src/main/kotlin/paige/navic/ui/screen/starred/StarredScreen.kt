@@ -39,6 +39,7 @@ import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
@@ -46,7 +47,6 @@ import paige.navic.ui.core.UiState
 import paige.navic.ui.navigation.PersistentViewModelStoreOwner
 import paige.navic.ui.screen.album.viewmodel.AlbumListViewModel
 import paige.navic.ui.screen.artist.viewmodel.ArtistListViewModel
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.screen.song.viewmodel.SongListViewModel
 import paige.navic.ui.screen.starred.component.StarredScreenContent
 

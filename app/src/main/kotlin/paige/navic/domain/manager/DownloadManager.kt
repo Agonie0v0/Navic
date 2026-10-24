@@ -31,6 +31,7 @@ import paige.navic.database.dao.DownloadDao
 import paige.navic.database.dao.SongDao
 import paige.navic.database.entity.DownloadEntity
 import paige.navic.database.entity.DownloadStatus
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.settings.DownloadStorage
 import paige.navic.util.Logger
 import paige.navic.work.DownloadMigrationWorker

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import paige.navic.database.dao.AlbumDao
 import paige.navic.database.dao.ArtistDao
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.ConnectivityManager
+import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainSong

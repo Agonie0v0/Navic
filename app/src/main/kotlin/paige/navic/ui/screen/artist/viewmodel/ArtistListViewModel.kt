@@ -8,16 +8,16 @@ package paige.navic.ui.screen.artist.viewmodel
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Job
 import paige.navic.database.dao.AlbumDao
 import paige.navic.database.dao.LetterCount
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainFilter

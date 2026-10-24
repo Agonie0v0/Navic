@@ -35,7 +35,7 @@ import paige.navic.database.entity.PlaylistSongCrossRef
 import paige.navic.database.entity.SongEntity
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.mapper.toEntity
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainArtist
 import paige.navic.util.Logger
 import kotlin.coroutines.cancellation.CancellationException

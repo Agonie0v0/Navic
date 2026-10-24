@@ -7,7 +7,7 @@
 package paige.navic.ui.screen.share.viewmodel
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainShare
 import paige.navic.domain.repository.ShareRepository
 import paige.navic.ui.viewmodel.AsyncViewModel

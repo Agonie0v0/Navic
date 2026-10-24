@@ -36,8 +36,8 @@ import paige.navic.database.mapper.toDomainModel
 import paige.navic.domain.manager.AudioGainManager
 import paige.navic.domain.manager.DownloadManager
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
 import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainExplicitStatus
 import paige.navic.domain.model.DomainRadio
@@ -253,8 +253,10 @@ class MediaPlayer(
 					val currentSong = _uiState.value.currentSong ?: return
 					if (currentSong.id.startsWith("radio_")) {
 						val rawTitle = mediaMetadata.title?.toString()?.takeIf { it.isNotBlank() }
-						val rawArtist = mediaMetadata.artist?.toString()?.takeIf { it.isNotBlank() && it != "Live Radio" }
-							?: mediaMetadata.subtitle?.toString()?.takeIf { it.isNotBlank() && it != "Live Radio" }
+						val rawArtist = mediaMetadata.artist?.toString()
+							?.takeIf { it.isNotBlank() && it != "Live Radio" }
+							?: mediaMetadata.subtitle?.toString()
+								?.takeIf { it.isNotBlank() && it != "Live Radio" }
 
 						val updatedSong = if (rawTitle != null) {
 							val parts = rawTitle.split(" - ", limit = 2)

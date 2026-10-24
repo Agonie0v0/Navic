@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.session
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import paige.navic.domain.manager.PreferenceManager
 import paige.navic.domain.model.settings.OfflineMode
 import android.net.ConnectivityManager as AndroidConnectivityManager
 

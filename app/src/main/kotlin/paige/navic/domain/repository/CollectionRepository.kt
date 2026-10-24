@@ -17,7 +17,7 @@ import paige.navic.database.dao.PlaylistDao
 import paige.navic.database.dao.SongDao
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.mapper.toEntity
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainPlaylist
 import paige.navic.domain.model.DomainSong

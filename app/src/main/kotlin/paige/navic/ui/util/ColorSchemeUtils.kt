@@ -23,7 +23,7 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import org.koin.compose.koinInject
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.settings.ThemeMode
 import paige.navic.playback.MediaPlayer
 import coil3.compose.LocalPlatformContext as LocalCoilPlatformContext

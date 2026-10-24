@@ -9,7 +9,7 @@ package paige.navic.domain.sync
 import kotlinx.coroutines.CancellationException
 import paige.navic.database.dao.SyncActionDao
 import paige.navic.database.entity.SyncActionType
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
 
 class SyncActionProcessor(

@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import paige.navic.R
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.repository.DbRepository
 import paige.navic.domain.sync.SyncCoordinator
 import paige.navic.ui.core.LoginUiState

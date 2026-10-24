@@ -12,6 +12,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.xxHash32
 import java.io.File
 

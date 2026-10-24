@@ -10,7 +10,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.repository.DbRepository
 import paige.navic.util.Logger
 import kotlin.time.Clock

@@ -42,8 +42,8 @@ import paige.navic.R
 import paige.navic.database.entity.DownloadStatus
 import paige.navic.domain.manager.DownloadManager
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
-import paige.navic.domain.manager.canUserShare
+import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.canUserShare
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumInfo
 import paige.navic.domain.model.DomainPlaylist

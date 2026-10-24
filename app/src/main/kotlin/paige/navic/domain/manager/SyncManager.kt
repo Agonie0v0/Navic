@@ -32,6 +32,7 @@ import paige.navic.database.dao.AlbumDao
 import paige.navic.database.dao.SyncActionDao
 import paige.navic.database.entity.SyncActionEntity
 import paige.navic.database.entity.SyncActionType
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
 import paige.navic.work.LibrarySyncWorker
 import paige.navic.work.SyncActionWorker

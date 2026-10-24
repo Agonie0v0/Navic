@@ -36,7 +36,7 @@ import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.ui.component.common.SegmentedListItemDefaults
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.navigation.Screen
@@ -121,7 +121,10 @@ fun SettingsConnectionOptionsScreen() {
 						onValueChange = { newValue ->
 							instanceUrlField = newValue
 							val trimmed = newValue.trim()
-							if (trimmed.isNotBlank() && (trimmed.startsWith("http://") || trimmed.startsWith("https://"))) {
+							if (trimmed.isNotBlank() && (trimmed.startsWith("http://") || trimmed.startsWith(
+									"https://"
+								))
+							) {
 								sessionManager.updateInstanceUrl(trimmed)
 							}
 						},

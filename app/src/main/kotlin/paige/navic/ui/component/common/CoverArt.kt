@@ -30,7 +30,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import org.koin.compose.koinInject
 import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import coil3.compose.LocalPlatformContext as LocalCoilPlatformContext
 
 @Composable
