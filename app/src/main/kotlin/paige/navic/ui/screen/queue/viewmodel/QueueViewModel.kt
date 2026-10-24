@@ -7,8 +7,8 @@
 package paige.navic.ui.screen.queue.viewmodel
 
 import androidx.lifecycle.ViewModel
-import paige.navic.domain.manager.playback.DownloadManager
 import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.DownloadManager
 
 class QueueViewModel(
 	connectivityManager: ConnectivityManager,

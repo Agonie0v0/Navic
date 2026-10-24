@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import paige.navic.database.dao.SyncActionDao
-import paige.navic.domain.manager.playback.DownloadManager
 import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.SyncManager
 import paige.navic.domain.repository.DbRepository
 import paige.navic.domain.sync.SyncCoordinator

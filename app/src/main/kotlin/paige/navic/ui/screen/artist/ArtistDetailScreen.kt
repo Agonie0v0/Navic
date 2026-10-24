@@ -71,8 +71,8 @@ import paige.navic.database.entity.DownloadStatus
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.playback.DownloadManager
 import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.ArtistAlbumViewMode

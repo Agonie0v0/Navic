@@ -10,7 +10,6 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import paige.navic.domain.download.DownloadProcessor
 import paige.navic.domain.manager.playback.AudioGainManager
-import paige.navic.domain.manager.playback.DownloadManager
 import paige.navic.domain.manager.playback.EqualizerManager
 import paige.navic.domain.manager.playback.SleepTimerManager
 import paige.navic.domain.manager.playback.StreamCacheManager
@@ -19,6 +18,7 @@ import paige.navic.domain.manager.runtime.PermissionManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.runtime.StorageManager
 import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.LoginManager
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SyncManager
