@@ -9,6 +9,7 @@ package paige.navic.domain.manager.session
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import dev.zt64.subsonic.api.model.Role
+import dev.zt64.subsonic.api.model.SubsonicException
 import dev.zt64.subsonic.api.model.User
 import dev.zt64.subsonic.client.SubsonicAuth
 import dev.zt64.subsonic.client.SubsonicClient
@@ -34,6 +35,9 @@ class SessionManager(
 	private val preferenceManager: PreferenceManager,
 	private val dnsResolver: NavicularDnsResolver
 ) {
+	private companion object {
+		const val USER_AGENT = "Navic"
+	}
 
 	val isLoggedIn: StateFlow<Boolean>
 		field = MutableStateFlow(false)
@@ -82,10 +86,10 @@ class SessionManager(
 			username = username,
 			password = password,
 		),
-		client = "Navic",
+		client = USER_AGENT,
 		clientConfig = {
 			install(UserAgent) {
-				agent = "Navic"
+				agent = USER_AGENT
 			}
 
 			val customHeaders = preferenceManager.customHeadersMap()
@@ -102,6 +106,7 @@ class SessionManager(
 		)
 	)
 
+	@Throws(SubsonicException::class)
 	suspend fun login(
 		instanceUrl: String,
 		username: String,
@@ -109,16 +114,8 @@ class SessionManager(
 	) {
 		val client = createClient(instanceUrl, username, password)
 
-		try {
-			client.ping()
-			fetchCurrentUser(username, client)
-		} catch (e: Exception) {
-			// TODO: custom exception instead of the generic "Exception"
-			throw Exception(
-				"Failed to connect to the instance. Please check your credentials and try again.",
-				e
-			)
-		}
+		client.ping()
+		fetchCurrentUser(username, client)
 
 		this.instanceUrl = instanceUrl
 		this.username = username
