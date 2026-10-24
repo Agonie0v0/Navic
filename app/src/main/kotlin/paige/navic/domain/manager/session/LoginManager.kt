@@ -12,6 +12,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.zt64.subsonic.api.model.SubsonicErrorCode
+import dev.zt64.subsonic.api.model.SubsonicException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -104,11 +106,19 @@ class LoginManager(
 					"https://$rawUrl"
 				}
 
-				sessionManager.login(
-					url,
-					usernameState.text.toString(),
-					passwordState.text.toString()
-				)
+				try {
+					sessionManager.login(
+						url,
+						usernameState.text.toString(),
+						passwordState.text.toString()
+					)
+				} catch (e: SubsonicException) {
+					if (e.code != SubsonicErrorCode.WRONG_USERNAME_OR_PASSWORD) {
+						throw e
+					}
+					loginState.value = LoginUiState.InvalidCredentials
+					return@launch
+				}
 
 				syncManager.startPeriodicSync(syncImmediately = false)
 

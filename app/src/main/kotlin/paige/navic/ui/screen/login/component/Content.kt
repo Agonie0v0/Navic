@@ -39,6 +39,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -51,6 +52,7 @@ import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
+import paige.navic.di.LocalSnackBarState
 import paige.navic.domain.manager.runtime.PermissionManager
 import paige.navic.domain.manager.session.LoginManager
 import paige.navic.ui.component.common.SegmentedListButton
@@ -70,6 +72,9 @@ fun LoginScreenContent(innerPadding: PaddingValues) {
 	val instanceState = viewModel.instanceState
 	val usernameState = viewModel.usernameState
 	val passwordState = viewModel.passwordState
+
+	val snackBarState = LocalSnackBarState.current
+	val resources = LocalResources.current
 
 	val isBusy = loginState is LoginUiState.Loading || loginState is LoginUiState.Syncing
 
@@ -115,6 +120,12 @@ fun LoginScreenContent(innerPadding: PaddingValues) {
 		if (loginState is LoginUiState.Success) {
 			backStack.clear()
 			backStack.add(Screen.Library())
+		}
+
+		if (loginState is LoginUiState.InvalidCredentials) {
+			snackBarState.showSnackbar(
+				resources.getString(R.string.info_incorrect_credentials)
+			)
 		}
 	}
 
