@@ -16,11 +16,11 @@ import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.requiredSizeIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ContainedLoadingIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.ui.LocalNavAnimatedContentScope
@@ -59,7 +60,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import coil3.compose.LocalPlatformContext as LocalCoilPlatformContext
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ImageViewScreen(
 	coverArtId: String,
@@ -147,9 +148,11 @@ fun ImageViewScreen(
 					CoverArt(
 						coverArtId = coverArtId,
 						contentDescription = null,
+						contentScale = ContentScale.Fit,
+						square = true,
 						modifier = Modifier
-							.fillMaxSize()
-							.requiredSizeIn(maxWidth = 420.dp, maxHeight = 420.dp)
+							.fillMaxWidth()
+							.padding(16.dp)
 							.aspectRatio(1f)
 							.offset { IntOffset(x = 0, y = offsetY.value.roundToInt()) }
 							.sharedElement(
