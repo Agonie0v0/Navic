@@ -7,6 +7,7 @@
 package paige.navic.database.entity
 
 import androidx.room3.Entity
+import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import kotlinx.serialization.Serializable
 import paige.navic.domain.model.DomainContributor
@@ -17,7 +18,13 @@ import kotlin.time.Duration
 import kotlin.time.Instant
 
 @Serializable
-@Entity
+@Entity(
+	indices = [
+		Index(value = ["belongsToAlbumId"]),
+		Index(value = ["artistId"]),
+		Index(value = ["starredAt"])
+	]
+)
 data class SongEntity(
 	@PrimaryKey val songId: String,
 	val title: String,

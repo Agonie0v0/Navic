@@ -7,11 +7,17 @@
 package paige.navic.database.entity
 
 import androidx.room3.Entity
+import androidx.room3.Index
 import androidx.room3.PrimaryKey
 import kotlin.time.Duration
 import kotlin.time.Instant
 
-@Entity
+@Entity(
+	indices = [
+		Index(value = ["artistId"]),
+		Index(value = ["starredAt"])
+	]
+)
 data class AlbumEntity(
 	@PrimaryKey val albumId: String,
 	val name: String?,

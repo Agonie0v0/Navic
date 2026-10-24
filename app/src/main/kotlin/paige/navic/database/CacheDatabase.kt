@@ -34,7 +34,7 @@ import paige.navic.database.entity.SongEntity
 import paige.navic.database.entity.SyncActionEntity
 
 @Database(
-	version = 25,
+	version = 26,
 	entities = [
 		AlbumEntity::class,
 		ArtistEntity::class,
@@ -49,6 +49,7 @@ import paige.navic.database.entity.SyncActionEntity
 	],
 	autoMigrations = [
 		AutoMigration(from = 24, to = 25),
+		AutoMigration(from = 25, to = 26)
 	]
 )
 @ColumnTypeConverters(Converters::class)
