@@ -36,15 +36,26 @@ class SearchRepository(
 				artistDao.insertArtistsIgnoringConflicts(data.artists.map { it.toEntity() })
 				songDao.insertSongsIgnoringConflicts(data.songs.map { it.toEntity() })
 
-				val albums = albumDao.getAlbumsByIds(data.albums.map { it.id })
-				val artists = artistDao.getArtistsByIds(data.artists.map { it.id })
-				val songs = songDao.getSongsByIds(data.songs.map { it.id })
+				val albumIds = data.albums.map { it.id }
+				val artistIds = data.artists.map { it.id }
+				val songIds = data.songs.map { it.id }
+
+				val albumOrder = albumIds.withIndex().associate { (i, id) -> id to i }
+				val artistOrder = artistIds.withIndex().associate { (i, id) -> id to i }
+				val songOrder = songIds.withIndex().associate { (i, id) -> id to i }
+
+				val albums = albumDao.getAlbumsByIds(albumIds)
+					.map { it.toDomainModel() }
+					.sortedBy { albumOrder[it.id] }
+				val artists = artistDao.getArtistsByIds(artistIds)
+					.map { it.toDomainModel() }
+					.sortedBy { artistOrder[it.id] }
+				val songs = songDao.getSongsByIds(songIds)
+					.map { it.toDomainModel() }
+					.sortedBy { songOrder[it.id] }
 				val localPlaylists = playlistDao.searchPlaylistsList(query)
 
-				(albums.map { it.toDomainModel() }
-					+ artists.map { it.toDomainModel() }
-					+ songs.map { it.toDomainModel() }
-					+ localPlaylists.map { it.toDomainModel() })
+				(albums + artists + songs + localPlaylists.map { it.toDomainModel() })
 			} catch (e: Exception) {
 				if (e is CancellationException) throw e
 				Logger.e(
