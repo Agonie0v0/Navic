@@ -100,6 +100,7 @@ class PreferenceManager(
 	var nowPlayingSongInfo by preference(true)
 	var nowPlayingSliderStyle by preference(NowPlayingSliderStyle.Squiggly)
 	var nowPlayingCoverArtAction by preference(CoverArtTapAction.ShowLyrics)
+	var nowPlayingShowTimeRemaining by preference(false)
 	var customHeaders by preference("")
 	var checkForUpdates by preference(true)
 	var explicitContentPlayback by preference(ExplicitContentPlayback.Allowed)
