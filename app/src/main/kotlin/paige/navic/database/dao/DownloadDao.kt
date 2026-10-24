@@ -48,4 +48,16 @@ interface DownloadDao {
 
 	@Query("DELETE FROM DownloadEntity")
 	suspend fun clearAllDownloads()
+
+	@Query("SELECT * FROM DownloadEntity WHERE status = 'DOWNLOADED' AND filePath IS NOT NULL")
+	fun getDownloadedEntitiesFlow(): Flow<List<DownloadEntity>>
+
+	@Query("SELECT filePath FROM DownloadEntity WHERE status = 'DOWNLOADED' AND filePath IS NOT NULL")
+	fun getDownloadedFilePathsFlow(): Flow<List<String>>
+
+	@Query("SELECT * FROM DownloadEntity WHERE songId IN (:songIds)")
+	fun getDownloadsForSongsFlow(songIds: Collection<String>): Flow<List<DownloadEntity>>
+
+	@Query("SELECT songId FROM DownloadEntity WHERE songId IN (:songIds) AND status IN ('DOWNLOADED', 'DOWNLOADING')")
+	suspend fun getActiveOrCompletedDownloadIds(songIds: Collection<String>): List<String>
 }

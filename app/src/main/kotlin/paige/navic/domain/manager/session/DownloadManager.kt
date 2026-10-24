@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -55,11 +56,8 @@ class DownloadManager(
 
 	val allDownloads = downloadDao.getAllDownloads().map { it.toImmutableList() }
 	val downloadCount = downloadDao.getDownloadsCount()
-	val downloadSize = allDownloads.map { downloads ->
-		downloads
-			.filter { it.status == DownloadStatus.DOWNLOADED }
-			.mapNotNull { it.filePath }
-			.sumOf { storageManager.getFileSize(it) }
+	val downloadSize = downloadDao.getDownloadedFilePathsFlow().map { paths ->
+		paths.sumOf { storageManager.getFileSize(it) }
 	}.flowOn(Dispatchers.IO)
 
 	val downloadedSongs: StateFlow<Map<String, String>>
@@ -73,9 +71,8 @@ class DownloadManager(
 
 	init {
 		scope.launch {
-			allDownloads.collectLatest { downloads ->
+			downloadDao.getDownloadedEntitiesFlow().collectLatest { downloads ->
 				downloadedSongs.value = downloads
-					.filter { it.status == DownloadStatus.DOWNLOADED && it.filePath != null }
 					.associate { it.songId to it.filePath!! }
 			}
 		}
@@ -153,10 +150,7 @@ class DownloadManager(
 	private suspend fun enqueueSongs(songIds: List<String>): Int {
 		if (songIds.isEmpty()) return 0
 
-		val existing = downloadDao.getDownloadsByStatus(DownloadStatus.DOWNLOADED)
-			.associateBy { it.songId } +
-			downloadDao.getDownloadsByStatus(DownloadStatus.DOWNLOADING)
-				.associateBy { it.songId }
+		val existing = downloadDao.getActiveOrCompletedDownloadIds(songIds).toSet()
 
 		val newIds = songIds
 			.distinct()
@@ -251,8 +245,8 @@ class DownloadManager(
 	}
 
 	fun getCollectionDownloadStatus(songIds: List<String>): Flow<DownloadStatus> {
-		return allDownloads.map { downloads ->
-			val collectionDownloads = downloads.filter { it.songId in songIds }
+		if (songIds.isEmpty()) return flowOf(DownloadStatus.NOT_DOWNLOADED)
+		return downloadDao.getDownloadsForSongsFlow(songIds).map { collectionDownloads ->
 			when {
 				collectionDownloads.isEmpty() -> DownloadStatus.NOT_DOWNLOADED
 				collectionDownloads.any {
