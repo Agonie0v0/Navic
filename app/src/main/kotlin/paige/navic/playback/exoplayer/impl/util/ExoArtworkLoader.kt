@@ -47,6 +47,9 @@ class ExoArtworkLoader(
 			try {
 				val diskCache = imageLoader.diskCache
 				val snapshot = diskCache?.openSnapshot(coverId)
+					?: listOf("512", "1024", "200", "4096", "100", "50").firstNotNullOfOrNull { size ->
+						diskCache?.openSnapshot("$coverId#size=$size")
+					}
 				val imageBytes = snapshot.use {
 					it?.data?.toFile()?.readBytes()
 				}

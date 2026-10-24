@@ -38,13 +38,13 @@ class CoilSingleton(
 	)
 
 	// https://slack-chats.kotlinlang.org/t/8294624/hi-i-m-using-coil-to-load-images-in-compose-and-i-need-to-se
-	private class SizeInterceptor : Interceptor {
+	private inner class SizeInterceptor : Interceptor {
 		private val sizes = listOf(50, 100, 200, 512, 1024, 4096)
 
 		override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
 			val request = chain.request
 			val width = chain.size.width
-			val newRequest = if (width is Dimension.Pixels) {
+			val newRequest = if (width is Dimension.Pixels && request.data is String) {
 				val url = (request.data as String).replace(
 					Regex("[?&]size=[0-9]+"), ""
 				)
@@ -57,18 +57,31 @@ class CoilSingleton(
 					.appendQueryParameter("size", targetSize)
 					.build()
 
-				val cacheKey = "#size=$targetSize".let { suffix ->
-					uri.getQueryParameter("id")
-						?.let { "$it$suffix" }
-						?: "$url$suffix"
+				val idParam = uri.getQueryParameter("id")
+				val baseKey = idParam ?: request.diskCacheKey
+				val sizedKey = "#size=$targetSize".let { suffix ->
+					idParam?.let { "$it$suffix" } ?: "$url$suffix"
 				}
 
-				val builder = request.newBuilder().data(newUri)
+				val diskCache = getDiskCache()
+				val (finalData, finalCacheKey) = when {
+					diskCache.openSnapshot(sizedKey)?.use { true } == true -> {
+						newUri to sizedKey
+					}
+					baseKey != null && diskCache.openSnapshot(baseKey)?.use { true } == true -> {
+						request.data to baseKey
+					}
+					else -> {
+						newUri to sizedKey
+					}
+				}
+
+				val builder = request.newBuilder().data(finalData)
 				request.memoryCacheKey?.let {
-					builder.memoryCacheKey(cacheKey)
+					builder.memoryCacheKey(finalCacheKey)
 				}
 				request.diskCacheKey?.let {
-					builder.diskCacheKey(cacheKey)
+					builder.diskCacheKey(finalCacheKey)
 				}
 				builder.build()
 			} else {
