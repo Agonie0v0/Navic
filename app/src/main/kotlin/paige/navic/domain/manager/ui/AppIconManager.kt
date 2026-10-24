@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.ui
 
 import android.content.ComponentName
 import android.content.Context
@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import paige.navic.R
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.AppIconVariant
 
 class AppIconManager(
@@ -61,7 +62,8 @@ class AppIconManager(
 					componentName,
 					PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS
 				)
-				val activityResources = context.packageManager.getResourcesForActivity(componentName)
+				val activityResources =
+					context.packageManager.getResourcesForActivity(componentName)
 				ResourcesCompat.getDrawable(activityResources, info.icon, null)
 			} catch (_: Exception) {
 				null

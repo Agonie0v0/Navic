@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -48,7 +47,7 @@ import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.database.entity.DownloadEntity
 import paige.navic.database.entity.DownloadStatus
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainExplicitStatus
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.settings.ExplicitContentPlayback

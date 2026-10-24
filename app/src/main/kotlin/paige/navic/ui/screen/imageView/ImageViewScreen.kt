@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSharedTransitionScope
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.screen.imageView.component.ImageViewScreenTopBar
 import paige.navic.ui.util.EmphasizedDecelerateEasing
@@ -130,7 +130,8 @@ fun ImageViewScreen(
 			contentColor = contentColor
 		) {
 			Box(
-				modifier = Modifier.fillMaxSize()
+				modifier = Modifier
+					.fillMaxSize()
 					.draggable(
 						orientation = Orientation.Vertical,
 						state = rememberDraggableState { delta ->
@@ -168,7 +169,9 @@ fun ImageViewScreen(
 					)
 				}
 				if (loading) {
-					Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.5f)))
+					Box(Modifier
+						.matchParentSize()
+						.background(Color.Black.copy(alpha = 0.5f)))
 					ContainedLoadingIndicator(Modifier.size(48.dp))
 					NavigationBackHandler(
 						state = rememberNavigationEventState(NavigationEventInfo.None),

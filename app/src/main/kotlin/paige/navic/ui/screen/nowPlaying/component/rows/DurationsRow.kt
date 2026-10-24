@@ -22,7 +22,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.playback.MediaPlayer
 import paige.navic.util.toHoursMinutesSeconds
 import kotlin.time.Duration.Companion.seconds
@@ -66,7 +66,8 @@ fun NowPlayingDurationsRow() {
 					modifier = Modifier.clickable(
 						interactionSource = remember { MutableInteractionSource() }
 					) {
-						preferenceManager.nowPlayingShowTimeRemaining = !preferenceManager.nowPlayingShowTimeRemaining
+						preferenceManager.nowPlayingShowTimeRemaining =
+							!preferenceManager.nowPlayingShowTimeRemaining
 					}
 				)
 				Spacer(Modifier.weight(1f))
@@ -77,7 +78,8 @@ fun NowPlayingDurationsRow() {
 					modifier = Modifier.clickable(
 						interactionSource = remember { MutableInteractionSource() }
 					) {
-						preferenceManager.nowPlayingShowTimeRemaining = !preferenceManager.nowPlayingShowTimeRemaining
+						preferenceManager.nowPlayingShowTimeRemaining =
+							!preferenceManager.nowPlayingShowTimeRemaining
 					}
 				)
 			}

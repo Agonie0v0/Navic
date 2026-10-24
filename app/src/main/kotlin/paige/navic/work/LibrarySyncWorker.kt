@@ -15,8 +15,8 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import kotlinx.coroutines.CancellationException
 import paige.navic.R
-import paige.navic.domain.manager.NotificationIds
-import paige.navic.domain.manager.NotificationManager
+import paige.navic.domain.manager.runtime.NotificationIds
+import paige.navic.domain.manager.runtime.NotificationManager
 import paige.navic.domain.sync.SyncCoordinator
 import paige.navic.util.Logger
 

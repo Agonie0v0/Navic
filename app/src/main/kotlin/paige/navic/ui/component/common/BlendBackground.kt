@@ -38,7 +38,7 @@ import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.PlatformLayerComposable
 import paige.navic.util.backwardsCompatibleBlur
 import paige.navic.util.disableHardwareIfCucked

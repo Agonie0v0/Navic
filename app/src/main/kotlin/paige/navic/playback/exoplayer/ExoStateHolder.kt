@@ -55,7 +55,7 @@ import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import paige.navic.discord.ExoDiscordIntegration
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.playback.ExoAudioGainProcessor
 import paige.navic.playback.exoplayer.impl.util.ExoArtworkLoader
@@ -144,26 +144,26 @@ class ExoStateHolder : KoinComponent {
 			audioSinkBuilder
 				.setEnableFloatOutput(true)
 				.setAudioProcessorChain(object : AudioProcessorChain {
-				override fun getAudioProcessors(inputFormat: Format): Array<out AudioProcessor> {
-					return audioProcessors
-				}
+					override fun getAudioProcessors(inputFormat: Format): Array<out AudioProcessor> {
+						return audioProcessors
+					}
 
-				override fun applyPlaybackParameters(playbackParameters: PlaybackParameters): PlaybackParameters {
-					return PlaybackParameters.DEFAULT
-				}
+					override fun applyPlaybackParameters(playbackParameters: PlaybackParameters): PlaybackParameters {
+						return PlaybackParameters.DEFAULT
+					}
 
-				override fun applySkipSilenceEnabled(skipSilenceEnabled: Boolean): Boolean {
-					return false
-				}
+					override fun applySkipSilenceEnabled(skipSilenceEnabled: Boolean): Boolean {
+						return false
+					}
 
-				override fun getMediaDuration(playoutDuration: Long): Long {
-					return playoutDuration
-				}
+					override fun getMediaDuration(playoutDuration: Long): Long {
+						return playoutDuration
+					}
 
-				override fun getSkippedOutputFrameCount(): Long {
-					return 0
-				}
-			})
+					override fun getSkippedOutputFrameCount(): Long {
+						return 0
+					}
+				})
 		} else {
 			audioSinkBuilder.setAudioProcessors(audioProcessors)
 		}

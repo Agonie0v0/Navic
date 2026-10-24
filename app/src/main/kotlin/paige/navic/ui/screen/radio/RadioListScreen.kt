@@ -48,7 +48,7 @@ import paige.navic.R
 import paige.navic.R.string.info_no_radios
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.BottomBarCollapseMode
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer

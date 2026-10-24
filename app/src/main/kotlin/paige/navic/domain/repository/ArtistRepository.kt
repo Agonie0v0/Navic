@@ -15,7 +15,7 @@ import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.paging.createPagedFlow
 import paige.navic.database.query.getArtistLetterCountsQuery
 import paige.navic.database.query.toSqlQuery
-import paige.navic.domain.manager.SyncManager
+import paige.navic.domain.manager.session.SyncManager
 import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainFilter
@@ -32,7 +32,14 @@ class ArtistRepository(
 		reversed: Boolean = false,
 	): Flow<PagingData<DomainArtist>> = createPagedFlow(
 		isRandom = (listType == DomainArtistListType.Random),
-		getRandomIds = { artistDao.getArtistIdsByQuery(listType.toSqlQuery(filters = filters, idsOnly = true)) },
+		getRandomIds = {
+			artistDao.getArtistIdsByQuery(
+				listType.toSqlQuery(
+					filters = filters,
+					idsOnly = true
+				)
+			)
+		},
 		getEntityId = { it.artistId },
 		fetchByIds = artistDao::getArtistsByIds,
 		getStandardQuery = { artistDao.getArtistsByQuery(listType.toSqlQuery(reversed, filters)) },

@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.runtime
 
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import paige.navic.discord.ExoDiscordIntegration
-import paige.navic.domain.manager.base.BasePreferenceManager
+import paige.navic.domain.manager.runtime.base.BasePreferenceManager
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainPlaylistListType
@@ -89,12 +89,9 @@ class PreferenceManager(
 
 	var downloadStorage by preference(DownloadStorage.Internal)
 	var downloadQuality by preference(StreamingQuality.Lossless)
-	var downloadQualityCellular by preference(StreamingQuality.Lossless)
 	var isAdvancedDownloadTranscodingActive by preference(false)
 	var customDownloadMaxBitrate by preference(0)
-	var customDownloadMaxBitrateCellular by preference(0)
 	var customDownloadFormat by preference("")
-	var customDownloadFormatCellular by preference("")
 
 	var nowPlayingToolbarPosition by preference(ToolbarPosition.Bottom)
 	var nowPlayingSongInfo by preference(true)

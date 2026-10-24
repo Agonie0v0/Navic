@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.session
 
 import android.content.Context
 import androidx.work.BackoffPolicy
@@ -31,6 +31,9 @@ import paige.navic.database.dao.DownloadDao
 import paige.navic.database.dao.SongDao
 import paige.navic.database.entity.DownloadEntity
 import paige.navic.database.entity.DownloadStatus
+import paige.navic.domain.manager.runtime.NotificationIds
+import paige.navic.domain.manager.runtime.NotificationManager
+import paige.navic.domain.manager.runtime.StorageManager
 import paige.navic.domain.model.settings.DownloadStorage
 import paige.navic.util.Logger
 import paige.navic.work.DownloadMigrationWorker

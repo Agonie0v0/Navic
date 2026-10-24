@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.ResolvedTextDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import org.koin.compose.koinInject
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 
 @Composable
 fun LyricsScreenKaraokeText(

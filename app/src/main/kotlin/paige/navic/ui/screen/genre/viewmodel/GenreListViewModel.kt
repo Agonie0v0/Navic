@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainGenre
 import paige.navic.domain.repository.GenreRepository
 import paige.navic.ui.viewmodel.AsyncViewModel

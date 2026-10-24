@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import paige.navic.R
-import paige.navic.domain.manager.ConnectivityManager
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.model.settings.StreamingQuality
 import paige.navic.domain.model.settings.description
 import paige.navic.ui.component.common.SegmentedListItemDefaults

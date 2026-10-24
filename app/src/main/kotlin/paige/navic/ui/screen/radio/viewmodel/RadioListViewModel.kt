@@ -9,7 +9,7 @@ package paige.navic.ui.screen.radio.viewmodel
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainRadio
 import paige.navic.domain.repository.RadioRepository
 import paige.navic.ui.viewmodel.SelectableViewModel

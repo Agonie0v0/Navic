@@ -18,8 +18,8 @@ import paige.navic.R
 import paige.navic.database.dao.PlaylistDao
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.mapper.toEntity
-import paige.navic.domain.manager.SessionManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainPlaylist
 import paige.navic.ui.core.UiState
 

@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
 import paige.navic.R
-import paige.navic.domain.manager.LinkManager
+import paige.navic.domain.manager.ui.LinkManager
 import paige.navic.ui.component.common.SegmentedListButton
 import paige.navic.ui.component.common.SegmentedListButtonDefaults
 

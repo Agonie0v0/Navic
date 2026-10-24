@@ -74,10 +74,10 @@ import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSharedTransitionScope
 import paige.navic.di.LocalSizeClass
 import paige.navic.di.LocalSnackBarState
-import paige.navic.domain.manager.BottomBarScrollManager
-import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.BottomBarScrollManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.settings.ExplicitContentPlayback
 import paige.navic.generated.BuildInfo
 import paige.navic.playback.MediaPlayer
@@ -197,7 +197,8 @@ fun App() {
 			NavicTheme {
 				Row(modifier = Modifier.fillMaxSize()) {
 					if (sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
-						&& Screen.Login !in backStack) {
+						&& Screen.Login !in backStack
+					) {
 						SideBar()
 					}
 					@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

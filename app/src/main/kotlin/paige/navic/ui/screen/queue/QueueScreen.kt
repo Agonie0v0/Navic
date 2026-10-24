@@ -50,7 +50,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.R
 import paige.navic.di.LocalNavStack
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.settings.QueueInfoType
 import paige.navic.playback.MediaPlayer
@@ -162,7 +162,8 @@ fun QueueScreen() {
 		}
 
 		AndroidView(
-			modifier = Modifier.padding(horizontal = 12.dp)
+			modifier = Modifier
+				.padding(horizontal = 12.dp)
 				.fillMaxSize()
 				.navigationBarsPadding()
 				.clipToBounds()

@@ -29,7 +29,7 @@ import paige.navic.database.dao.LyricDao
 import paige.navic.database.dao.SongDao
 import paige.navic.database.entity.LyricEntity
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.lyrics.LyricsConfig
 import paige.navic.domain.model.lyrics.LyricsLine

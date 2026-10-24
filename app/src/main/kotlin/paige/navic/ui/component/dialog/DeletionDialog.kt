@@ -30,9 +30,9 @@ import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.R
 import paige.navic.database.dao.PlaylistDao
 import paige.navic.database.entity.SyncActionType
-import paige.navic.domain.manager.SessionManager
-import paige.navic.domain.manager.SnackBarManager
-import paige.navic.domain.manager.SyncManager
+import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SyncManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.ui.component.common.SegmentedListButton
 import paige.navic.ui.component.common.SegmentedListButtonDefaults
 import paige.navic.ui.core.UiState

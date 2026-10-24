@@ -14,18 +14,16 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import paige.navic.R
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.ConnectivityManager
-import paige.navic.domain.manager.SessionManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumInfo
-import paige.navic.domain.model.DomainPlaylist
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.domain.repository.AlbumRepository
@@ -76,10 +74,10 @@ class CollectionDetailViewModel(
 			album?.let { repository.getOtherAlbums(it.artistId, it.id) } ?: emptyFlow()
 		}
 		.stateIn(
-		scope = viewModelScope,
-		started = SharingStarted.Lazily,
-		initialValue = emptyList()
-	)
+			scope = viewModelScope,
+			started = SharingStarted.Lazily,
+			initialValue = emptyList()
+		)
 
 	init {
 		launch {

@@ -7,9 +7,9 @@
 package paige.navic.ui.screen.song.viewmodel
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import paige.navic.domain.manager.ConnectivityManager
-import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainFilter
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.DomainSongListType

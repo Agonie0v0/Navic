@@ -52,16 +52,15 @@ import paige.navic.R.string.title_more_by_artist
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainPlaylist
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
-import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.Album
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.ArtCarousel
 import paige.navic.ui.component.layout.ArtCarouselItem
 import paige.navic.ui.component.layout.PullToRefreshBox
@@ -69,6 +68,8 @@ import paige.navic.ui.component.layout.RootBottomBar
 import paige.navic.ui.component.sheet.CollectionSheet
 import paige.navic.ui.component.snackbar.ErrorSnackBar
 import paige.navic.ui.core.UiState
+import paige.navic.ui.icons.Icons
+import paige.navic.ui.icons.outlined.Album
 import paige.navic.ui.navigation.Screen.ArtistDetail
 import paige.navic.ui.navigation.Screen.CollectionDetail
 import paige.navic.ui.screen.collection.component.CollectionDetailScreenFooterRow
@@ -79,7 +80,6 @@ import paige.navic.ui.screen.collection.component.CollectionDetailScreenSongRowD
 import paige.navic.ui.screen.collection.component.CollectionDetailScreenTopBar
 import paige.navic.ui.screen.collection.viewmodel.CollectionDetailViewModel
 import paige.navic.ui.screen.playlist.dialog.PlaylistUpdateDialog
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.theme.NavicTheme
 import paige.navic.ui.util.rememberColorSchemeFromCoverArt
 import paige.navic.ui.util.withoutTop
@@ -375,14 +375,19 @@ fun CollectionDetailScreen(
 
 					(collection as? DomainAlbum)?.artistName?.let { artistName ->
 						item {
-							var albumToAddToPlaylist by remember<MutableState<DomainAlbum?>> { mutableStateOf(null) }
+							var albumToAddToPlaylist by remember<MutableState<DomainAlbum?>> {
+								mutableStateOf(
+									null
+								)
+							}
 
 							ArtCarousel(
 								title = stringResource(
 									title_more_by_artist,
 									formatArgs = arrayOf(artistName)
 								),
-								items = otherAlbums.sortedByDescending { it.playCount }.toImmutableList()
+								items = otherAlbums.sortedByDescending { it.playCount }
+									.toImmutableList()
 							) { album ->
 								ArtCarouselItem(
 									coverArtId = album.coverArtId,
@@ -407,9 +412,11 @@ fun CollectionDetailScreen(
 										onPlayNext = { player.playNext(selectedAlbum as DomainSongCollection) },
 										onAddToQueue = { player.addToQueue(selectedAlbum as DomainSongCollection) },
 										onAddAllToPlaylist = { albumToAddToPlaylist = album },
-										onViewArtist = dropUnlessResumed { backStack.add(
-											ArtistDetail(album.artistId)
-										) },
+										onViewArtist = dropUnlessResumed {
+											backStack.add(
+												ArtistDetail(album.artistId)
+											)
+										},
 										rating = album.userRating ?: 0,
 										onSetRating = { viewModel.rateSelectedAlbum(it) },
 										starred = isStarred,
@@ -422,7 +429,8 @@ fun CollectionDetailScreen(
 							if (albumToAddToPlaylist != null) {
 								albumToAddToPlaylist?.let {
 									PlaylistUpdateDialog(
-										songIds = it.songs.map { song -> song.id }.toPersistentList(),
+										songIds = it.songs.map { song -> song.id }
+											.toPersistentList(),
 										onDismissRequest = { albumToAddToPlaylist = null }
 									)
 								}

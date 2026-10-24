@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.runtime
 
 import android.Manifest
 import android.content.Context

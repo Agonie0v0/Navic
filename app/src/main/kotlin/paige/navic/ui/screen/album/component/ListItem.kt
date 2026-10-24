@@ -12,9 +12,9 @@ import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
@@ -23,7 +23,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.di.LocalNavStack
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.component.common.MarqueeText

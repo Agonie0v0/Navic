@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager.base
+package paige.navic.domain.manager.runtime.base
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

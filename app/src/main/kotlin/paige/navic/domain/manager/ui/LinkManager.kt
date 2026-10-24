@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.ui
 
 import android.app.Application
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
@@ -24,7 +25,7 @@ class LinkManager(
 		intent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 		try {
 			intent.launchUrl(application, link.toUri())
-		} catch (ex: android.content.ActivityNotFoundException) {
+		} catch (ex: ActivityNotFoundException) {
 			Logger.w("LinkManager", "no browser found", ex)
 			Toast.makeText(
 				application.applicationContext,

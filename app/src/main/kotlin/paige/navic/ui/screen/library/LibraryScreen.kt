@@ -28,13 +28,14 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import paige.navic.R
 import paige.navic.di.LocalBottomBarScrollManager
-import paige.navic.domain.manager.LoginManager
+import paige.navic.domain.manager.session.LoginManager
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.dialog.DeletionDialog
 import paige.navic.ui.component.dialog.DeletionTarget
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
 import paige.navic.ui.component.layout.RootTopBar
@@ -48,7 +49,6 @@ import paige.navic.ui.screen.genre.viewmodel.GenreListViewModel
 import paige.navic.ui.screen.library.component.LibraryScreenContent
 import paige.navic.ui.screen.playlist.dialog.PlaylistCreateDialog
 import paige.navic.ui.screen.playlist.viewmodel.PlaylistListViewModel
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.screen.stats.viewmodel.StatisticsViewModel
 import paige.navic.ui.viewmodel.RootViewModel
 

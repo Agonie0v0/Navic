@@ -16,8 +16,8 @@ import androidx.compose.ui.res.stringResource
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.session.DownloadManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.ui.component.common.SegmentedListButton
 import paige.navic.ui.component.common.SegmentedListButtonDefaults
 import paige.navic.ui.icons.Icons
@@ -50,6 +50,7 @@ fun BulkDownloadDialog(
 					target.name
 				)
 			}
+
 			is BulkDownloadTarget.Library -> {
 				stringResource(R.string.title_library_download) to stringResource(
 					R.string.info_library_download_warning
@@ -71,6 +72,7 @@ fun BulkDownloadDialog(
 								is BulkDownloadTarget.Artist -> {
 									downloadManager.downloadCollection(target.songIds)
 								}
+
 								is BulkDownloadTarget.Library -> {
 									downloadManager.downloadEntireLibrary()
 								}

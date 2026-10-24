@@ -18,9 +18,9 @@ import paige.navic.R
 import paige.navic.database.dao.DownloadDao
 import paige.navic.database.entity.DownloadEntity
 import paige.navic.database.entity.DownloadStatus
-import paige.navic.domain.manager.NotificationIds
-import paige.navic.domain.manager.NotificationManager
-import paige.navic.domain.manager.StorageManager
+import paige.navic.domain.manager.runtime.NotificationIds
+import paige.navic.domain.manager.runtime.NotificationManager
+import paige.navic.domain.manager.runtime.StorageManager
 import paige.navic.domain.model.settings.DownloadStorage
 import paige.navic.domain.repository.SongRepository
 import paige.navic.util.Logger

@@ -10,8 +10,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import paige.navic.R
-import paige.navic.domain.manager.SessionManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.ui.viewmodel.AsyncViewModel
 
 class RadioCreateDialogViewModel(

@@ -13,8 +13,8 @@ import paige.navic.database.dao.PlaylistDao
 import paige.navic.database.dao.SongDao
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.mapper.toEntity
-import paige.navic.domain.manager.ConnectivityManager
-import paige.navic.domain.manager.SessionManager
+import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
 
 class SearchRepository(

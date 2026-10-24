@@ -28,8 +28,8 @@ import org.koin.core.parameter.parametersOf
 import paige.navic.R
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainFilter
@@ -39,6 +39,7 @@ import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
@@ -46,7 +47,6 @@ import paige.navic.ui.core.UiState
 import paige.navic.ui.navigation.PersistentViewModelStoreOwner
 import paige.navic.ui.screen.album.viewmodel.AlbumListViewModel
 import paige.navic.ui.screen.artist.viewmodel.ArtistListViewModel
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.screen.song.viewmodel.SongListViewModel
 import paige.navic.ui.screen.starred.component.StarredScreenContent
 

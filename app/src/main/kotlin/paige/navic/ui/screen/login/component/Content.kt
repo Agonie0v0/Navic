@@ -51,14 +51,14 @@ import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
-import paige.navic.domain.manager.LoginManager
-import paige.navic.domain.manager.PermissionManager
-import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.Error
+import paige.navic.domain.manager.runtime.PermissionManager
+import paige.navic.domain.manager.session.LoginManager
 import paige.navic.ui.component.common.SegmentedListButton
 import paige.navic.ui.component.common.SegmentedListButtonDefaults
 import paige.navic.ui.component.dialog.FormDialog
 import paige.navic.ui.core.LoginUiState
+import paige.navic.ui.icons.Icons
+import paige.navic.ui.icons.outlined.Error
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.theme.defaultFont
 

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.session
 
 import android.content.Context
 import androidx.annotation.StringRes
@@ -32,11 +32,13 @@ import paige.navic.database.dao.AlbumDao
 import paige.navic.database.dao.SyncActionDao
 import paige.navic.database.entity.SyncActionEntity
 import paige.navic.database.entity.SyncActionType
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.Logger
 import paige.navic.work.LibrarySyncWorker
 import paige.navic.work.SyncActionWorker
 import paige.navic.work.WorkKeys
 import paige.navic.work.WorkNames
+import java.util.concurrent.TimeUnit
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -110,7 +112,7 @@ class SyncManager(
 		Logger.i("SyncManager", "Scheduling periodic sync.")
 
 		val request =
-			PeriodicWorkRequestBuilder<LibrarySyncWorker>(15, java.util.concurrent.TimeUnit.MINUTES)
+			PeriodicWorkRequestBuilder<LibrarySyncWorker>(15, TimeUnit.MINUTES)
 				.setConstraints(networkConstraints())
 				.setInputData(
 					workDataOf(
@@ -121,7 +123,7 @@ class SyncManager(
 				.setBackoffCriteria(
 					BackoffPolicy.EXPONENTIAL,
 					30,
-					java.util.concurrent.TimeUnit.SECONDS
+					TimeUnit.SECONDS
 				)
 				.addTag(WorkNames.SYNC_TAG)
 				.build()
@@ -151,7 +153,7 @@ class SyncManager(
 			.setBackoffCriteria(
 				BackoffPolicy.EXPONENTIAL,
 				30,
-				java.util.concurrent.TimeUnit.SECONDS
+				TimeUnit.SECONDS
 			)
 			.addTag(WorkNames.SYNC_TAG)
 			.build()
@@ -200,7 +202,7 @@ class SyncManager(
 			.setBackoffCriteria(
 				BackoffPolicy.EXPONENTIAL,
 				30,
-				java.util.concurrent.TimeUnit.SECONDS
+				TimeUnit.SECONDS
 			)
 			.addTag(WorkNames.SYNC_ACTION_TAG)
 			.build()

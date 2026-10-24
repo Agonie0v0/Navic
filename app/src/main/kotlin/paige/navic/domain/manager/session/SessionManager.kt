@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.session
 
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.Logger
 import paige.navic.util.getEncryptedString
 import paige.navic.util.insertEncryptedString

@@ -26,8 +26,8 @@ import paige.navic.database.entity.DownloadEntity
 import paige.navic.database.entity.DownloadStatus
 import paige.navic.domain.download.DownloadCancelledException
 import paige.navic.domain.download.DownloadProcessor
-import paige.navic.domain.manager.NotificationIds
-import paige.navic.domain.manager.NotificationManager
+import paige.navic.domain.manager.runtime.NotificationIds
+import paige.navic.domain.manager.runtime.NotificationManager
 import paige.navic.util.Logger
 
 class DownloadWorker(

@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainExplicitStatus
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.settings.ExplicitContentPlayback
@@ -98,10 +98,10 @@ fun QueueScreenItem(
 		backgroundContent = {
 			Box(
 				modifier = Modifier
-                    .fillMaxSize()
-                    .clip(itemShape.shape)
-                    .background(MaterialTheme.colorScheme.errorContainer)
-                    .padding(horizontal = 20.dp)
+					.fillMaxSize()
+					.clip(itemShape.shape)
+					.background(MaterialTheme.colorScheme.errorContainer)
+					.padding(horizontal = 20.dp)
 			) {
 				Icon(
 					imageVector = Icons.Outlined.Delete,

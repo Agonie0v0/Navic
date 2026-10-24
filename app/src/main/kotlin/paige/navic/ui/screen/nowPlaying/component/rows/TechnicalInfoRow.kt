@@ -24,15 +24,11 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import org.koin.compose.koinInject
-import paige.navic.domain.manager.ConnectivityManager
-import paige.navic.domain.manager.PreferenceManager
 import paige.navic.playback.MediaPlayer
 import paige.navic.playback.PlaybackUtils
 
 @Composable
 fun NowPlayingTechnicalInfoRow() {
-	val preferenceManager = koinInject<PreferenceManager>()
-	val connectivityManager = koinInject<ConnectivityManager>()
 	val player = koinInject<MediaPlayer>()
 	val playerState by player.uiState.collectAsState()
 	val song = playerState.currentSong
@@ -65,23 +61,11 @@ fun NowPlayingTechnicalInfoRow() {
 						if (it >= 1000) "${it / 1000.0} kHz" else "$it Hz"
 					} ?: "-- kHz"
 
-				val isCellular = connectivityManager.isCellular.collectAsState().value
-				val requestedBitrate = if (preferenceManager.isAdvancedTranscodingActive) {
-					if (isCellular) preferenceManager.customMaxBitrateCellular else preferenceManager.customMaxBitrate
-				} else {
-					if (isCellular) preferenceManager.streamingQualityCellular.bitrate else preferenceManager.streamingQualityWifi.bitrate
-				}
-
 				val bitDepthFormatted = playerState.playbackBitDepth
 					?.takeIf { it > 16 }
 					?.let { "$it bit" }
 
 				val bitrateFormatted = playerState.playbackBitrate?.let { "${it / 1000} kbps" }
-					?: if (requestedBitrate > 0) {
-						"$requestedBitrate kbps"
-					} else {
-						song?.bitRate?.let { "$it kbps" }
-					} ?: "-- kbps"
 
 				val format =
 					playerState.playbackMimeType

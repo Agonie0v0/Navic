@@ -17,7 +17,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import okhttp3.Dns
 import okhttp3.OkHttpClient
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import java.security.SecureRandom
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
@@ -32,7 +32,11 @@ fun createSSLSocketFactory(trustManagers: Array<TrustManager>): SSLSocketFactory
 	}.socketFactory
 }
 
-fun buildKtorEngine(proxyUrl: String? = null, trustAllCerts: Boolean = false, dnsResolver: Dns? = null): HttpClientEngine {
+fun buildKtorEngine(
+	proxyUrl: String? = null,
+	trustAllCerts: Boolean = false,
+	dnsResolver: Dns? = null
+): HttpClientEngine {
 	return OkHttp.create {
 		config {
 			if (trustAllCerts) {
@@ -142,7 +146,10 @@ fun extractProxyConfigFromUrl(url: String): ProxyConfig? {
 	return null
 }
 
-fun createHttpClientWithPreferences(preferenceManager: PreferenceManager, dnsResolver: NavicularDnsResolver): HttpClient {
+fun createHttpClientWithPreferences(
+	preferenceManager: PreferenceManager,
+	dnsResolver: NavicularDnsResolver
+): HttpClient {
 	return createHttpClient(
 		preferenceManager.dangerousSslNoopEnabled,
 		preferenceManager.customHeadersMap(),

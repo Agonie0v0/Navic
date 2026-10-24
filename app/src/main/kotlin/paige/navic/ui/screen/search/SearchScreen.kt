@@ -47,8 +47,8 @@ import org.koin.core.parameter.parametersOf
 import paige.navic.R
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainArtist
@@ -166,7 +166,8 @@ fun SearchScreen(
 			val preferVisible =
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
-				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
+				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)
+			) {
 				RootBottomBar(scrolled = scrollManager.isTriggered)
 			}
 		}
@@ -182,6 +183,7 @@ fun SearchScreen(
 				) {
 					artGridPlaceholder(viewMode = ListViewMode.List)
 				}
+
 				is UiState.Error -> ErrorBox(uiState, padding = contentPadding)
 				is UiState.Success -> {
 					val results = uiState.data
@@ -231,7 +233,8 @@ fun SearchScreen(
 										song = song,
 										selected = selectedSong == song,
 										starred = if (selectedSong == song) selectedSongIsStarred else song.starredAt != null,
-										rating = if (selectedSong == song) selectedSongRating else (song.userRating ?: 0),
+										rating = if (selectedSong == song) selectedSongRating else (song.userRating
+											?: 0),
 										onSelect = { viewModel.selectSong(song) },
 										onDeselect = { viewModel.clearSelectedSong() },
 										onSetStarred = { viewModel.starSelectedSong(it) },
@@ -267,7 +270,8 @@ fun SearchScreen(
 								seeAll = false
 							) { album ->
 								AlbumListScreenGridItem(
-									modifier = Modifier.animateItem(fadeInSpec = null)
+									modifier = Modifier
+										.animateItem(fadeInSpec = null)
 										.width(150.dp),
 									tab = "search",
 									album = album,
@@ -295,7 +299,8 @@ fun SearchScreen(
 								seeAll = false
 							) { artist ->
 								ArtistListScreenGridItem(
-									modifier = Modifier.animateItem(fadeInSpec = null)
+									modifier = Modifier
+										.animateItem(fadeInSpec = null)
 										.width(150.dp),
 									tab = "search",
 									artist = artist,

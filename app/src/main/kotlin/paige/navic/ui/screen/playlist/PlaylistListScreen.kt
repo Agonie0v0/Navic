@@ -52,17 +52,16 @@ import paige.navic.R
 import paige.navic.R.string.info_no_playlists_short
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.domain.model.settings.BottomBarCollapseMode
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.domain.model.settings.ListViewMode
-import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.Add
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.dialog.DeletionDialog
 import paige.navic.ui.component.dialog.DeletionTarget
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.ArtGrid
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
@@ -71,13 +70,14 @@ import paige.navic.ui.component.layout.RootTopBar
 import paige.navic.ui.component.layout.artGridPlaceholder
 import paige.navic.ui.component.snackbar.ErrorSnackBar
 import paige.navic.ui.core.UiState
+import paige.navic.ui.icons.Icons
+import paige.navic.ui.icons.outlined.Add
 import paige.navic.ui.navigation.PersistentViewModelStoreOwner
 import paige.navic.ui.screen.playlist.component.PlaylistListScreenGridItem
 import paige.navic.ui.screen.playlist.component.PlaylistListScreenListItem
 import paige.navic.ui.screen.playlist.component.PlaylistListScreenSortButton
 import paige.navic.ui.screen.playlist.dialog.PlaylistCreateDialog
 import paige.navic.ui.screen.playlist.viewmodel.PlaylistListViewModel
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.util.withoutTop
 import paige.navic.ui.viewmodel.RootViewModel
 
@@ -191,15 +191,16 @@ fun PlaylistListScreen(
 			val preferVisible =
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
-				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
+				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)
+			) {
 				RootBottomBar(scrolled = scrollManager.isTriggered)
 			}
 		}
 	) { innerPadding ->
 		PullToRefreshBox(
 			modifier = Modifier
-				.padding(top = innerPadding.calculateTopPadding())
-				.background(MaterialTheme.colorScheme.surface),
+                .padding(top = innerPadding.calculateTopPadding())
+                .background(MaterialTheme.colorScheme.surface),
 			finished = state !is UiState.Loading,
 			onRefresh = { viewModel.refreshPlaylists(true) },
 			key = state

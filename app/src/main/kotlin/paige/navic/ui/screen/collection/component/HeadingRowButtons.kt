@@ -35,9 +35,10 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.database.entity.DownloadStatus
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.session.DownloadManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainSongCollection
+import paige.navic.playback.MediaPlayer
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.filled.Play
 import paige.navic.ui.icons.outlined.Close
@@ -45,7 +46,6 @@ import paige.navic.ui.icons.outlined.Delete
 import paige.navic.ui.icons.outlined.Download
 import paige.navic.ui.icons.outlined.DownloadOff
 import paige.navic.ui.icons.outlined.Shuffle
-import paige.navic.playback.MediaPlayer
 import paige.navic.ui.theme.defaultFont
 
 @Composable
@@ -87,7 +87,9 @@ fun CollectionDetailScreenHeadingRowButtons(
 			)
 		}
 		Button(
-			modifier = Modifier.weight(1f).height(buttonHeight),
+			modifier = Modifier
+				.weight(1f)
+				.height(buttonHeight),
 			onClick = {
 				player.playNow(collection)
 			},
@@ -97,7 +99,9 @@ fun CollectionDetailScreenHeadingRowButtons(
 			Icon(
 				Icons.Filled.Play,
 				null,
-				modifier = Modifier.size(25.dp).padding(end = 3.dp)
+				modifier = Modifier
+					.size(25.dp)
+					.padding(end = 3.dp)
 			)
 			Text(
 				stringResource(R.string.action_play),
