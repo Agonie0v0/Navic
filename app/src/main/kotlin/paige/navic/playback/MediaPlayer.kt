@@ -10,6 +10,7 @@ import android.app.Application
 import android.content.Intent
 import androidx.core.net.toUri
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackParameters
@@ -295,8 +296,6 @@ class MediaPlayer(
 					}
 				}
 			})
-			updatePlaybackState()
-			updatePlaybackProperties(currentTracks)
 
 			downloadManager.allDownloads.first()
 			pendingSyncState?.let { state ->
@@ -496,24 +495,23 @@ class MediaPlayer(
 
 	@UnstableApi
 	private fun updatePlaybackProperties(tracks: Tracks) {
-		val audioGroup =
+		val audioGroups =
 			tracks.groups.firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.isSelected }
-		if (audioGroup != null) {
-			for (i in 0 until audioGroup.length) {
-				if (audioGroup.isTrackSelected(i)) {
-					val format = audioGroup.getTrackFormat(i)
+		if (audioGroups != null) {
+			for (i in 0 until audioGroups.length) {
+				if (audioGroups.isTrackSelected(i)) {
+					val format = audioGroups.getTrackFormat(i)
 					Logger.i("MediaPlayer", "active track format: $format")
 					_uiState.update { state ->
 						state.copy(
-							playbackBitrate = format.bitrate.takeIf { it > 0 },
-							playbackSampleRate = format.sampleRate.takeIf { it > 0 },
+							playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE },
+							playbackSampleRate = format.sampleRate.takeIf { it != Format.NO_VALUE },
 							playbackMimeType = format.sampleMimeType,
 							playbackBitDepth = when (format.pcmEncoding) {
 								C.ENCODING_PCM_8BIT -> 8
 								C.ENCODING_PCM_16BIT -> 16
 								C.ENCODING_PCM_24BIT -> 24
-								C.ENCODING_PCM_32BIT -> 32
-								C.ENCODING_PCM_FLOAT -> 32
+								C.ENCODING_PCM_32BIT, C.ENCODING_PCM_FLOAT -> 32
 								else -> -1
 							}
 						)

@@ -61,11 +61,13 @@ fun NowPlayingTechnicalInfoRow() {
 						if (it >= 1000) "${it / 1000.0} kHz" else "$it Hz"
 					} ?: "-- kHz"
 
-				val bitDepthFormatted = playerState.playbackBitDepth
+				val bitDepthFormatted = (playerState.playbackBitDepth ?: song?.bitDepth)
 					?.takeIf { it > 16 }
 					?.let { "$it bit" }
 
-				val bitrateFormatted = playerState.playbackBitrate?.let { "${it / 1000} kbps" }
+				val bitrateFormatted =
+					(playerState.playbackBitrate ?: song?.bitRate)?.let { "${it / 1000} kbps" }
+						?: "-- kbps"
 
 				val format =
 					playerState.playbackMimeType
