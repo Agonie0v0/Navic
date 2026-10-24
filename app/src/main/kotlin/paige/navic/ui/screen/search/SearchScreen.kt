@@ -97,6 +97,7 @@ fun SearchScreen(
 	val preferenceManager = koinInject<PreferenceManager>()
 	val downloadManager = koinInject<DownloadManager>()
 	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(initialValue = emptyList())
+	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
 
 	val viewModel = koinViewModel<SearchViewModel>(
 		viewModelStoreOwner = if (nested) {
@@ -226,7 +227,7 @@ fun SearchScreen(
 									span = { GridItemSpan(maxLineSpan) }
 								) { index ->
 									val song = displaySongs[index]
-									val download = allDownloads.find { it.songId == song.id }
+									val download = downloadsMap[song.id]
 
 									SongListScreenItem(
 										modifier = Modifier.animateItem(),

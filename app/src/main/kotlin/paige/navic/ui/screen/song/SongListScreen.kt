@@ -112,6 +112,8 @@ fun SongListScreen(
 		}
 	}
 
+	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
+
 	Scaffold(
 		topBar = {
 			if (!nested) {
@@ -163,7 +165,7 @@ fun SongListScreen(
 					items(lazyPagingItems.itemCount) { index ->
 						val song = lazyPagingItems[index] ?: return@items
 
-						val download = allDownloads.find { it.songId == song.id }
+						val download = downloadsMap[song.id]
 						SongListScreenItem(
 							modifier = Modifier.animateItem(),
 							song = song,

@@ -130,6 +130,7 @@ fun ArtistDetailScreen(
 	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(
 		initialValue = emptyList()
 	)
+	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
 	val downloadStatus by downloadManager.getCollectionDownloadStatus(
 		artistState.data?.albums.orEmpty().flatMap { album ->
 			album.songs.map { it.id }
@@ -320,8 +321,7 @@ fun ArtistDetailScreen(
 												.height(250.dp)
 										) {
 											itemsIndexed(songs) { index, song ->
-												val download =
-													allDownloads.find { it.songId == song.id }
+												val download = downloadsMap[song.id]
 												SongRow(
 													modifier = Modifier.weight(1f),
 													song = song,

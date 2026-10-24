@@ -71,6 +71,8 @@ fun GenreDetailScreenContent(
 	onPlayAlbumNext: () -> Unit,
 	onAddAlbumToQueue: () -> Unit,
 ) {
+	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
+
 	LazyVerticalGrid(
 		columns = GridCells.Fixed(2),
 		contentPadding = innerPadding.withoutTop() + PaddingValues(top = 8.dp),
@@ -107,7 +109,7 @@ fun GenreDetailScreenContent(
 				) { index ->
 					val song = songs[index] ?: return@items
 
-					val download = allDownloads.find { it.songId == song.id }
+					val download = downloadsMap[song.id]
 					SongRow(
 						song = song,
 						selected = selectedSong == song,

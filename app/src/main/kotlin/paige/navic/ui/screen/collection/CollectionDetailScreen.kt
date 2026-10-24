@@ -111,6 +111,7 @@ fun CollectionDetailScreen(
 	val otherAlbums by viewModel.otherAlbums.collectAsState()
 	val downloadManager = koinInject<DownloadManager>()
 	val allDownloads by downloadManager.allDownloads.collectAsState(emptyList())
+	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
 	val backStack = LocalNavStack.current
 
 	val titleAlpha by remember {
@@ -247,7 +248,7 @@ fun CollectionDetailScreen(
 									}
 								}
 								itemsIndexed(group.value) { index, song ->
-									val download = allDownloads.find { it.songId == song.id }
+									val download = downloadsMap[song.id]
 									Box(
 										modifier = Modifier.height(intrinsicSize = IntrinsicSize.Max)
 									) {
@@ -306,7 +307,7 @@ fun CollectionDetailScreen(
 							key = { index -> "${collection.id}_$index" }
 						) { index ->
 							val song = pagedPlaylistSongs[index] ?: return@items
-							val download = allDownloads.find { it.songId == song.id }
+							val download = downloadsMap[song.id]
 							Box {
 								CollectionDetailScreenSongRow(
 									song = song,

@@ -111,6 +111,7 @@ fun StarredScreenContent(
 	val backStack = LocalNavStack.current
 
 	val layoutDirection = LocalLayoutDirection.current
+	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
 
 	var songIdsToAddToPlaylist by rememberSaveable { mutableStateOf<ImmutableList<String>?>(null) }
 
@@ -198,7 +199,7 @@ fun StarredScreenContent(
 					items(songs.itemCount) { index ->
 						val song = songs[index] ?: return@items
 
-						val download = allDownloads.find { it.songId == song.id }
+						val download = downloadsMap[song.id]
 						SongRow(
 							modifier = Modifier.weight(1f),
 							song = song,
