@@ -66,7 +66,8 @@ fun NowPlayingTechnicalInfoRow() {
 					?.let { "$it bit" }
 
 				val bitrateFormatted =
-					(playerState.playbackBitrate ?: song?.bitRate)?.let { "${it / 1000} kbps" }
+					(playerState.playbackBitrate?.let { it / 1000 }
+						?: song?.bitRate)?.let { "$it kbps" }
 						?: "-- kbps"
 
 				val format =
