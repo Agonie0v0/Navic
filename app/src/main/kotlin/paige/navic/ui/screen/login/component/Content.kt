@@ -46,9 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import com.kyant.capsule.ContinuousCapsule
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
@@ -58,6 +56,8 @@ import paige.navic.domain.manager.session.LoginManager
 import paige.navic.ui.component.common.SegmentedListButton
 import paige.navic.ui.component.common.SegmentedListButtonDefaults
 import paige.navic.ui.component.dialog.FormDialog
+import paige.navic.ui.core.LoginEvent
+import paige.navic.ui.core.LoginField
 import paige.navic.ui.core.LoginUiState
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.outlined.Error
@@ -68,6 +68,7 @@ import paige.navic.ui.theme.defaultFont
 fun LoginScreenContent(innerPadding: PaddingValues) {
 	val viewModel = koinInject<LoginManager>()
 	val loginState by viewModel.loginState.collectAsStateWithLifecycle()
+	val formState by viewModel.formState.collectAsStateWithLifecycle()
 
 	val instanceState = viewModel.instanceState
 	val usernameState = viewModel.usernameState
@@ -93,39 +94,43 @@ fun LoginScreenContent(innerPadding: PaddingValues) {
 
 	val login: () -> Unit = {
 		loginScope.launch {
-			withContext(Dispatchers.IO) {
-				if (viewModel.isLocalNetworkInstance()) {
-					if (!permissionManager.requestLocalNetworkPermission()) {
-						localNetworkDenied = true
-						return@withContext
-					}
-				}
-				if (!permissionManager.requestNotificationsPermission()) {
-					notificationsDenied = true
-					return@withContext
-				}
-				if (!viewModel.login()) {
-					haptics.performHapticFeedback(HapticFeedbackType.Reject)
-					when {
-						viewModel.instanceError -> instanceFocusRequester.requestFocus()
-						viewModel.usernameError -> usernameFocusRequester.requestFocus()
-						viewModel.passwordError -> passwordFocusRequester.requestFocus()
-					}
+			if (viewModel.isLocalNetworkInstance()) {
+				if (!permissionManager.requestLocalNetworkPermission()) {
+					localNetworkDenied = true
+					return@launch
 				}
 			}
+			if (!permissionManager.requestNotificationsPermission()) {
+				notificationsDenied = true
+				return@launch
+			}
+			viewModel.login()
 		}
 	}
 
-	LaunchedEffect(loginState) {
-		if (loginState is LoginUiState.Success) {
-			backStack.clear()
-			backStack.add(Screen.Library())
-		}
+	LaunchedEffect(Unit) {
+		viewModel.events.collect { event ->
+			when (event) {
+				LoginEvent.Success -> {
+					backStack.clear()
+					backStack.add(Screen.Library())
+				}
 
-		if (loginState is LoginUiState.InvalidCredentials) {
-			snackBarState.showSnackbar(
-				resources.getString(R.string.info_incorrect_credentials)
-			)
+				LoginEvent.InvalidCredentials -> {
+					snackBarState.showSnackbar(
+						resources.getString(R.string.info_incorrect_credentials)
+					)
+				}
+
+				is LoginEvent.ValidationFailed -> {
+					haptics.performHapticFeedback(HapticFeedbackType.Reject)
+					when (event.field) {
+						LoginField.Instance -> instanceFocusRequester.requestFocus()
+						LoginField.Username -> usernameFocusRequester.requestFocus()
+						LoginField.Password -> passwordFocusRequester.requestFocus()
+					}
+				}
+			}
 		}
 	}
 
@@ -173,17 +178,14 @@ fun LoginScreenContent(innerPadding: PaddingValues) {
 				LoginScreenFields(
 					isBusy = isBusy,
 					instanceState = instanceState,
-					instanceError = viewModel.instanceError,
+					instanceError = formState.instanceError,
 					instanceFocusRequester = instanceFocusRequester,
-					onInstanceFocusChanged = { viewModel.validateInstance() },
 					usernameState = usernameState,
-					usernameError = viewModel.usernameError,
+					usernameError = formState.usernameError,
 					usernameFocusRequester = usernameFocusRequester,
-					onUsernameFocusChanged = { viewModel.validateUsername() },
 					passwordState = passwordState,
-					passwordError = viewModel.passwordError,
+					passwordError = formState.passwordError,
 					passwordFocusRequester = passwordFocusRequester,
-					onPasswordFocusChanged = { viewModel.validatePassword() },
 					onLogin = login
 				)
 

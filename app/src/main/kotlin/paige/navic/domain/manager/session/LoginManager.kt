@@ -9,22 +9,30 @@ package paige.navic.domain.manager.session
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import dev.zt64.subsonic.api.model.SubsonicErrorCode
 import dev.zt64.subsonic.api.model.SubsonicException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import paige.navic.R
 import paige.navic.domain.manager.runtime.NotificationIds
 import paige.navic.domain.manager.runtime.NotificationManager
 import paige.navic.domain.repository.DbRepository
 import paige.navic.domain.sync.SyncCoordinator
+import paige.navic.ui.core.LoginEvent
+import paige.navic.ui.core.LoginField
+import paige.navic.ui.core.LoginFormState
 import paige.navic.ui.core.LoginUiState
 import paige.navic.ui.util.AddressUtil
 
@@ -38,6 +46,7 @@ class LoginManager(
 	private val context: Context
 ) {
 	val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+	private val mainScope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
 
 	val loginState: StateFlow<LoginUiState>
 		field = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
@@ -46,36 +55,37 @@ class LoginManager(
 	val usernameState = TextFieldState()
 	val passwordState = TextFieldState()
 
-	var instanceError by mutableStateOf(false)
-		private set
-	var usernameError by mutableStateOf(false)
-		private set
-	var passwordError by mutableStateOf(false)
-		private set
+	private val validationShown = MutableStateFlow(false)
 
-	fun validateInstance() {
-		instanceError = instanceState.text.isBlank()
-	}
+	val formState: StateFlow<LoginFormState> = combine(
+		snapshotFlow {
+			Triple(
+				instanceState.text.isBlank(),
+				usernameState.text.isBlank(),
+				passwordState.text.isBlank()
+			)
+		},
+		validationShown
+	) { (instanceBlank, usernameBlank, passwordBlank), shown ->
+		LoginFormState(
+			instanceError = shown && instanceBlank,
+			usernameError = shown && usernameBlank,
+			passwordError = shown && passwordBlank
+		)
+	}.stateIn(
+		scope = mainScope,
+		started = SharingStarted.WhileSubscribed(5_000),
+		initialValue = LoginFormState()
+	)
 
-	fun validateUsername() {
-		usernameError = usernameState.text.isBlank()
-	}
+	private val _events = MutableSharedFlow<LoginEvent>(extraBufferCapacity = 1)
+	val events: SharedFlow<LoginEvent> = _events.asSharedFlow()
 
-	fun validatePassword() {
-		passwordError = passwordState.text.isBlank()
-	}
-
-	fun validateStuff(): Boolean {
-		validateInstance()
-		validateUsername()
-		validatePassword()
-		return !instanceError && !usernameError && !passwordError
-	}
-
-	fun isLocalNetworkInstance(): Boolean {
+	suspend fun isLocalNetworkInstance(): Boolean {
 		val host = AddressUtil.extractHostFromUri(instanceState.text.toString())
+			?: return false
 
-		return host != null && AddressUtil.isAddressLocal(host)
+		return withContext(Dispatchers.IO) { AddressUtil.isAddressLocal(host) }
 	}
 
 	init {
@@ -92,31 +102,43 @@ class LoginManager(
 		}
 	}
 
-	fun login(): Boolean {
-		if (!validateStuff()) return false
+	fun login() {
+		validationShown.value = true
+
+		val url = instanceState.text.toString().trim().removeSuffix("/")
+		val username = usernameState.text.toString()
+		val password = passwordState.text.toString()
+
+		val invalidField = when {
+			url.isBlank() -> LoginField.Instance
+			username.isBlank() -> LoginField.Username
+			password.isBlank() -> LoginField.Password
+			else -> null
+		}
+
+		if (invalidField != null) {
+			_events.tryEmit(LoginEvent.ValidationFailed(invalidField))
+			return
+		}
 
 		scope.launch {
 			loginState.value = LoginUiState.Loading
 
 			try {
-				val rawUrl = instanceState.text.toString().trim().removeSuffix("/")
-				val url = if (rawUrl.startsWith("https://") || rawUrl.startsWith("http://")) {
-					rawUrl
+				val normalizedUrl = if (url.startsWith("https://") || url.startsWith("http://")) {
+					url
 				} else {
-					"https://$rawUrl"
+					"https://$url"
 				}
 
 				try {
-					sessionManager.login(
-						url,
-						usernameState.text.toString(),
-						passwordState.text.toString()
-					)
+					sessionManager.login(normalizedUrl, username, password)
 				} catch (e: SubsonicException) {
 					if (e.code != SubsonicErrorCode.WRONG_USERNAME_OR_PASSWORD) {
 						throw e
 					}
-					loginState.value = LoginUiState.InvalidCredentials
+					loginState.value = LoginUiState.Idle
+					_events.tryEmit(LoginEvent.InvalidCredentials)
 					return@launch
 				}
 
@@ -140,6 +162,7 @@ class LoginManager(
 
 				result.onSuccess {
 					loginState.value = LoginUiState.Success
+					_events.tryEmit(LoginEvent.Success)
 				}.onFailure { e ->
 					loginState.value = LoginUiState.Error(e as? Exception ?: Exception(e))
 				}
@@ -148,8 +171,6 @@ class LoginManager(
 				loginState.value = LoginUiState.Error(e)
 			}
 		}
-
-		return true
 	}
 
 	private fun contextTitle(progress: Float): String {
