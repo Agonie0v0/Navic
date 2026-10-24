@@ -36,7 +36,7 @@ import paige.navic.R
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainArtistListType
@@ -126,7 +126,8 @@ fun ArtistListScreen(
 			val preferVisible =
 				preferenceManager.bottomBarVisibilityMode == BottomBarVisibilityMode.AllScreens
 			if (!nested
-				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)) {
+				|| (sizeClass.widthSizeClass < WindowWidthSizeClass.Medium && preferVisible)
+			) {
 				RootBottomBar(scrolled = scrollManager.isTriggered)
 			}
 		}
@@ -215,7 +216,8 @@ fun ArtistListScreenGridItem(
 		}
 		if (playlistDialogShown) {
 			PlaylistUpdateDialog(
-				songIds = selectedArtistAlbums?.flatMap { album -> album.songs.map { it.id } }.orEmpty().toPersistentList(),
+				songIds = selectedArtistAlbums?.flatMap { album -> album.songs.map { it.id } }
+					.orEmpty().toPersistentList(),
 				onDismissRequest = { playlistDialogShown = false }
 			)
 		}

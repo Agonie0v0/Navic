@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 import paige.navic.database.dao.AlbumDao
 import paige.navic.database.dao.LetterCount
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainArtistListType

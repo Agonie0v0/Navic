@@ -71,9 +71,9 @@ import paige.navic.database.entity.DownloadStatus
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.playback.DownloadManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.ArtistAlbumViewMode
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
@@ -201,16 +201,20 @@ fun ArtistDetailScreen(
 				modifier = Modifier.fillMaxSize()
 			) { artistState ->
 				when (artistState) {
-					is UiState.Error -> Box(Modifier
-						.fillMaxSize()
-						.padding(contentPadding)) {
+					is UiState.Error -> Box(
+						Modifier
+							.fillMaxSize()
+							.padding(contentPadding)
+					) {
 						ErrorBox(artistState)
 					}
 
 					is UiState.Loading -> Box(Modifier.fillMaxSize()) {
-						ContainedLoadingIndicator(Modifier
-							.size(80.dp)
-							.align(Alignment.Center))
+						ContainedLoadingIndicator(
+							Modifier
+								.size(80.dp)
+								.align(Alignment.Center)
+						)
 					}
 
 					is UiState.Success -> {

@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import paige.navic.R
-import paige.navic.domain.manager.SnackBarManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.ui.core.UiState
 import dev.zt64.subsonic.api.model.Playlist as ApiPlaylist
 

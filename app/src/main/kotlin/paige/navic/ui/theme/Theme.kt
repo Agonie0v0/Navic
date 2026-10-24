@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toArgb
 import com.kyant.capsule.ContinuousRoundedRectangle
 import org.koin.compose.koinInject
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.AnimationStyle
 import paige.navic.domain.model.settings.ThemeMode
 

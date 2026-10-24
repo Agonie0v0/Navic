@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import paige.navic.domain.manager.DownloadManager
+import paige.navic.domain.manager.playback.DownloadManager
 import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.repository.SearchRepository

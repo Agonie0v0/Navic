@@ -50,9 +50,9 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
-import paige.navic.domain.manager.LoginManager
-import paige.navic.domain.manager.SleepTimerManager
-import paige.navic.domain.manager.SleepTimerMode
+import paige.navic.domain.manager.playback.SleepTimerManager
+import paige.navic.domain.manager.playback.SleepTimerMode
+import paige.navic.domain.manager.session.LoginManager
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.canUserShare
 import paige.navic.ui.component.common.Monogram

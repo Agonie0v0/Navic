@@ -13,7 +13,7 @@ import paige.navic.database.entity.SyncActionType
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.paging.createPagedFlow
 import paige.navic.database.query.toSqlQuery
-import paige.navic.domain.manager.SyncManager
+import paige.navic.domain.manager.session.SyncManager
 import paige.navic.domain.model.DomainFilter
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.DomainSongListType
@@ -36,7 +36,14 @@ class SongRepository(
 		filters: Set<DomainFilter> = emptySet()
 	): Flow<PagingData<DomainSong>> = createPagedFlow(
 		isRandom = (listType == DomainSongListType.Random),
-		getRandomIds = { songDao.getSongIdsByQuery(listType.toSqlQuery(filters = filters, idsOnly = true)) },
+		getRandomIds = {
+			songDao.getSongIdsByQuery(
+				listType.toSqlQuery(
+					filters = filters,
+					idsOnly = true
+				)
+			)
+		},
 		getEntityId = { it.songId },
 		fetchByIds = songDao::getSongsByIds,
 		getStandardQuery = { songDao.getPagedSongsByQuery(listType.toSqlQuery(reversed, filters)) },

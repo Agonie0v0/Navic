@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.runtime
 
 import android.content.Context
 import android.os.Environment
 import android.os.StatFs
+import android.os.storage.StorageManager
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.jvm.javaio.copyTo
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,7 @@ class StorageManager(
 			.filter { dir ->
 				runCatching {
 					val volume = context
-						.getSystemService(android.os.storage.StorageManager::class.java)
+						.getSystemService(StorageManager::class.java)
 						?.getStorageVolume(dir)
 
 					volume?.isRemovable == true &&

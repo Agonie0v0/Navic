@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.session
 
 import android.content.Context
 import androidx.annotation.StringRes
@@ -19,7 +19,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import paige.navic.R
-import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.playback.DownloadManager
+import paige.navic.domain.manager.runtime.NotificationIds
+import paige.navic.domain.manager.runtime.NotificationManager
 import paige.navic.domain.repository.DbRepository
 import paige.navic.domain.sync.SyncCoordinator
 import paige.navic.ui.core.LoginUiState
@@ -72,11 +74,7 @@ class LoginManager(
 	fun isLocalNetworkInstance(): Boolean {
 		val host = AddressUtil.extractHostFromUri(instanceState.text.toString())
 
-		return if (host != null) {
-			AddressUtil.isAddressLocal(host)
-		} else {
-			false
-		}
+		return host != null && AddressUtil.isAddressLocal(host)
 	}
 
 	init {

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.playback
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -34,10 +34,10 @@ class EqualizerManager(
 			json.decodeFromString<EqualizerConfig>(
 				it[KEY_CONFIG] ?: return@preferenceStateFlow EqualizerConfig()
 			)
-		} catch(ex: SerializationException) {
+		} catch (ex: SerializationException) {
 			Logger.e("EqualizerManager", "failed to deserialise config", ex)
 			EqualizerConfig()
-		} catch(ex: Exception) {
+		} catch (ex: Exception) {
 			Logger.e("EqualizerManager", "failed to read config", ex)
 			EqualizerConfig()
 		}

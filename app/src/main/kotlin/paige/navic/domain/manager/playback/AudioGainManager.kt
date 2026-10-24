@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.playback
 
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -15,18 +15,18 @@ import paige.navic.domain.model.settings.ReplayGainMode
 import paige.navic.playback.exoplayer.ExoStateHolder
 
 @OptIn(UnstableApi::class)
-class AudioGainManager: KoinComponent {
+class AudioGainManager : KoinComponent {
 	private val stateHolder: ExoStateHolder by inject()
 
-    fun applyGainMode(
-        mode: ReplayGainMode
-    ) {
+	fun applyGainMode(
+		mode: ReplayGainMode
+	) {
 		stateHolder.gainProcessor.applyGainMode(mode)
-    }
+	}
 
 	fun resetGain() {
 		stateHolder.gainProcessor.resetGain()
-    }
+	}
 
 	fun setAmplifierValues(withReplayGain: Float, withoutReplayGain: Float) {
 		stateHolder.gainProcessor.rgAmpValue = withReplayGain

@@ -42,7 +42,7 @@ import paige.navic.R
 import paige.navic.R.string.info_no_albums
 import paige.navic.di.LocalBottomBarScrollManager
 import paige.navic.di.LocalSizeClass
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
@@ -50,6 +50,7 @@ import paige.navic.domain.model.settings.ListViewMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.AlphabeticalScroller
 import paige.navic.ui.component.common.ContentUnavailable
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.ArtGrid
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
@@ -62,7 +63,6 @@ import paige.navic.ui.screen.album.component.AlbumListScreenGridItem
 import paige.navic.ui.screen.album.component.AlbumListScreenListItem
 import paige.navic.ui.screen.album.component.AlbumListScreenSortButton
 import paige.navic.ui.screen.album.viewmodel.AlbumListViewModel
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.util.withoutTop
 import paige.navic.ui.viewmodel.RootViewModel
 
@@ -277,7 +277,9 @@ fun AlbumListScreen(
 									albumOffset += lc.count
 								}
 							} else {
-								items(items.itemCount, key = { index -> items.peek(index)?.id ?: index }) { index ->
+								items(
+									items.itemCount,
+									key = { index -> items.peek(index)?.id ?: index }) { index ->
 									val album = items[index] ?: return@items
 
 									if (selectedViewMode == ListViewMode.Grid) {

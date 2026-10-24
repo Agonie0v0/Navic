@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.playback
 
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -15,8 +15,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import paige.navic.database.entity.SyncActionType
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SyncManager
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 

@@ -15,7 +15,7 @@ import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.paging.createPagedFlow
 import paige.navic.database.query.getAlbumLetterCountsQuery
 import paige.navic.database.query.toSqlQuery
-import paige.navic.domain.manager.SyncManager
+import paige.navic.domain.manager.session.SyncManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainFilter
@@ -34,7 +34,14 @@ class AlbumRepository(
 		filters: Set<DomainFilter> = emptySet()
 	): Flow<PagingData<DomainAlbum>> = createPagedFlow(
 		isRandom = (listType == DomainAlbumListType.Random),
-		getRandomIds = { albumDao.getAlbumIdsByQuery(listType.toSqlQuery(filters = filters, idsOnly = true)) },
+		getRandomIds = {
+			albumDao.getAlbumIdsByQuery(
+				listType.toSqlQuery(
+					filters = filters,
+					idsOnly = true
+				)
+			)
+		},
 		getEntityId = { it.album.albumId },
 		fetchByIds = albumDao::getAlbumsByIds,
 		getStandardQuery = { albumDao.getAlbumsByQuery(listType.toSqlQuery(reversed, filters)) },

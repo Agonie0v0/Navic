@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-package paige.navic.domain.manager
+package paige.navic.domain.manager.ui
 
 import androidx.annotation.StringRes
 import kotlinx.coroutines.CoroutineScope

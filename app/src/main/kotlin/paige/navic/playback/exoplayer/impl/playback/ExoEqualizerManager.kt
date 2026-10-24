@@ -17,7 +17,7 @@ import androidx.media3.common.util.UnstableApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import paige.navic.domain.manager.EqualizerManager
+import paige.navic.domain.manager.playback.EqualizerManager
 import paige.navic.domain.model.settings.EqualizerMode
 import paige.navic.util.Logger
 
@@ -25,7 +25,7 @@ import paige.navic.util.Logger
 class ExoEqualizerManager(
 	private val equalizerManager: EqualizerManager,
 	private val context: Context
-): Player.Listener {
+) : Player.Listener {
 	private var equalizerMode = EqualizerMode.Disabled
 	private val scope = CoroutineScope(Dispatchers.Default)
 	private var currentAudioSessionId = C.AUDIO_SESSION_ID_UNSET

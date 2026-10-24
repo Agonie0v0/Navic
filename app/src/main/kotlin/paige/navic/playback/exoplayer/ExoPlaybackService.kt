@@ -22,14 +22,14 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import paige.navic.R
-import paige.navic.domain.manager.EqualizerManager
-import paige.navic.domain.manager.NotificationIds
-import paige.navic.domain.manager.NotificationStringIds
-import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.ScrobbleManager
-import paige.navic.domain.manager.SyncManager
+import paige.navic.domain.manager.playback.EqualizerManager
+import paige.navic.domain.manager.playback.ScrobbleManager
+import paige.navic.domain.manager.runtime.NotificationIds
+import paige.navic.domain.manager.runtime.NotificationStringIds
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SyncManager
 import paige.navic.playback.exoplayer.impl.playback.ExoEqualizerManager
 
 @OptIn(UnstableApi::class)

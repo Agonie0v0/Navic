@@ -27,7 +27,7 @@ import night.milkyway.antisocialcord.model.ActivityTimestamps
 import night.milkyway.antisocialcord.model.ActivityType
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.repository.AlbumRepository

@@ -35,8 +35,8 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.database.entity.DownloadStatus
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.playback.DownloadManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.icons.Icons

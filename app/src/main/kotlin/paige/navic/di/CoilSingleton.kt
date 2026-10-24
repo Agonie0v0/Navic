@@ -19,7 +19,7 @@ import coil3.request.ImageResult
 import coil3.request.crossfade
 import coil3.serviceLoaderEnabled
 import coil3.size.Dimension
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.network.NavicularDnsResolver
 import paige.navic.util.network.createHttpClientWithPreferences
 import kotlin.math.abs
@@ -68,9 +68,11 @@ class CoilSingleton(
 					diskCache.openSnapshot(sizedKey)?.use { true } == true -> {
 						newUri to sizedKey
 					}
+
 					baseKey != null && diskCache.openSnapshot(baseKey)?.use { true } == true -> {
 						request.data to baseKey
 					}
+
 					else -> {
 						newUri to sizedKey
 					}

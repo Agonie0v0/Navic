@@ -33,7 +33,10 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
-import paige.navic.domain.manager.PreferenceManager
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.ui.component.common.SegmentedListItem
+import paige.navic.ui.component.common.SegmentedListItemDefaults
+import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.filled.BottomNavigation
 import paige.navic.ui.icons.filled.Info
@@ -44,9 +47,6 @@ import paige.navic.ui.icons.outlined.ChevronForward
 import paige.navic.ui.icons.outlined.Code
 import paige.navic.ui.icons.outlined.DataTable
 import paige.navic.ui.icons.outlined.Note
-import paige.navic.ui.component.common.SegmentedListItem
-import paige.navic.ui.component.common.SegmentedListItemDefaults
-import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screen.settings.component.SettingsGroup
 import paige.navic.ui.screen.settings.component.SettingsGroupDefaults
@@ -185,7 +185,9 @@ private fun PageRow(
 				Icon(
 					icon,
 					contentDescription = null,
-					modifier = Modifier.padding(start = 8.dp, end = 5.dp).size(22.dp),
+					modifier = Modifier
+						.padding(start = 8.dp, end = 5.dp)
+						.size(22.dp),
 					tint = MaterialTheme.colorScheme.primary
 				)
 			}

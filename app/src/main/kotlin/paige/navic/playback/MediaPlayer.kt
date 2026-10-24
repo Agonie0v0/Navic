@@ -33,11 +33,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import paige.navic.database.dao.AlbumDao
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.AudioGainManager
-import paige.navic.domain.manager.DownloadManager
-import paige.navic.domain.manager.PreferenceManager
-import paige.navic.domain.manager.SnackBarManager
+import paige.navic.domain.manager.playback.AudioGainManager
+import paige.navic.domain.manager.playback.DownloadManager
+import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainExplicitStatus
 import paige.navic.domain.model.DomainRadio

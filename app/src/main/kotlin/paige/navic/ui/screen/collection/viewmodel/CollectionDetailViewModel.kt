@@ -19,9 +19,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import paige.navic.R
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.SnackBarManager
 import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumInfo
 import paige.navic.domain.model.DomainSong
