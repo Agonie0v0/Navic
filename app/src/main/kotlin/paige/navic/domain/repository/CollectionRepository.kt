@@ -77,7 +77,7 @@ class CollectionRepository(
 		?.toDomainModel()
 
 	suspend fun getAlbumInfo(albumId: String): ApiAlbumInfo {
-		return sessionManager.api.getAlbumInfo(albumId)
+		return sessionManager.api.getAlbumInfoID3(albumId)
 	}
 
 	suspend fun removeSongFromPlaylist(playlistId: String, position: Int) {

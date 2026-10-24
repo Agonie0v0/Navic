@@ -157,7 +157,11 @@ class DbRepository(
 		onProgress(0.0f, R.string.info_syncing_albums)
 		while (true) {
 			val batch =
-				sessionManager.api.getAlbums(ApiAlbumListType.AlphabeticalByName, pageSize, offset)
+				sessionManager.api.getAlbumsID3(
+					ApiAlbumListType.AlphabeticalByName,
+					pageSize,
+					offset
+				)
 			if (batch.isEmpty()) break
 			allAlbumSummaries.addAll(batch)
 			if (batch.size < pageSize) break
@@ -330,7 +334,7 @@ class DbRepository(
 	suspend fun syncArtists(): Result<Unit> = runDbOp {
 		//val pageSize = 500
 		//var offset = 0
-		val artists =	 mutableListOf<ArtistEntity>()
+		val artists = mutableListOf<ArtistEntity>()
 
 		// reverting this for now
 		// see https://github.com/ssalggnikool/Navic/issues/521
