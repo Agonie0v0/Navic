@@ -91,8 +91,7 @@ class CollectionRepository(
 		return Pager(
 			config = PagingConfig(
 				pageSize = 20,
-				prefetchDistance = 10,
-				maxSize = 100
+				prefetchDistance = 10
 			),
 			pagingSourceFactory = {
 				songDao.getPagedSongsByPlaylistId(playlistId)

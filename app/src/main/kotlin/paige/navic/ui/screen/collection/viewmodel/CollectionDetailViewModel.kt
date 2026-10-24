@@ -66,10 +66,8 @@ class CollectionDetailViewModel(
 
 	val isOnline = connectivityManager.isOnline
 
-	val pagedSongs: Flow<PagingData<DomainSong>> = uiState
-		.map { state -> state.data?.collection }
-		.filterIsInstance<DomainPlaylist>()
-		.flatMapLatest { playlist -> repository.getPagedPlaylistSongs(playlist.id) }
+	val pagedSongs: Flow<PagingData<DomainSong>> = repository
+		.getPagedPlaylistSongs(collectionId)
 		.cachedIn(viewModelScope)
 
 	val otherAlbums = uiState

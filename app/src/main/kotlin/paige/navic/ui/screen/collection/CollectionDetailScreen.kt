@@ -303,7 +303,7 @@ fun CollectionDetailScreen(
 					} else {
 						items(
 							count = pagedPlaylistSongs.itemCount,
-							key = { index -> pagedPlaylistSongs[index]?.id ?: index }
+							key = { index -> "${collection.id}_$index" }
 						) { index ->
 							val song = pagedPlaylistSongs[index] ?: return@items
 							val download = allDownloads.find { it.songId == song.id }
@@ -334,7 +334,7 @@ fun CollectionDetailScreen(
 									isOffline = !isOnline
 								)
 								CollectionDetailScreenSongRowDropdown(
-									expanded = state.data?.selectedSong == song,
+									expanded = state.data?.selectedIndex == index && state.data?.selectedSong?.id == song.id,
 									onDismissRequest = { viewModel.clearSelection() },
 									onRemoveStar = { viewModel.unstarSelectedSong() },
 									onAddStar = { viewModel.starSelectedSong() },
