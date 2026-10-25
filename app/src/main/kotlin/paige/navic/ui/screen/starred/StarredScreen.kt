@@ -38,6 +38,8 @@ import paige.navic.domain.model.DomainSongCollection
 import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
 import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.NestedTopBar
@@ -103,6 +105,7 @@ fun StarredScreen() {
 	val player = koinInject<MediaPlayer>()
 
 	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 
 	val isOnline by songsViewModel.isOnline.collectAsStateWithLifecycle()
 
@@ -160,7 +163,7 @@ fun StarredScreen() {
 					downloadManager.cancelDownload(song.id)
 				},
 				onDeleteDownloadSong = { song ->
-					downloadManager.deleteDownload(song.id)
+					downloadDeletionHandler.requestDelete(DeleteDownloadTarget.Single(song.id, song.title))
 				},
 				onPlaySongNext = { song ->
 					if (player.checkDuplicate(song.id, preferenceManager)) {

@@ -60,6 +60,8 @@ import paige.navic.domain.model.settings.ListViewMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.common.ErrorBox
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
 import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.ArtGrid
@@ -129,6 +131,7 @@ fun SearchScreen(
 	var selectedCategory by remember { mutableStateOf(SearchCategory.ALL) }
 	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
 	var shareId by remember { mutableStateOf<String?>(null) }
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 
 	val rootViewModel = koinViewModel<RootViewModel>()
 	LaunchedEffect(Unit) {
@@ -259,7 +262,9 @@ fun SearchScreen(
 										download = download,
 										onDownload = { downloadManager.downloadSong(song.id) },
 										onCancelDownload = { downloadManager.cancelDownload(song.id) },
-										onDeleteDownload = { downloadManager.deleteDownload(song.id) }
+										onDeleteDownload = {
+											downloadDeletionHandler.requestDelete(DeleteDownloadTarget.Single(song.id, song.title))
+										}
 									)
 								}
 							}

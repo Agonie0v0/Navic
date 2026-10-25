@@ -38,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +70,8 @@ import paige.navic.ui.component.common.SegmentedListItem
 import paige.navic.ui.component.common.SegmentedListItemDefaults
 import paige.navic.ui.component.dialog.BulkDownloadDialog
 import paige.navic.ui.component.dialog.BulkDownloadTarget
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.FormDialog
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.NestedTopBarDefaults
@@ -79,6 +82,7 @@ import paige.navic.ui.screen.settings.component.SettingsChoiceItem
 import paige.navic.ui.screen.settings.component.SettingsGroup
 import paige.navic.ui.screen.settings.component.SettingsGroupDefaults
 import paige.navic.ui.screen.settings.component.SettingsNavItem
+import paige.navic.ui.screen.settings.dialog.ConfirmDownloadDeletionSheet
 import paige.navic.ui.screen.settings.viewmodel.SettingsDataStorageViewModel
 import paige.navic.util.toFileSize
 import kotlin.time.Clock
@@ -104,6 +108,8 @@ fun SettingsDataStorageScreen() {
 	val downloadSize by viewModel.downloadSize.collectAsStateWithLifecycle(0L)
 
 	var showLibraryDownloadDialog by remember { mutableStateOf(false) }
+	var showConfirmDeletionDialog by rememberSaveable { mutableStateOf(false) }
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 	val isDownloadingLibrary by viewModel.isDownloadingLibrary.collectAsStateWithLifecycle()
 	val libraryDownloadProgress by viewModel.libraryDownloadProgress.collectAsStateWithLifecycle()
 
@@ -353,7 +359,14 @@ fun SettingsDataStorageScreen() {
 						},
 						content = { Text(stringResource(R.string.option_download_location)) },
 						label = { stringResource(it.displayName) },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 7)
+					)
+
+					SegmentedListItem(
+						onClick = { showConfirmDeletionDialog = true },
+						content = { Text(stringResource(R.string.option_confirm_download_deletion)) },
+						supportingContent = { Text(stringResource(R.string.subtitle_confirm_download_deletion)) },
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 7)
 					)
 
 					SegmentedListItem(
@@ -370,7 +383,7 @@ fun SettingsDataStorageScreen() {
 								} ($downloadsSizeMb) // $freeSpaceFormatted free"
 							)
 						},
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 6)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 2, count = 7)
 					)
 
 					SegmentedListItem(
@@ -498,7 +511,9 @@ fun SettingsDataStorageScreen() {
 						colors = SegmentedListItemDefaults.segmentedErrorColors()
 					)
 					SegmentedListItem(
-						onClick = viewModel::clearAllDownloads,
+						onClick = {
+							downloadDeletionHandler.requestDelete(DeleteDownloadTarget.Library)
+						},
 						content = { Text(stringResource(R.string.action_clear_downloads)) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(index = 3, count = 5),
 						colors = SegmentedListItemDefaults.segmentedErrorColors()
@@ -516,4 +531,9 @@ fun SettingsDataStorageScreen() {
 			}
 		}
 	}
+
+	ConfirmDownloadDeletionSheet(
+		presented = showConfirmDeletionDialog,
+		onDismissRequest = { showConfirmDeletionDialog = false }
+	)
 }

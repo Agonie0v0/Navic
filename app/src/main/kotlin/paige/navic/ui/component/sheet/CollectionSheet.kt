@@ -51,6 +51,8 @@ import paige.navic.domain.model.DomainSongCollection
 import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.component.common.MarqueeText
 import paige.navic.ui.component.common.RatingRow
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.LinkConfirmationDialog
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.brand.LastFM
@@ -100,6 +102,7 @@ fun CollectionSheet(
 		headlineColor = MaterialTheme.colorScheme.onSurface
 	)
 	var linkToOpen by rememberSaveable { mutableStateOf<String?>(null) }
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 
 	ModalBottomSheet(
 		onDismissRequest = onDismissRequest,
@@ -279,7 +282,7 @@ fun CollectionSheet(
 						content = { Text(stringResource(R.string.action_delete_download)) },
 						leadingContent = { Icon(Icons.Outlined.Delete, null) },
 						onClick = {
-							downloadManager.deleteDownloadedCollection(collection.songs.map { it.id })
+							downloadDeletionHandler.requestDelete(DeleteDownloadTarget.Collection.of(collection))
 							onDismissRequest()
 						},
 						colors = colors,

@@ -50,6 +50,8 @@ import paige.navic.domain.model.DomainSong
 import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.component.common.MarqueeText
 import paige.navic.ui.component.common.RatingRow
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.filled.Star
 import paige.navic.ui.icons.outlined.Album
@@ -109,6 +111,8 @@ fun SongSheet(
 	val sleepTimerManager = koinInject<SleepTimerManager>()
 	val sleepTimerMode by sleepTimerManager.mode.collectAsStateWithLifecycle()
 	val contentPadding = PaddingValues(horizontal = 16.dp)
+
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 
 	val colorScheme = if (useSongTheme) rememberColorSchemeFromCoverArt(song.coverArtId) else null
 
@@ -233,7 +237,10 @@ fun SongSheet(
 								content = { Text(stringResource(R.string.action_delete_download)) },
 								leadingContent = { Icon(Icons.Outlined.Delete, null) },
 								onClick = {
-									onDeleteDownload?.invoke()
+									downloadDeletionHandler.requestDelete(
+										target = DeleteDownloadTarget.Single(song.id, song.title),
+										onConfirmed = onDeleteDownload
+									)
 									onDismissRequest()
 								},
 								colors = colors,

@@ -39,6 +39,8 @@ import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainSongCollection
 import paige.navic.playback.MediaPlayer
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.filled.Play
 import paige.navic.ui.icons.outlined.Close
@@ -55,6 +57,7 @@ fun CollectionDetailScreenHeadingRowButtons(
 	val player = koinInject<MediaPlayer>()
 	val snackBarManager = koinInject<SnackBarManager>()
 	val downloadManager = koinInject<DownloadManager>()
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 	val scope = rememberCoroutineScope()
 
 	val downloadStatus by downloadManager
@@ -129,8 +132,10 @@ fun CollectionDetailScreenHeadingRowButtons(
 						}
 
 						DownloadStatus.DOWNLOADED -> {
-							downloadManager.deleteDownloadedCollection(collection.songs.map { it.id })
-							snackBarManager.notify(R.string.notice_deleted_download)
+							downloadDeletionHandler.requestDelete(
+								target = DeleteDownloadTarget.Collection.of(collection),
+								notifySnackBar = true
+							)
 						}
 					}
 				}

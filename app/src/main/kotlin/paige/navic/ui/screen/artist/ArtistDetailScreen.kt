@@ -73,15 +73,17 @@ import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
-import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.ArtistAlbumViewMode
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
+import paige.navic.domain.model.settings.DownloadDeletionType
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.component.common.SongRow
 import paige.navic.ui.component.dialog.BulkDownloadDialog
 import paige.navic.ui.component.dialog.BulkDownloadTarget
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.ArtCarousel
 import paige.navic.ui.component.layout.ArtCarouselItem
@@ -137,8 +139,6 @@ fun ArtistDetailScreen(
 		}
 	).collectAsState(DownloadStatus.NOT_DOWNLOADED)
 
-	val snackBarManager = koinInject<SnackBarManager>()
-
 	val spatialSpec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
 	val effectSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()
 
@@ -151,6 +151,7 @@ fun ArtistDetailScreen(
 	val gridState = rememberLazyGridState()
 
 	var showDownloadDialog by remember { mutableStateOf(false) }
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 
 	var shareId by remember { mutableStateOf<String?>(null) }
 
@@ -255,10 +256,15 @@ fun ArtistDetailScreen(
 									}
 								},
 								onDeleteDownload = {
-									state.albums.forEach { album ->
-										downloadManager.deleteDownloadedCollection(album.songs.map { it.id })
-									}
-									snackBarManager.notify(R.string.notice_deleted_download)
+									val allSongIds = state.albums.flatMap { album -> album.songs.map { it.id } }
+									downloadDeletionHandler.requestDelete(
+										target = DeleteDownloadTarget.Collection(
+											state.artist.name,
+											allSongIds,
+											DownloadDeletionType.ARTIST
+										),
+										notifySnackBar = true
+									)
 								},
 								downloadStatus = downloadStatus,
 								playEnabled = state.albums.isNotEmpty(),

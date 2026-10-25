@@ -45,6 +45,8 @@ import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
+import paige.navic.ui.component.dialog.DeleteDownloadTarget
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
 import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.layout.NestedTopBar
@@ -88,6 +90,7 @@ fun SongListScreen(
 
 	var shareId by remember { mutableStateOf<String?>(null) }
 	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
+	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	val actions: @Composable RowScope.() -> Unit = {
@@ -210,7 +213,7 @@ fun SongListScreen(
 								downloadManager.cancelDownload(song.id)
 							},
 							onDeleteDownload = {
-								downloadManager.deleteDownload(song.id)
+								downloadDeletionHandler.requestDelete(DeleteDownloadTarget.Single(song.id, song.title))
 							}
 						)
 					}

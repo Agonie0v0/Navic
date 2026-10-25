@@ -23,6 +23,7 @@ import paige.navic.domain.model.settings.CoverArtQuality
 import paige.navic.domain.model.settings.CoverArtShape
 import paige.navic.domain.model.settings.CoverArtTapAction
 import paige.navic.domain.model.settings.DiscordStatusType
+import paige.navic.domain.model.settings.DownloadDeletionType
 import paige.navic.domain.model.settings.DownloadStorage
 import paige.navic.domain.model.settings.ExplicitContentPlayback
 import paige.navic.domain.model.settings.FontOption
@@ -92,6 +93,23 @@ class PreferenceManager(
 	var isAdvancedDownloadTranscodingActive by preference(false)
 	var customDownloadMaxBitrate by preference(0)
 	var customDownloadFormat by preference("")
+	var confirmDeleteTypes by jsonPreference(
+		null,
+		DownloadDeletionType.entries.toSet()
+	)
+
+	fun isConfirmDeleteEnabled(type: DownloadDeletionType): Boolean {
+		return confirmDeleteTypes.contains(type)
+	}
+
+	fun toggleConfirmDelete(type: DownloadDeletionType) {
+		val current = confirmDeleteTypes
+		confirmDeleteTypes = if (current.contains(type)) {
+			current - type
+		} else {
+			current + type
+		}
+	}
 
 	var nowPlayingToolbarPosition by preference(ToolbarPosition.Bottom)
 	var nowPlayingSongInfo by preference(true)
