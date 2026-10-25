@@ -10,6 +10,7 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import dev.zt64.subsonic.api.model.Role
 import dev.zt64.subsonic.api.model.SubsonicException
+import dev.zt64.subsonic.api.model.SubsonicResponse
 import dev.zt64.subsonic.api.model.User
 import dev.zt64.subsonic.client.SubsonicAuth
 import dev.zt64.subsonic.client.SubsonicClient
@@ -35,7 +36,11 @@ import paige.navic.util.network.buildKtorEngine
 sealed interface SessionState {
 	data object Unauthenticated : SessionState
 	data object Restoring : SessionState
-	data class Authenticated(val currentUser: User) : SessionState
+	data class Authenticated(
+		val currentUser: User,
+		/* use this to check the music server being used */
+		val serverInfo: SubsonicResponse<Nothing>
+	) : SessionState
 }
 
 class SessionManager(
@@ -134,7 +139,9 @@ class SessionManager(
 	) {
 		val client = createClient(instanceUrl, username, password)
 
-		client.ping()
+		val pingResult = client.ping()
+		Logger.i("SessionManager", "Ping result: $pingResult")
+
 		val user = fetchCurrentUser(username, client)
 
 		this.instanceUrl = instanceUrl
@@ -142,7 +149,10 @@ class SessionManager(
 		this.password = password
 
 		api = client
-		_state.value = SessionState.Authenticated(user)
+		_state.value = SessionState.Authenticated(
+			currentUser = user,
+			serverInfo = pingResult
+		)
 	}
 
 	fun logout() {
