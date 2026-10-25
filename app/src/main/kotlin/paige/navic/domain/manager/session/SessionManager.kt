@@ -6,6 +6,9 @@
 
 package paige.navic.domain.manager.session
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import dev.zt64.subsonic.api.model.Role
@@ -18,8 +21,6 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -39,8 +40,7 @@ class SessionManager(
 		const val USER_AGENT = "Navic"
 	}
 
-	val isLoggedIn: StateFlow<Boolean>
-		field = MutableStateFlow(false)
+	var isLoggedIn by mutableStateOf(false)
 
 	private var currentUser: User? = null
 	private val mutex = Mutex()
@@ -72,8 +72,7 @@ class SessionManager(
 		private set
 
 	init {
-		isLoggedIn.value = settings.getStringOrNull("username") != null
-		if (isLoggedIn.value) getCachedUser()
+		getCachedUser()
 	}
 
 	private fun createClient(
@@ -122,13 +121,13 @@ class SessionManager(
 		this.password = password
 
 		api = client
-		isLoggedIn.value = true
+		isLoggedIn = true
 	}
 
 	fun logout() {
 		settings["username"] = null
 		settings.remove("password")
-		isLoggedIn.value = false
+		isLoggedIn = false
 		currentUser = null
 	}
 
@@ -182,6 +181,7 @@ class SessionManager(
 		scope.launch {
 			try {
 				fetchCurrentUser()
+				isLoggedIn = true
 			} catch (e: Exception) {
 				Logger.e("SessionManager", "Failed to fetch current user info", e)
 			}
