@@ -76,6 +76,7 @@ import paige.navic.di.LocalSizeClass
 import paige.navic.di.LocalSnackBarState
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.manager.ui.BottomBarScrollManager
 import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.settings.ExplicitContentPlayback
@@ -152,14 +153,31 @@ fun App() {
 	val sessionManager = koinInject<SessionManager>()
 	val preferenceManager = koinInject<PreferenceManager>()
 
-	val isLoggedIn by sessionManager.isLoggedIn.collectAsStateWithLifecycle()
+	val sessionState by sessionManager.sessionState.collectAsStateWithLifecycle()
 	val backStack = rememberNavBackStack(
-		config, if (isLoggedIn) {
-			Screen.Library()
-		} else {
+		config, if (sessionState is SessionState.Unauthenticated) {
 			Screen.Login
+		} else {
+			Screen.Library()
 		}
 	)
+
+	LaunchedEffect(sessionState) {
+		when {
+			sessionState is SessionState.Unauthenticated &&
+				backStack.lastOrNull() != Screen.Login -> {
+				backStack.clear()
+				backStack.add(Screen.Login)
+			}
+
+			sessionState is SessionState.Authenticated &&
+				backStack.lastOrNull() == Screen.Login -> {
+				backStack.clear()
+				backStack.add(Screen.Library())
+			}
+		}
+	}
+
 	val snackBarState = remember { SnackbarHostState() }
 	val snackBarManager = koinInject<SnackBarManager>()
 

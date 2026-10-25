@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import paige.navic.database.dao.LetterCount
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainFilter
@@ -50,7 +51,7 @@ class AlbumListViewModel(
 
 	init {
 		launch {
-			sessionManager.isLoggedIn.collect { if (it) refreshAlbums(false) }
+			sessionManager.sessionState.collect { if (it is SessionState.Authenticated) refreshAlbums(false) }
 		}
 	}
 

@@ -42,7 +42,7 @@ class ShareListViewModel(
 
 	init {
 		launch {
-			sessionManager.isLoggedIn.collect {
+			sessionManager.sessionState.collect {
 				refreshShares()
 			}
 		}

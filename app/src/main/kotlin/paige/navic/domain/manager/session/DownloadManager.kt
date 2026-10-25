@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -97,11 +98,13 @@ class DownloadManager(
 		}
 
 		scope.launch {
-			if (sessionManager.isLoggedIn.value &&
-				downloadDao.getDownloadsByStatus(DownloadStatus.DOWNLOADING).isNotEmpty()
-			) {
-				enqueueWorker()
-			}
+			sessionManager.sessionState
+				.filterIsInstance<SessionState.Authenticated>()
+				.collect {
+					if (downloadDao.getDownloadsByStatus(DownloadStatus.DOWNLOADING).isNotEmpty()) {
+						enqueueWorker()
+					}
+				}
 		}
 	}
 

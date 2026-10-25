@@ -12,6 +12,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.model.DomainGenre
 import paige.navic.domain.repository.GenreRepository
 import paige.navic.ui.viewmodel.AsyncViewModel
@@ -25,7 +26,7 @@ class GenreListViewModel(
 
 	init {
 		viewModelScope.launch {
-			sessionManager.isLoggedIn.collect { if (it) refreshGenres(false) }
+			sessionManager.sessionState.collect { if (it is SessionState.Authenticated) refreshGenres(false) }
 		}
 	}
 

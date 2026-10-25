@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.media3.common.util.UnstableApi
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -66,7 +65,6 @@ import paige.navic.ui.screen.album.viewmodel.AlbumListViewModel
 import paige.navic.ui.util.withoutTop
 import paige.navic.ui.viewmodel.RootViewModel
 
-@UnstableApi
 @Composable
 fun AlbumListScreen(
 	nested: Boolean = false,

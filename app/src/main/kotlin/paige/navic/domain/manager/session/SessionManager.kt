@@ -6,9 +6,6 @@
 
 package paige.navic.domain.manager.session
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import dev.zt64.subsonic.api.model.Role
@@ -21,6 +18,10 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -31,6 +32,12 @@ import paige.navic.util.insertEncryptedString
 import paige.navic.util.network.NavicularDnsResolver
 import paige.navic.util.network.buildKtorEngine
 
+sealed interface SessionState {
+	data object Unauthenticated : SessionState
+	data object Restoring : SessionState
+	data class Authenticated(val currentUser: User) : SessionState
+}
+
 class SessionManager(
 	private val settings: Settings,
 	private val preferenceManager: PreferenceManager,
@@ -40,11 +47,11 @@ class SessionManager(
 		const val USER_AGENT = "Navic"
 	}
 
-	var isLoggedIn by mutableStateOf(false)
+	private val _state = MutableStateFlow<SessionState>(SessionState.Unauthenticated)
+	val sessionState: StateFlow<SessionState> = _state.asStateFlow()
 
-	private var currentUser: User? = null
 	private val mutex = Mutex()
-	private val scope = CoroutineScope(Dispatchers.IO)
+	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 	var username: String
 		get() = settings.getString("username", "")
@@ -71,8 +78,22 @@ class SessionManager(
 	)
 		private set
 
+	private val hasStoredCredentials: Boolean
+		get() = username.isNotBlank() && password.isNotBlank() && instanceUrl.isNotBlank()
+
 	init {
-		getCachedUser()
+		if (hasStoredCredentials) {
+			_state.value = SessionState.Restoring
+
+			scope.launch {
+				try {
+					login(instanceUrl, username, password)
+				} catch (e: Exception) {
+					Logger.e("SessionManager", "Failed to restore session", e)
+					_state.value = SessionState.Unauthenticated
+				}
+			}
+		}
 	}
 
 	private fun createClient(
@@ -114,21 +135,20 @@ class SessionManager(
 		val client = createClient(instanceUrl, username, password)
 
 		client.ping()
-		fetchCurrentUser(username, client)
+		val user = fetchCurrentUser(username, client)
 
 		this.instanceUrl = instanceUrl
 		this.username = username
 		this.password = password
 
 		api = client
-		isLoggedIn = true
+		_state.value = SessionState.Authenticated(user)
 	}
 
 	fun logout() {
 		settings["username"] = null
 		settings.remove("password")
-		isLoggedIn = false
-		currentUser = null
+		_state.value = SessionState.Unauthenticated
 	}
 
 	fun refreshClient() {
@@ -162,31 +182,13 @@ class SessionManager(
 	private suspend fun fetchCurrentUser(
 		username: String = this.username,
 		client: SubsonicClient = api
-	): User? {
-		mutex.withLock {
-			if (username.isNotBlank()) {
-				currentUser = client.getUser(username)
-				return currentUser
-			}
-		}
-
+	): User = mutex.withLock {
 		// TODO: custom exception instead of the generic "Exception"
-		throw Exception("Failed to get current user because the username is blank")
-	}
+		if (username.isBlank()) {
+			throw Exception("Failed to get current user because the username is blank")
+		}
 
-	fun getCachedUser(): User? {
-		if (currentUser != null) {
-			return currentUser
-		}
-		scope.launch {
-			try {
-				fetchCurrentUser()
-				isLoggedIn = true
-			} catch (e: Exception) {
-				Logger.e("SessionManager", "Failed to fetch current user info", e)
-			}
-		}
-		return currentUser
+		client.getUser(username)
 	}
 }
 
@@ -199,5 +201,5 @@ fun User.canShare(): Boolean {
 }
 
 fun SessionManager.canUserShare(): Boolean {
-	return this.getCachedUser()?.canShare() ?: false
+	return (sessionState.value as? SessionState.Authenticated)?.currentUser?.canShare() == true
 }

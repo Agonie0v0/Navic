@@ -21,6 +21,7 @@ import paige.navic.R
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.domain.manager.session.ConnectivityManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainAlbumInfo
@@ -81,7 +82,7 @@ class CollectionDetailViewModel(
 
 	init {
 		launch {
-			sessionManager.isLoggedIn.collect { if (it) refreshCollection(false) }
+			sessionManager.sessionState.collect { if (it is SessionState.Authenticated) refreshCollection(false) }
 		}
 	}
 

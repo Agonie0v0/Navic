@@ -54,7 +54,8 @@ import paige.navic.domain.manager.playback.SleepTimerManager
 import paige.navic.domain.manager.playback.SleepTimerMode
 import paige.navic.domain.manager.session.LoginManager
 import paige.navic.domain.manager.session.SessionManager
-import paige.navic.domain.manager.session.canUserShare
+import paige.navic.domain.manager.session.SessionState
+import paige.navic.domain.manager.session.canShare
 import paige.navic.ui.component.common.Monogram
 import paige.navic.ui.component.common.SegmentedListItem
 import paige.navic.ui.component.common.SegmentedListItemDefaults
@@ -76,6 +77,8 @@ fun AccountSheet(
 	val backStack = LocalNavStack.current
 	val loginManager = koinInject<LoginManager>()
 	val sessionManager = koinInject<SessionManager>()
+	val sessionState =
+		sessionManager.sessionState.collectAsStateWithLifecycle()
 
 	var sleepTimerSheetOpen by rememberSaveable { mutableStateOf(false) }
 	val sleepTimerManager = koinInject<SleepTimerManager>()
@@ -192,7 +195,8 @@ fun AccountSheet(
 
 			Spacer(Modifier.height(9.dp))
 
-			val isSharingAllowed = sessionManager.canUserShare()
+			val isSharingAllowed =
+				(sessionState as? SessionState.Authenticated)?.currentUser?.canShare() == true
 			val count = if (isSharingAllowed) 4 else 3
 
 			if (isSharingAllowed) {

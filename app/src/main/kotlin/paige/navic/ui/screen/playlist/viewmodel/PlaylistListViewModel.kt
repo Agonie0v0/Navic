@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.model.DomainFilter
 import paige.navic.domain.model.DomainPlaylist
 import paige.navic.domain.model.DomainPlaylistListType
@@ -41,7 +42,7 @@ class PlaylistListViewModel(
 
 	init {
 		viewModelScope.launch {
-			sessionManager.isLoggedIn.collect { if (it) refreshPlaylists(false) }
+			sessionManager.sessionState.collect { if (it is SessionState.Authenticated) refreshPlaylists(false) }
 		}
 	}
 

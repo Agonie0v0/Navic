@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.repository.DbRepository
 import paige.navic.util.Logger
 import kotlin.time.Clock
@@ -27,7 +28,7 @@ class SyncCoordinator(
 	private val fullSyncThreshold = 1.hours
 
 	val isLoggedIn: Boolean
-		get() = sessionManager.isLoggedIn.value
+		get() = sessionManager.sessionState.value is SessionState.Authenticated
 
 	fun isFullSyncDue(force: Boolean = false): Boolean {
 		return force || preferenceManager.lastFullSyncTime <= 0L ||

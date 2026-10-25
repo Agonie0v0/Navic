@@ -88,20 +88,6 @@ class LoginManager(
 		return withContext(Dispatchers.IO) { AddressUtil.isAddressLocal(host) }
 	}
 
-	init {
-		loadUser()
-	}
-
-	fun loadUser() {
-		scope.launch {
-			if (sessionManager.isLoggedIn.value) {
-				loginState.value = LoginUiState.Success
-			} else {
-				loginState.value = LoginUiState.Idle
-			}
-		}
-	}
-
 	fun login() {
 		validationShown.value = true
 

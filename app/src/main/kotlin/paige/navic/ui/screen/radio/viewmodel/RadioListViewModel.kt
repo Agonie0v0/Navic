@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.model.DomainRadio
 import paige.navic.domain.repository.RadioRepository
 import paige.navic.ui.viewmodel.SelectableViewModel
@@ -22,7 +23,7 @@ class RadioListViewModel(
 
 	init {
 		viewModelScope.launch {
-			sessionManager.isLoggedIn.collect { if (it) refreshRadios(false) }
+			sessionManager.sessionState.collect { if (it is SessionState.Authenticated) refreshRadios(false) }
 		}
 	}
 

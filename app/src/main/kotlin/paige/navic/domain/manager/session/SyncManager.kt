@@ -25,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import paige.navic.R
@@ -59,9 +60,13 @@ class SyncManager(
 	private val workManager = WorkManager.getInstance(context)
 
 	init {
-		if (sessionManager.isLoggedIn.value) {
-			startPeriodicSync()
-			schedulePendingActions()
+		scope.launch {
+			sessionManager.sessionState
+				.filterIsInstance<SessionState.Authenticated>()
+				.collect {
+					startPeriodicSync()
+					schedulePendingActions()
+				}
 		}
 	}
 
@@ -91,7 +96,7 @@ class SyncManager(
 	)
 
 	fun startPeriodicSync(syncImmediately: Boolean = true) {
-		if (!sessionManager.isLoggedIn.value) return
+		if (sessionManager.sessionState.value !is SessionState.Authenticated) return
 
 		schedulePeriodicWork()
 
@@ -136,7 +141,7 @@ class SyncManager(
 	}
 
 	fun triggerManualSync() {
-		if (!sessionManager.isLoggedIn.value) return
+		if (sessionManager.sessionState.value !is SessionState.Authenticated) return
 
 		schedulePeriodicWork()
 		preferenceManager.lastFullSyncTime = 0
