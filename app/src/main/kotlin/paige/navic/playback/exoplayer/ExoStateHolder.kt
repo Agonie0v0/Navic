@@ -54,7 +54,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import paige.navic.discord.ExoDiscordIntegration
+import paige.navic.playback.exoplayer.impl.listeners.ExoDiscordIntegration
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.playback.ExoAudioGainProcessor

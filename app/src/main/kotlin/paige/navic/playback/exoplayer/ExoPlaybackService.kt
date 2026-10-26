@@ -23,7 +23,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import paige.navic.R
 import paige.navic.domain.manager.playback.EqualizerManager
-import paige.navic.domain.manager.playback.ScrobbleManager
+import paige.navic.playback.exoplayer.impl.listeners.ScrobbleExoListener
 import paige.navic.domain.manager.runtime.NotificationIds
 import paige.navic.domain.manager.runtime.NotificationStringIds
 import paige.navic.domain.manager.runtime.PreferenceManager
@@ -49,7 +49,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 	private lateinit var exoEqualizerManager: ExoEqualizerManager
 
-	private lateinit var scrobbleManager: ScrobbleManager
+	private lateinit var scrobbleListener: ScrobbleExoListener
 
 	override fun onCreate() {
 		super.onCreate()
@@ -74,7 +74,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 		stateHolder.playerInstance.let { player ->
 			player as Player
 
-			scrobbleManager = ScrobbleManager(
+			scrobbleListener = ScrobbleExoListener(
 				player,
 				reachability,
 				syncManager,
@@ -103,7 +103,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 	override fun onDestroy() {
 		exoEqualizerManager.releaseEqualizer()
-		scrobbleManager.release()
+		scrobbleListener.release()
 		serviceScope.cancel()
 		stopForeground(STOP_FOREGROUND_REMOVE)
 		stateHolder.destroySession()

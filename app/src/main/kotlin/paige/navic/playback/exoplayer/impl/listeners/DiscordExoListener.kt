@@ -1,10 +1,4 @@
-/*
- * Navic, a Subsonic music streaming app for Android
- * Copyright (c) 2026 paige
- * SPDX-License-Identifier: GPL-3.0-only
- */
-
-package paige.navic.discord
+package paige.navic.playback.exoplayer.impl.listeners
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -34,7 +28,7 @@ import paige.navic.domain.repository.AlbumRepository
 import paige.navic.domain.repository.SongRepository
 
 class ExoDiscordIntegration(
-	val player: Player,
+    val player: Player,
 ) : Player.Listener, KoinComponent {
 	private val context: Context by inject()
 	private val preferenceManager: PreferenceManager by inject()
@@ -57,23 +51,23 @@ class ExoDiscordIntegration(
 		// idk how to combine flows of different types
 		scope.launch {
 			combine(
-				snapshotFlow { preferenceManager.enableDiscordIntegration },
-				snapshotFlow { preferenceManager.disableRpcWhenPowerSaving }
-			) { it }.collect {
+                snapshotFlow { preferenceManager.enableDiscordIntegration },
+                snapshotFlow { preferenceManager.disableRpcWhenPowerSaving }
+            ) { it }.collect {
 				setCurrentActivity(player.currentMediaItem)
 			}
 		}
 		scope.launch {
 			combine(
-				snapshotFlow { preferenceManager.discordStatusType }
-			) { it }.collect {
+                snapshotFlow { preferenceManager.discordStatusType }
+            ) { it }.collect {
 				setCurrentActivity(player.currentMediaItem)
 			}
 		}
 		scope.launch {
 			combine(
-				snapshotFlow { preferenceManager.discordAppId }
-			) { it }.collect {
+                snapshotFlow { preferenceManager.discordAppId }
+            ) { it }.collect {
 				setCurrentActivity(player.currentMediaItem)
 			}
 		}
@@ -85,7 +79,7 @@ class ExoDiscordIntegration(
 					}
 				}
 			},
-			IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+            IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
 		)
 	}
 
@@ -98,9 +92,9 @@ class ExoDiscordIntegration(
 	}
 
 	override fun onPositionDiscontinuity(
-		oldPosition: Player.PositionInfo,
-		newPosition: Player.PositionInfo,
-		reason: @Player.DiscontinuityReason Int
+        oldPosition: Player.PositionInfo,
+        newPosition: Player.PositionInfo,
+        reason: @Player.DiscontinuityReason Int
 	) {
 		scope.launch {
 			val isSeekOrRepeat = reason == Player.DISCONTINUITY_REASON_SEEK ||
@@ -172,20 +166,20 @@ class ExoDiscordIntegration(
 		}
 
 		return Activity(
-			name = "Navic",
-			activityType = ActivityType.LISTENING,
-			state = song.artistName?.padEnd(2, INVISIBLE_CHARACTER),
-			details = song.title.padEnd(2, INVISIBLE_CHARACTER),
-			statusDisplayType = preferenceManager.discordStatusType.wrappedType,
-			assets = ActivityAssets(
-				largeUrl = null,
-				largeImage = largeImage,
-				largeText = song.albumTitle?.padEnd(2, INVISIBLE_CHARACTER),
-				smallImage = null,
-				smallText = null,
-				smallUrl = null
-			),
-			timestamps = endSec?.let { ActivityTimestamps(startSec, endSec) }
-		)
+            name = "Navic",
+            activityType = ActivityType.LISTENING,
+            state = song.artistName?.padEnd(2, INVISIBLE_CHARACTER),
+            details = song.title.padEnd(2, INVISIBLE_CHARACTER),
+            statusDisplayType = preferenceManager.discordStatusType.wrappedType,
+            assets = ActivityAssets(
+                largeUrl = null,
+                largeImage = largeImage,
+                largeText = song.albumTitle?.padEnd(2, INVISIBLE_CHARACTER),
+                smallImage = null,
+                smallText = null,
+                smallUrl = null
+            ),
+            timestamps = endSec?.let { ActivityTimestamps(startSec, endSec) }
+        )
 	}
 }

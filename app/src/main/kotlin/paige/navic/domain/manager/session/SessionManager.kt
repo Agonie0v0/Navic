@@ -49,6 +49,7 @@ class SessionManager(
 	private val dnsResolver: NavicDnsResolver
 ) {
 	private companion object {
+		const val TAG = "SessionManager"
 		const val USER_AGENT = "Navic"
 	}
 
@@ -95,14 +96,14 @@ class SessionManager(
 					login(instanceUrl, username, password)
 				} catch (e: SubsonicException) {
 					if (e.code == SubsonicErrorCode.WRONG_USERNAME_OR_PASSWORD) {
-						Logger.e("SessionManager", "Credentials invalid, logging out", e)
+						Logger.e(TAG, "Credentials invalid, logging out", e)
 						logout()
 					} else {
-						Logger.w("SessionManager", "SubsonicException during restoration: $e")
+						Logger.w(TAG, "SubsonicException during restoration: $e")
 						_state.value = SessionState.Authenticated(currentUser = null, serverInfo = null)
 					}
 				} catch (e: Exception) {
-					Logger.w("SessionManager", "Failed to reach server during restoration, treating as offline authenticated", e)
+					Logger.w(TAG, "Failed to reach server during restoration, treating as offline authenticated", e)
 					_state.value = SessionState.Authenticated(
 						currentUser = null,
 						serverInfo = null
@@ -151,7 +152,7 @@ class SessionManager(
 		val client = createClient(instanceUrl, username, password)
 
 		val pingResult = client.ping()
-		Logger.i("SessionManager", "Ping result: $pingResult")
+		Logger.i(TAG, "Ping result: $pingResult")
 
 		val user = fetchCurrentUser(username, client)
 
@@ -199,7 +200,7 @@ class SessionManager(
 		size = "${preferenceManager.coverArtQuality.value}"
 	)
 
-
+	// TODO: use getTokenInfo instead to retrieve the username, will be required when implementing API key support
 	private suspend fun fetchCurrentUser(
 		username: String = this.username,
 		client: SubsonicClient = api

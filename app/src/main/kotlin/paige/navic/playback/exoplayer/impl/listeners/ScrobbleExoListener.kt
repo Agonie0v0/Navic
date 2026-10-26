@@ -1,10 +1,4 @@
-/*
- * Navic, a Subsonic music streaming app for Android
- * Copyright (c) 2026 paige
- * SPDX-License-Identifier: GPL-3.0-only
- */
-
-package paige.navic.domain.manager.playback
+package paige.navic.playback.exoplayer.impl.listeners
 
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -16,18 +10,18 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import paige.navic.database.entity.SyncActionType
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SyncManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 
-class ScrobbleManager(
-	private val player: Player,
-	val reachability: ReachabilityFlow,
-	val syncManager: SyncManager,
-	val sessionManager: SessionManager,
-	val preferenceManager: PreferenceManager
+class ScrobbleExoListener(
+    private val player: Player,
+    val reachability: ReachabilityFlow,
+    val syncManager: SyncManager,
+    val sessionManager: SessionManager,
+    val preferenceManager: PreferenceManager
 ) : Player.Listener {
 	private var currentMediaId: String? = null
 	private var hasScrobbledCurrent = false
@@ -100,7 +94,7 @@ class ScrobbleManager(
 				accumulatedPlayTime += timePassed
 
 				checkProgress()
-				delay(2.seconds)
+                delay(2.seconds)
 			}
 		}
 	}
@@ -122,9 +116,9 @@ class ScrobbleManager(
 	}
 
 	override fun onPositionDiscontinuity(
-		oldPosition: Player.PositionInfo,
-		newPosition: Player.PositionInfo,
-		reason: Int
+        oldPosition: Player.PositionInfo,
+        newPosition: Player.PositionInfo,
+        reason: Int
 	) {
 		val isSeekOrRepeat = reason == Player.DISCONTINUITY_REASON_SEEK ||
 			reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION

@@ -27,7 +27,7 @@ import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
-import paige.navic.discord.ExoDiscordIntegration
+import paige.navic.playback.exoplayer.impl.listeners.ExoDiscordIntegration
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.DiscordStatusType
 import paige.navic.domain.model.settings.ExplicitContentPlayback

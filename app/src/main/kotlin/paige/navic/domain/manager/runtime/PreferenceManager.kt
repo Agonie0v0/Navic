@@ -8,7 +8,7 @@ package paige.navic.domain.manager.runtime
 
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
-import paige.navic.discord.ExoDiscordIntegration
+import paige.navic.playback.exoplayer.impl.listeners.ExoDiscordIntegration
 import paige.navic.domain.manager.runtime.base.BasePreferenceManager
 import paige.navic.domain.model.DomainAlbumListType
 import paige.navic.domain.model.DomainArtistListType
