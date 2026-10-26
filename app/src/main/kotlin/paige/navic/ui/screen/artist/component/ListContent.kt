@@ -37,12 +37,14 @@ import paige.navic.domain.model.settings.ListViewMode
 import paige.navic.ui.component.common.AlphabeticalScroller
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.layout.ArtGrid
+import paige.navic.ui.component.layout.artGridPlaceholder
 import paige.navic.ui.screen.artist.ArtistListScreenGridItem
 import paige.navic.ui.util.withoutTop
 
 @Composable
 fun ArtistListScreenContent(
-	artists: LazyPagingItems<DomainArtist>,
+	artists: LazyPagingItems<DomainArtist>?,
+	isLoading: Boolean,
 	letterCounts: List<LetterCount>,
 	starred: Boolean,
 	selectedSorting: DomainArtistListType,
@@ -59,7 +61,7 @@ fun ArtistListScreenContent(
 	onPlayNext: () -> Unit,
 	onAddToQueue: () -> Unit,
 ) {
-	val totalArtistCount = artists.itemCount
+	val totalArtistCount = artists?.itemCount ?: 0
 
 	val headerIndices = remember(letterCounts) {
 		var gridPosition = 1
@@ -84,7 +86,7 @@ fun ArtistListScreenContent(
 			else Modifier.fillMaxSize(),
 			state = gridState,
 			contentPadding = innerPadding.withoutTop(),
-			verticalArrangement = if (totalArtistCount == 0) {
+			verticalArrangement = if (totalArtistCount == 0 && !isLoading) {
 				Arrangement.Center
 			} else if (selectedViewMode == ListViewMode.List) {
 				Arrangement.spacedBy(0.dp)
@@ -93,7 +95,7 @@ fun ArtistListScreenContent(
 			},
 			selectedViewMode = selectedViewMode
 		) {
-			if (totalArtistCount != 0) {
+			if (totalArtistCount > 0 && artists != null) {
 				item(span = { GridItemSpan(maxLineSpan) }) {
 					Row(
 						modifier = Modifier
@@ -111,28 +113,62 @@ fun ArtistListScreenContent(
 						)
 					}
 				}
-			}
-			if (selectedSorting == DomainArtistListType.AlphabeticalByName) {
-				var artistOffset = 0
-				letterCounts.forEach { lc ->
-					stickyHeader {
-						Row(
-							modifier = Modifier
-								.background(MaterialTheme.colorScheme.surface)
-								.padding(textPadding),
-							verticalAlignment = Alignment.CenterVertically
-						) {
-							Text(
-								text = lc.letter,
-								color = MaterialTheme.colorScheme.onSurfaceVariant
-							)
+				if (selectedSorting == DomainArtistListType.AlphabeticalByName) {
+					var artistOffset = 0
+					letterCounts.forEach { lc ->
+						stickyHeader {
+							Row(
+								modifier = Modifier
+									.background(MaterialTheme.colorScheme.surface)
+									.padding(textPadding),
+								verticalAlignment = Alignment.CenterVertically
+							) {
+								Text(
+									text = lc.letter,
+									color = MaterialTheme.colorScheme.onSurfaceVariant
+								)
+							}
 						}
+						val startArtistIndex = artistOffset
+						items(lc.count) { i ->
+							val artistIndex = startArtistIndex + i
+							if (artistIndex >= artists.itemCount) return@items
+							val artist = artists[artistIndex] ?: return@items
+
+							if (selectedViewMode == ListViewMode.Grid) {
+								ArtistListScreenGridItem(
+									modifier = Modifier.animateItem(),
+									tab = "artists",
+									artist = artist,
+									selected = artist == selectedArtist,
+									selectedArtistAlbums = selectedArtistAlbums,
+									starred = starred,
+									onSelect = { onUpdateSelection(artist) },
+									onDeselect = { onClearSelection() },
+									onSetStarred = { onSetStarred(it) },
+									onPlayNext = onPlayNext,
+									onAddToQueue = onAddToQueue
+								)
+							} else {
+								ArtistListScreenListItem(
+									modifier = Modifier.animateItem(),
+									artist = artist,
+									selected = artist == selectedArtist,
+									selectedArtistAlbums = selectedArtistAlbums,
+									starred = starred,
+									onSelect = { onUpdateSelection(artist) },
+									onDeselect = { onClearSelection() },
+									onSetStarred = { onSetStarred(it) },
+									onPlayNext = onPlayNext,
+									onAddToQueue = onAddToQueue
+								)
+							}
+						}
+						artistOffset += lc.count
 					}
-					val startArtistIndex = artistOffset
-					items(lc.count) { i ->
-						val artistIndex = startArtistIndex + i
-						if (artistIndex >= artists.itemCount) return@items
-						val artist = artists[artistIndex] ?: return@items
+				} else {
+					items(artists.itemCount, key = { index -> artists.peek(index)?.id ?: index }) { index ->
+						val artist = artists[index] ?: return@items
 
 						if (selectedViewMode == ListViewMode.Grid) {
 							ArtistListScreenGridItem(
@@ -163,44 +199,10 @@ fun ArtistListScreenContent(
 							)
 						}
 					}
-					artistOffset += lc.count
 				}
+			} else if (isLoading) {
+				artGridPlaceholder(viewMode = selectedViewMode)
 			} else {
-				items(artists.itemCount, key = { index -> artists.peek(index)?.id ?: index }) { index ->
-					val artist = artists[index] ?: return@items
-
-					if (selectedViewMode == ListViewMode.Grid) {
-						ArtistListScreenGridItem(
-							modifier = Modifier.animateItem(),
-							tab = "artists",
-							artist = artist,
-							selected = artist == selectedArtist,
-							selectedArtistAlbums = selectedArtistAlbums,
-							starred = starred,
-							onSelect = { onUpdateSelection(artist) },
-							onDeselect = { onClearSelection() },
-							onSetStarred = { onSetStarred(it) },
-							onPlayNext = onPlayNext,
-							onAddToQueue = onAddToQueue
-						)
-					} else {
-						ArtistListScreenListItem(
-							modifier = Modifier.animateItem(),
-							artist = artist,
-							selected = artist == selectedArtist,
-							selectedArtistAlbums = selectedArtistAlbums,
-							starred = starred,
-							onSelect = { onUpdateSelection(artist) },
-							onDeselect = { onClearSelection() },
-							onSetStarred = { onSetStarred(it) },
-							onPlayNext = onPlayNext,
-							onAddToQueue = onAddToQueue
-						)
-					}
-				}
-			}
-
-			if (totalArtistCount == 0) {
 				item(span = { GridItemSpan(maxLineSpan) }) {
 					ContentUnavailable(
 						label = stringResource(R.string.info_no_artists)

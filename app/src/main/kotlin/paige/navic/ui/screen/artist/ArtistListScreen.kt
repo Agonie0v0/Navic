@@ -27,6 +27,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.collections.immutable.toPersistentList
 import org.koin.compose.koinInject
@@ -132,18 +133,19 @@ fun ArtistListScreen(
 			}
 		}
 	) { innerPadding ->
+		val isLoading = state is UiState.Loading || lazyPagingItems?.loadState?.refresh is LoadState.Loading
+
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = state !is UiState.Loading,
+			finished = !isLoading,
 			onRefresh = { viewModel.refreshArtists(true) },
 			key = state
 		) {
-			if (lazyPagingItems == null) return@PullToRefreshBox
-
 			ArtistListScreenContent(
 				artists = lazyPagingItems,
+				isLoading = isLoading,
 				letterCounts = letterCounts,
 				starred = selectedArtist?.starredAt != null,
 				selectedSorting = selectedSorting,

@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -39,9 +40,9 @@ import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.dialog.DeleteDownloadTarget
-import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
 import paige.navic.ui.component.dialog.ShareDialog
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
@@ -69,7 +70,7 @@ fun StarredScreen() {
 	)
 	val downloadManager = koinInject<DownloadManager>()
 	val songsState by songsViewModel.uiState.collectAsStateWithLifecycle()
-	val songsLazyItems = songsState.data?.items?.collectAsLazyPagingItems() ?: return
+	val songsLazyItems = songsState.data?.items?.collectAsLazyPagingItems()
 	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(
 		initialValue = emptyList()
 	)
@@ -85,7 +86,7 @@ fun StarredScreen() {
 		viewModelStoreOwner = persistentViewModelStoreOwner
 	)
 	val albumsState by albumsViewModel.uiState.collectAsStateWithLifecycle()
-	val albumsLazyItems = albumsState.data?.items?.collectAsLazyPagingItems() ?: return
+	val albumsLazyItems = albumsState.data?.items?.collectAsLazyPagingItems()
 
 	val artistsViewModel = koinViewModel<ArtistListViewModel>(
 		key = "starredArtists",
@@ -98,7 +99,7 @@ fun StarredScreen() {
 		viewModelStoreOwner = persistentViewModelStoreOwner
 	)
 	val artistsState by artistsViewModel.uiState.collectAsStateWithLifecycle()
-	val artistsLazyItems = artistsState.data?.items?.collectAsLazyPagingItems() ?: return
+	val artistsLazyItems = artistsState.data?.items?.collectAsLazyPagingItems()
 
 	var shareId by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -121,13 +122,18 @@ fun StarredScreen() {
 			}
 		}
 	) { innerPadding ->
+		val isLoading = songsState is UiState.Loading ||
+			albumsState is UiState.Loading ||
+			artistsState is UiState.Loading ||
+			songsLazyItems?.loadState?.refresh is LoadState.Loading ||
+			albumsLazyItems?.loadState?.refresh is LoadState.Loading ||
+			artistsLazyItems?.loadState?.refresh is LoadState.Loading
+
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = !(albumsState is UiState.Loading ||
-				artistsState is UiState.Loading ||
-				songsState is UiState.Loading),
+			finished = !isLoading,
 			onRefresh = {
 				albumsViewModel.refreshAlbums(true)
 				artistsViewModel.refreshArtists(true)
@@ -140,6 +146,7 @@ fun StarredScreen() {
 
 			StarredScreenContent(
 				innerPadding = innerPadding,
+				isLoading = isLoading,
 				onSetShareId = { shareId = it },
 				isOnline = isOnline,
 
@@ -147,7 +154,7 @@ fun StarredScreen() {
 				selectedSong = songsState.data?.selected,
 				allDownloads = allDownloads,
 				onPlaySong = { index ->
-					songsLazyItems.itemSnapshotList.items.let {
+					songsLazyItems?.itemSnapshotList?.items?.let {
 						player.playNow(it, index)
 					}
 				},

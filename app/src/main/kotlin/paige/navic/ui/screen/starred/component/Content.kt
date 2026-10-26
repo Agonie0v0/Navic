@@ -52,10 +52,12 @@ import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainArtistListType
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.DomainSongListType
+import paige.navic.domain.model.settings.ListViewMode
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.common.SongRow
 import paige.navic.ui.component.layout.ArtCarousel
 import paige.navic.ui.component.layout.ArtCarouselItem
+import paige.navic.ui.component.layout.ArtGridPlaceholder
 import paige.navic.ui.component.sheet.ArtistSheet
 import paige.navic.ui.component.sheet.CollectionSheet
 import paige.navic.ui.navigation.Screen
@@ -64,10 +66,11 @@ import paige.navic.ui.screen.playlist.dialog.PlaylistUpdateDialog
 @Composable
 fun StarredScreenContent(
 	innerPadding: PaddingValues,
+	isLoading: Boolean = false,
 	onSetShareId: (String) -> Unit,
 	isOnline: Boolean = false,
 
-	songs: LazyPagingItems<DomainSong>,
+	songs: LazyPagingItems<DomainSong>?,
 	selectedSong: DomainSong?,
 	selectedSongIsStarred: Boolean,
 	selectedSongRating: Int,
@@ -85,7 +88,7 @@ fun StarredScreenContent(
 	onDeleteDownloadSong: (DomainSong) -> Unit,
 
 	// albums
-	albums: LazyPagingItems<DomainAlbum>,
+	albums: LazyPagingItems<DomainAlbum>?,
 	selectedAlbum: DomainAlbum?,
 	selectedAlbumIsStarred: Boolean,
 	selectedAlbumRating: Int,
@@ -97,7 +100,7 @@ fun StarredScreenContent(
 	onAddAlbumToQueue: () -> Unit,
 
 	// artists
-	artists: LazyPagingItems<DomainArtist>,
+	artists: LazyPagingItems<DomainArtist>?,
 	selectedArtist: DomainArtist?,
 	selectedArtistAlbums: List<DomainAlbum>?,
 	selectedArtistIsStarred: Boolean,
@@ -117,20 +120,36 @@ fun StarredScreenContent(
 
 	val scrollState = rememberScrollState()
 
+	val songCount = songs?.itemCount ?: 0
+	val albumCount = albums?.itemCount ?: 0
+	val artistCount = artists?.itemCount ?: 0
+	val totalCount = songCount + albumCount + artistCount
+
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
 			.verticalScroll(state = scrollState),
 		verticalArrangement = Arrangement.spacedBy(
 			space = 12.dp,
-			alignment = if (albums.itemCount == 0 && songs.itemCount == 0 && artists.itemCount == 0) Alignment.CenterVertically else Alignment.Top
+			alignment = if (totalCount == 0 && !isLoading) Alignment.CenterVertically else Alignment.Top
 		),
 		horizontalAlignment = Alignment.CenterHorizontally,
 	) {
-		if (albums.itemCount == 0 && songs.itemCount == 0 && artists.itemCount == 0) {
-			ContentUnavailable(
-				label = stringResource(R.string.info_no_starred)
-			)
+		if (totalCount == 0) {
+			if (isLoading) {
+				Column(
+					modifier = Modifier.padding(innerPadding),
+					verticalArrangement = Arrangement.spacedBy(12.dp)
+				) {
+					repeat(8) {
+						ArtGridPlaceholder(viewMode = ListViewMode.List)
+					}
+				}
+			} else {
+				ContentUnavailable(
+					label = stringResource(R.string.info_no_starred)
+				)
+			}
 			return@Column
 		}
 		Column(
@@ -150,7 +169,7 @@ fun StarredScreenContent(
 					bottom = innerPadding.calculateBottomPadding()
 				), horizontalAlignment = Alignment.CenterHorizontally
 		) {
-			if (songs.itemCount > 0) {
+			if (songCount > 0 && songs != null) {
 				Row(
 					modifier = Modifier
 						.heightIn(min = 32.dp)
@@ -178,8 +197,8 @@ fun StarredScreenContent(
 						})
 					)
 				}
-				val rowCount = remember(songs.itemCount) {
-					songs.itemCount.coerceIn(1, 3)
+				val rowCount = remember(songCount) {
+					songCount.coerceIn(1, 3)
 				}
 				val gridHeight = remember(rowCount) {
 					when (rowCount) {
@@ -196,7 +215,7 @@ fun StarredScreenContent(
 						.fillMaxWidth()
 						.height(gridHeight)
 				) {
-					items(songs.itemCount) { index ->
+					items(songCount) { index ->
 						val song = songs[index] ?: return@items
 
 						val download = downloadsMap[song.id]
@@ -223,38 +242,40 @@ fun StarredScreenContent(
 					}
 				}
 			}
-			ArtCarousel(
-				stringResource(R.string.title_albums),
-				albums.itemSnapshotList.items.toImmutableList(),
-				Screen.AlbumList(true, DomainAlbumListType.AlphabeticalByArtist)
-			) { album ->
-				ArtCarouselItem(
-					coverArtId = album.coverArtId,
-					title = album.name ?: "[unknown album]",
-					subtitle = album.artistName,
-					contentDescription = null,
-					onSelect = { onSelectAlbum(album) },
-					onClick = dropUnlessResumed {
-						backStack.add(Screen.CollectionDetail(album.id, "artist"))
-					})
-				if (selectedAlbum == album) {
-					CollectionSheet(
-						onDismissRequest = { onClearAlbumSelection() },
-						collection = album,
-						starred = selectedAlbumIsStarred,
-						onShare = { onSetShareId(album.id) },
-						onPlayNext = onPlayAlbumNext,
-						onAddToQueue = onAddAlbumToQueue,
-						onSetStarred = { onStarSelectedAlbum(!selectedAlbumIsStarred) },
-						onAddAllToPlaylist = {
-							songIdsToAddToPlaylist = selectedAlbum.songs.map { it.id }.toImmutableList()
-						},
-						rating = selectedAlbumRating,
-						onSetRating = onRateSelectedAlbum
-					)
+			if (albumCount > 0 && albums != null) {
+				ArtCarousel(
+					stringResource(R.string.title_albums),
+					albums.itemSnapshotList.items.toImmutableList(),
+					Screen.AlbumList(true, DomainAlbumListType.AlphabeticalByArtist)
+				) { album ->
+					ArtCarouselItem(
+						coverArtId = album.coverArtId,
+						title = album.name ?: "[unknown album]",
+						subtitle = album.artistName,
+						contentDescription = null,
+						onSelect = { onSelectAlbum(album) },
+						onClick = dropUnlessResumed {
+							backStack.add(Screen.CollectionDetail(album.id, "artist"))
+						})
+					if (selectedAlbum == album) {
+						CollectionSheet(
+							onDismissRequest = { onClearAlbumSelection() },
+							collection = album,
+							starred = selectedAlbumIsStarred,
+							onShare = { onSetShareId(album.id) },
+							onPlayNext = onPlayAlbumNext,
+							onAddToQueue = onAddAlbumToQueue,
+							onSetStarred = { onStarSelectedAlbum(!selectedAlbumIsStarred) },
+							onAddAllToPlaylist = {
+								songIdsToAddToPlaylist = selectedAlbum.songs.map { it.id }.toImmutableList()
+							},
+							rating = selectedAlbumRating,
+							onSetRating = onRateSelectedAlbum
+						)
+					}
 				}
 			}
-			if (artists.itemCount == 0) return@Column
+			if (artistCount == 0 || artists == null) return@Column
 			ArtCarousel(
 				stringResource(R.string.title_artists),
 				artists.itemSnapshotList.items.toImmutableList(),

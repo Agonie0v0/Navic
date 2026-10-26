@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -162,53 +163,48 @@ fun RadioListScreen(
 			}
 		}
 	) { innerPadding ->
+		val isLoading = state is UiState.Loading || lazyPagingItems?.loadState?.refresh is LoadState.Loading
+		val itemCount = lazyPagingItems?.itemCount ?: 0
+
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = state !is UiState.Loading,
+			finished = !isLoading,
 			onRefresh = { viewModel.refreshRadios(true) },
 			key = state
 		) {
-			lazyPagingItems?.let {
-				ArtGrid(
-					modifier = if (!nested)
-						Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
-					else Modifier,
-					contentPadding = innerPadding.withoutTop(),
-					state = viewModel.gridState,
-					verticalArrangement = if (it.itemCount < 0)
-						Arrangement.Center
-					else Arrangement.spacedBy(12.dp)
-				) {
-					if (lazyPagingItems.itemCount > 0) {
-						items(lazyPagingItems.itemCount) { index ->
-							val radio = lazyPagingItems[index]
-							if (radio != null) {
-								RadioListScreenCard(
-									modifier = Modifier.animateItem(),
-									radio = radio,
-									onClick = { player.playRadio(radio) },
-									onLongClick = { viewModel.selected = radio }
-								)
-							}
+			ArtGrid(
+				modifier = if (!nested)
+					Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+				else Modifier,
+				contentPadding = innerPadding.withoutTop(),
+				state = viewModel.gridState,
+				verticalArrangement = if (itemCount == 0 && !isLoading)
+					Arrangement.Center
+				else Arrangement.spacedBy(12.dp)
+			) {
+				if (itemCount > 0 && lazyPagingItems != null) {
+					items(itemCount) { index ->
+						val radio = lazyPagingItems[index]
+						if (radio != null) {
+							RadioListScreenCard(
+								modifier = Modifier.animateItem(),
+								radio = radio,
+								onClick = { player.playRadio(radio) },
+								onLongClick = { viewModel.selected = radio }
+							)
 						}
-					} else {
-						when (state) {
-							is UiState.Loading -> {
-								items(10) {
-									RadioListScreenCardPlaceholder()
-								}
-							}
-
-							else -> {
-								item(span = { GridItemSpan(maxLineSpan) }) {
-									ContentUnavailable(
-										label = stringResource(info_no_radios)
-									)
-								}
-							}
-						}
+					}
+				} else if (isLoading) {
+					items(10) {
+						RadioListScreenCardPlaceholder()
+					}
+				} else {
+					item(span = { GridItemSpan(maxLineSpan) }) {
+						ContentUnavailable(
+							label = stringResource(info_no_radios)
+						)
 					}
 				}
 			}

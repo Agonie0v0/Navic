@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -43,12 +44,14 @@ import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.model.DomainSong
 import paige.navic.domain.model.DomainSongListType
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
+import paige.navic.domain.model.settings.ListViewMode
 import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.dialog.DeleteDownloadTarget
-import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
 import paige.navic.ui.component.dialog.ShareDialog
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
+import paige.navic.ui.component.layout.ArtGridPlaceholder
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
@@ -144,11 +147,14 @@ fun SongListScreen(
 			}
 		}
 	) { innerPadding ->
+		val isLoading = state is UiState.Loading || lazyPagingItems?.loadState?.refresh is LoadState.Loading
+		val itemCount = lazyPagingItems?.itemCount ?: 0
+
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = state !is UiState.Loading,
+			finished = !isLoading,
 			onRefresh = { viewModel.refreshSongs(true) },
 			key = state
 		) {
@@ -159,13 +165,13 @@ fun SongListScreen(
 						.nestedScroll(scrollBehavior.nestedScrollConnection)
 				else Modifier.fillMaxSize(),
 				contentPadding = innerPadding.withoutTop(),
-				verticalArrangement = if (lazyPagingItems == null || lazyPagingItems.itemCount == 0)
+				verticalArrangement = if (itemCount == 0 && !isLoading)
 					Arrangement.Center
 				else Arrangement.spacedBy(12.dp),
 				state = listState
 			) {
-				if (lazyPagingItems != null && lazyPagingItems.itemCount > 0) {
-					items(lazyPagingItems.itemCount) { index ->
+				if (itemCount > 0 && lazyPagingItems != null) {
+					items(itemCount) { index ->
 						val song = lazyPagingItems[index] ?: return@items
 
 						val download = downloadsMap[song.id]
@@ -217,19 +223,15 @@ fun SongListScreen(
 							}
 						)
 					}
+				} else if (isLoading) {
+					items(10) {
+						ArtGridPlaceholder(viewMode = ListViewMode.List)
+					}
 				} else {
-					when (state) {
-						is UiState.Loading -> {
-							// TODO
-						}
-
-						else -> {
-							item {
-								ContentUnavailable(
-									label = stringResource(info_no_songs)
-								)
-							}
-						}
+					item {
+						ContentUnavailable(
+							label = stringResource(info_no_songs)
+						)
 					}
 				}
 			}

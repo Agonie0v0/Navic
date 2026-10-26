@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -97,7 +98,7 @@ fun PlaylistListScreen(
 	)
 	val player = koinInject<MediaPlayer>()
 	val state by viewModel.uiState.collectAsState()
-	val lazyPagingItems = state.data?.items?.collectAsLazyPagingItems() ?: return
+	val lazyPagingItems = state.data?.items?.collectAsLazyPagingItems()
 	val selectedSorting by viewModel.selectedSorting.collectAsStateWithLifecycle()
 	val selectedReversed by viewModel.selectedReversed.collectAsStateWithLifecycle()
 	val selectedFilters by viewModel.selectedFilters.collectAsStateWithLifecycle()
@@ -197,11 +198,14 @@ fun PlaylistListScreen(
 			}
 		}
 	) { innerPadding ->
+		val isLoading = state is UiState.Loading || lazyPagingItems?.loadState?.refresh is LoadState.Loading
+		val itemCount = lazyPagingItems?.itemCount ?: 0
+
 		PullToRefreshBox(
 			modifier = Modifier
                 .padding(top = innerPadding.calculateTopPadding())
                 .background(MaterialTheme.colorScheme.surface),
-			finished = state !is UiState.Loading,
+			finished = !isLoading,
 			onRefresh = { viewModel.refreshPlaylists(true) },
 			key = state
 		) {
@@ -211,7 +215,7 @@ fun PlaylistListScreen(
 				else Modifier,
 				state = gridState,
 				contentPadding = innerPadding.withoutTop(),
-				verticalArrangement = if (lazyPagingItems.itemCount == 0) {
+				verticalArrangement = if (itemCount == 0 && !isLoading) {
 					Arrangement.Center
 				} else if (selectedViewMode == ListViewMode.List) {
 					Arrangement.spacedBy(0.dp)
@@ -220,8 +224,8 @@ fun PlaylistListScreen(
 				},
 				selectedViewMode = selectedViewMode
 			) {
-				if (lazyPagingItems.itemCount > 0) {
-					items(lazyPagingItems.itemCount) { index ->
+				if (itemCount > 0 && lazyPagingItems != null) {
+					items(itemCount) { index ->
 						val playlist = lazyPagingItems[index] ?: return@items
 
 						if (selectedViewMode == ListViewMode.Grid) {
@@ -283,19 +287,13 @@ fun PlaylistListScreen(
 							)
 						}
 					}
+				} else if (isLoading) {
+					artGridPlaceholder(viewMode = selectedViewMode)
 				} else {
-					when (state) {
-						is UiState.Loading -> {
-							artGridPlaceholder(viewMode = selectedViewMode)
-						}
-
-						else -> {
-							item(span = { GridItemSpan(maxLineSpan) }) {
-								ContentUnavailable(
-									label = stringResource(info_no_playlists_short)
-								)
-							}
-						}
+					item(span = { GridItemSpan(maxLineSpan) }) {
+						ContentUnavailable(
+							label = stringResource(info_no_playlists_short)
+						)
 					}
 				}
 			}

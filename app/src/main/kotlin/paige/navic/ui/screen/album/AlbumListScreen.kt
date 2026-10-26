@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.compose.koinInject
@@ -55,6 +56,7 @@ import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.component.layout.PullToRefreshBox
 import paige.navic.ui.component.layout.RootBottomBar
 import paige.navic.ui.component.layout.RootTopBar
+import paige.navic.ui.component.layout.artGridPlaceholder
 import paige.navic.ui.component.snackbar.ErrorSnackBar
 import paige.navic.ui.core.UiState
 import paige.navic.ui.navigation.PersistentViewModelStoreOwner
@@ -141,11 +143,14 @@ fun AlbumListScreen(
 			}
 		}
 	) { innerPadding ->
+		val isLoading = state is UiState.Loading || lazyPagingItems?.loadState?.refresh is LoadState.Loading
+		val itemCount = lazyPagingItems?.itemCount ?: 0
+
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = state !is UiState.Loading,
+			finished = !isLoading,
 			onRefresh = { viewModel.refreshAlbums(true) },
 			key = state
 		) {
@@ -165,7 +170,7 @@ fun AlbumListScreen(
 					else Modifier,
 					state = viewModel.gridState,
 					contentPadding = innerPadding.withoutTop(),
-					verticalArrangement = if (lazyPagingItems == null || lazyPagingItems.itemCount == 0) {
+					verticalArrangement = if (itemCount == 0 && !isLoading) {
 						Arrangement.Center
 					} else if (selectedViewMode == ListViewMode.List) {
 						Arrangement.spacedBy(0.dp)
@@ -174,111 +179,33 @@ fun AlbumListScreen(
 					},
 					selectedViewMode = selectedViewMode
 				) {
-					lazyPagingItems?.let { items ->
-						if (items.itemCount > 0) {
-							if (selectedSorting == DomainAlbumListType.AlphabeticalByName) {
-								val textPadding = PaddingValues(
-									horizontal = if (selectedViewMode == ListViewMode.List) 16.dp else 0.dp,
-									vertical = 8.dp
-								)
+					if (itemCount > 0 && lazyPagingItems != null) {
+						if (selectedSorting == DomainAlbumListType.AlphabeticalByName) {
+							val textPadding = PaddingValues(
+								horizontal = if (selectedViewMode == ListViewMode.List) 16.dp else 0.dp,
+								vertical = 8.dp
+							)
 
-								var albumOffset = 0
-								letterCounts.forEach { lc ->
-									stickyHeader {
-										Row(
-											modifier = Modifier
-												.background(MaterialTheme.colorScheme.surface)
-												.padding(textPadding),
-											verticalAlignment = Alignment.CenterVertically
-										) {
-											Text(
-												text = lc.letter,
-												color = MaterialTheme.colorScheme.onSurfaceVariant
-											)
-										}
+							var albumOffset = 0
+							letterCounts.forEach { lc ->
+								stickyHeader {
+									Row(
+										modifier = Modifier
+											.background(MaterialTheme.colorScheme.surface)
+											.padding(textPadding),
+										verticalAlignment = Alignment.CenterVertically
+									) {
+										Text(
+											text = lc.letter,
+											color = MaterialTheme.colorScheme.onSurfaceVariant
+										)
 									}
-									val startAlbumIndex = albumOffset
-									items(lc.count) { i ->
-										val albumIndex = startAlbumIndex + i
-										if (albumIndex >= items.itemCount) return@items
-										val album = items[albumIndex] ?: return@items
-
-										if (selectedViewMode == ListViewMode.Grid) {
-											AlbumListScreenGridItem(
-												modifier = Modifier.animateItem(),
-												tab = "albums",
-												album = album,
-												selected = album == selectedAlbum,
-												starred = selectedAlbum?.starredAt != null,
-												onSelect = {
-													viewModel.selected = album
-												},
-												onDeselect = {
-													viewModel.selected = null
-												},
-												onSetStarred = {
-													viewModel.starAlbum(it)
-												},
-												onSetShareId = {
-													shareId = it
-												},
-												onPlayNext = {
-													if (selectedAlbum != null) player.playNext(
-														selectedAlbum as DomainSongCollection
-													)
-												},
-												onAddToQueue = {
-													if (selectedAlbum != null) {
-														player.addToQueue(
-															selectedAlbum as DomainSongCollection
-														)
-													}
-												},
-												rating = selectedAlbum?.userRating ?: 0,
-												onSetRating = { it: Int -> viewModel.setRating(it) }
-											)
-										} else {
-											AlbumListScreenListItem(
-												modifier = Modifier.animateItem(),
-												album = album,
-												selected = album == selectedAlbum,
-												starred = selectedAlbum?.starredAt != null,
-												onSelect = {
-													viewModel.selected = album
-												},
-												onDeselect = {
-													viewModel.selected = null
-												},
-												onSetStarred = {
-													viewModel.starAlbum(it)
-												},
-												onSetShareId = { newShareId: String ->
-													shareId = newShareId
-												},
-												onPlayNext = {
-													if (selectedAlbum != null) player.playNext(
-														selectedAlbum as DomainSongCollection
-													)
-												},
-												onAddToQueue = {
-													if (selectedAlbum != null) {
-														player.addToQueue(
-															selectedAlbum as DomainSongCollection
-														)
-													}
-												},
-												rating = selectedAlbum?.userRating ?: 0,
-												onSetRating = { it: Int -> viewModel.setRating(it) }
-											)
-										}
-									}
-									albumOffset += lc.count
 								}
-							} else {
-								items(
-									items.itemCount,
-									key = { index -> items.peek(index)?.id ?: index }) { index ->
-									val album = items[index] ?: return@items
+								val startAlbumIndex = albumOffset
+								items(lc.count) { i ->
+									val albumIndex = startAlbumIndex + i
+									if (albumIndex >= lazyPagingItems.itemCount) return@items
+									val album = lazyPagingItems[albumIndex] ?: return@items
 
 									if (selectedViewMode == ListViewMode.Grid) {
 										AlbumListScreenGridItem(
@@ -349,12 +276,89 @@ fun AlbumListScreen(
 										)
 									}
 								}
+								albumOffset += lc.count
 							}
-
 						} else {
-							item(span = { GridItemSpan(maxLineSpan) }) {
-								ContentUnavailable(label = stringResource(info_no_albums))
+							items(
+								lazyPagingItems.itemCount,
+								key = { index -> lazyPagingItems.peek(index)?.id ?: index }) { index ->
+								val album = lazyPagingItems[index] ?: return@items
+
+								if (selectedViewMode == ListViewMode.Grid) {
+									AlbumListScreenGridItem(
+										modifier = Modifier.animateItem(),
+										tab = "albums",
+										album = album,
+										selected = album == selectedAlbum,
+										starred = selectedAlbum?.starredAt != null,
+										onSelect = {
+											viewModel.selected = album
+										},
+										onDeselect = {
+											viewModel.selected = null
+										},
+										onSetStarred = {
+											viewModel.starAlbum(it)
+										},
+										onSetShareId = {
+											shareId = it
+										},
+										onPlayNext = {
+											if (selectedAlbum != null) player.playNext(
+												selectedAlbum as DomainSongCollection
+											)
+										},
+										onAddToQueue = {
+											if (selectedAlbum != null) {
+												player.addToQueue(
+													selectedAlbum as DomainSongCollection
+												)
+											}
+										},
+										rating = selectedAlbum?.userRating ?: 0,
+										onSetRating = { it: Int -> viewModel.setRating(it) }
+									)
+								} else {
+									AlbumListScreenListItem(
+										modifier = Modifier.animateItem(),
+										album = album,
+										selected = album == selectedAlbum,
+										starred = selectedAlbum?.starredAt != null,
+										onSelect = {
+											viewModel.selected = album
+										},
+										onDeselect = {
+											viewModel.selected = null
+										},
+										onSetStarred = {
+											viewModel.starAlbum(it)
+										},
+										onSetShareId = { newShareId: String ->
+											shareId = newShareId
+										},
+										onPlayNext = {
+											if (selectedAlbum != null) player.playNext(
+												selectedAlbum as DomainSongCollection
+											)
+										},
+										onAddToQueue = {
+											if (selectedAlbum != null) {
+												player.addToQueue(
+													selectedAlbum as DomainSongCollection
+												)
+											}
+										},
+										rating = selectedAlbum?.userRating ?: 0,
+										onSetRating = { it: Int -> viewModel.setRating(it) }
+									)
+								}
 							}
+						}
+					} else if (isLoading) {
+						artGridPlaceholder(viewMode = selectedViewMode)
+					} else {
+						item(span = { GridItemSpan(maxLineSpan) }) {
+							ContentUnavailable(label = stringResource(info_no_albums))
 						}
 					}
 				}

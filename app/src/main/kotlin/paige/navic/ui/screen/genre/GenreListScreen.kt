@@ -25,6 +25,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -62,7 +63,7 @@ fun GenreListScreen(
 		}
 	)
 	val genresState by viewModel.uiState.collectAsState()
-	val genresLazyItems = genresState.data?.collectAsLazyPagingItems() ?: return
+	val genresLazyItems = genresState.data?.collectAsLazyPagingItems()
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	val rootViewModel = koinViewModel<RootViewModel>()
@@ -97,11 +98,14 @@ fun GenreListScreen(
 			}
 		}
 	) { innerPadding ->
+		val isLoading = genresState is UiState.Loading || genresLazyItems?.loadState?.refresh is LoadState.Loading
+		val itemCount = genresLazyItems?.itemCount ?: 0
+
 		PullToRefreshBox(
 			modifier = Modifier
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
-			finished = genresState !is UiState.Loading,
+			finished = !isLoading,
 			onRefresh = { viewModel.refreshGenres(true) },
 			key = genresState
 		) {
@@ -111,31 +115,27 @@ fun GenreListScreen(
 				else Modifier,
 				contentPadding = innerPadding.withoutTop(),
 				state = viewModel.gridState,
-				verticalArrangement = if (genresLazyItems.itemCount == 0)
+				verticalArrangement = if (itemCount == 0 && !isLoading)
 					Arrangement.Center
 				else Arrangement.spacedBy(12.dp),
 				columns = GridCells.Fixed(2)
 			) {
-				if (genresLazyItems.itemCount > 0) {
-					items(genresLazyItems.itemCount) { index ->
+				if (itemCount > 0 && genresLazyItems != null) {
+					items(itemCount) { index ->
 						GenreListScreenCard(
 							modifier = Modifier.animateItem(),
 							genre = genresLazyItems[index] ?: return@items
 						)
 					}
+				} else if (isLoading) {
+					items(10) {
+						GenreListScreenCardPlaceholder()
+					}
 				} else {
-					when (genresState) {
-						is UiState.Loading -> items(10) {
-							GenreListScreenCardPlaceholder()
-						}
-
-						else -> {
-							item(span = { GridItemSpan(maxLineSpan) }) {
-								ContentUnavailable(
-									label = stringResource(info_no_genres)
-								)
-							}
-						}
+					item(span = { GridItemSpan(maxLineSpan) }) {
+						ContentUnavailable(
+							label = stringResource(info_no_genres)
+						)
 					}
 				}
 			}
