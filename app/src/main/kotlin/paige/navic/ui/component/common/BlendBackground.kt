@@ -104,15 +104,16 @@ fun BlendBackground(
 	)
 
 	PlatformLayerComposable(
+		// blur has to wrap the AndroidView, not the content inside it
 		modifier = modifier
 			.fillMaxSize()
 			.background(MaterialTheme.colorScheme.background)
+			.renderAtScale(RENDER_SCALE)
+			.backwardsCompatibleBlur(BLUR_RADIUS * RENDER_SCALE)
 	) {
 		Box(
 			modifier = Modifier
 				.fillMaxSize()
-				.renderAtScale(RENDER_SCALE)
-				.backwardsCompatibleBlur(BLUR_RADIUS * RENDER_SCALE)
 				.graphicsLayer {
 					compositingStrategy = CompositingStrategy.Offscreen
 					colorFilter = saturation
