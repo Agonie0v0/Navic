@@ -129,8 +129,8 @@ class PreferenceManager(
 	var miniPlayerProgressStyle by preference(MiniPlayerProgressStyle.Seekable)
 
 	// theme related settings
-	var theme by preference(Theme.Dynamic)
-	var themeMode by preference(ThemeMode.System)
+	var theme by preference(Theme.getDefaultTheme())
+	var themeMode by preference(ThemeMode.getDefaultMode())
 	var amoled by preference(false)
 	var dynamicTheming by preference(false)
 	var paletteStyle by preference(PaletteStyle.TonalSpot)

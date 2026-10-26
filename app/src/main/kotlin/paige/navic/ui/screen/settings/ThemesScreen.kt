@@ -78,6 +78,7 @@ import paige.navic.ui.screen.settings.component.SettingsGroup
 import paige.navic.ui.screen.settings.component.SettingsGroupDefaults
 import paige.navic.ui.screen.settings.component.SettingsToggleItem
 import paige.navic.ui.util.label
+import paige.navic.util.PlatformSupport
 
 @Composable
 fun SettingsThemesScreen() {
@@ -98,7 +99,9 @@ fun SettingsThemesScreen() {
 			) {
 				SettingsGroup {
 					SettingsChoiceItem(
-						choices = ThemeMode.entries.toImmutableList(),
+						choices = ThemeMode.entries
+							.filterNot { it == ThemeMode.System && !PlatformSupport.SUPPORTS_DARK_THEME }
+							.toImmutableList(),
 						selectedChoice = preferenceManager.themeMode,
 						onChoiceSelected = { preferenceManager.themeMode = it },
 						content = { Text(stringResource(R.string.title_theme_mode)) },
@@ -120,7 +123,11 @@ fun SettingsThemesScreen() {
 									.selectableGroup(),
 								horizontalArrangement = Arrangement.SpaceBetween
 							) {
-								items(Theme.entries) { theme ->
+								items(
+									Theme.entries.filterNot {
+										it == Theme.Dynamic && !PlatformSupport.SUPPORTS_DYNAMIC_THEME
+									}
+								) { theme ->
 									ThemeCard(
 										theme = theme,
 										isSelected = preferenceManager.theme == theme,

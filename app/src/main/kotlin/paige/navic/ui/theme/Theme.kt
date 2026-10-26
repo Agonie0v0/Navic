@@ -24,6 +24,7 @@ import org.koin.compose.koinInject
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.AnimationStyle
 import paige.navic.domain.model.settings.ThemeMode
+import paige.navic.util.PlatformSupport
 
 @Composable
 fun NavicTheme(
@@ -39,7 +40,7 @@ fun NavicTheme(
 			AnimationStyle.Standard -> MotionScheme.standard()
 		}
 	}
-	val inDarkTheme = isSystemInDarkTheme()
+	val inDarkTheme = isSystemInDarkTheme() || !PlatformSupport.SUPPORTS_DARK_THEME
 	val isDark = remember(preferenceManager.themeMode) {
 		when (preferenceManager.themeMode) {
 			ThemeMode.System -> inDarkTheme
