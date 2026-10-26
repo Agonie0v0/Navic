@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialShapes
@@ -73,7 +72,7 @@ import paige.navic.ui.screen.stats.viewmodel.StatisticsViewModel
 import paige.navic.ui.theme.NavicTheme
 import paige.navic.util.toSummaryString
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun StatisticsScreen(
 	nested: Boolean = false
@@ -223,10 +222,13 @@ fun StatisticsScreen(
 						key = { it.artist.id },
 						span = { GridItemSpan(maxLineSpan) }
 					) { stats ->
-						val maxPlays = state.topArtists.first().playCount.toFloat()
+						val maxDuration = state.topArtists.firstOrNull()?.listeningTime?.inWholeMilliseconds?.toFloat() ?: 1f
+						val ratio = if (maxDuration > 0f) {
+							(stats.listeningTime.inWholeMilliseconds.toFloat() / maxDuration).coerceIn(0f, 1f)
+						} else 0f
 						TopArtistItem(
 							stats = stats,
-							ratio = stats.playCount / maxPlays,
+							ratio = ratio,
 							onClick = { backStack.add(Screen.ArtistDetail(stats.artist.id)) },
 							onLongClick = { selectedArtist = stats.artist }
 						)

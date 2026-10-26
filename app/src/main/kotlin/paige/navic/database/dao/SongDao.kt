@@ -54,16 +54,16 @@ interface SongDao {
 	@Query("SELECT SUM(duration * playCount) FROM SongEntity")
 	fun getTotalListeningTime(): Flow<Long?>
 
-	@Query("SELECT * FROM SongEntity WHERE playCount > 0 ORDER BY playCount DESC LIMIT :limit")
+	@Query("SELECT * FROM SongEntity WHERE playCount > 0 ORDER BY (duration * playCount) DESC LIMIT :limit")
 	fun getTopSongs(limit: Int): Flow<List<SongEntity>>
 
 	@Query("SELECT * FROM SongEntity WHERE starredAt IS NOT NULL")
 	fun getStarredSongs(): Flow<List<SongEntity>>
 
-	@Query("SELECT belongsToAlbumId FROM SongEntity WHERE playCount > 0 GROUP BY belongsToAlbumId ORDER BY SUM(playCount) DESC LIMIT :limit")
+	@Query("SELECT belongsToAlbumId FROM SongEntity WHERE playCount > 0 GROUP BY belongsToAlbumId ORDER BY SUM(duration * playCount) DESC LIMIT :limit")
 	fun getTopAlbumIds(limit: Int): Flow<List<String>>
 
-	@Query("SELECT artistId FROM SongEntity WHERE playCount > 0 GROUP BY artistId ORDER BY SUM(playCount) DESC LIMIT :limit")
+	@Query("SELECT artistId FROM SongEntity WHERE playCount > 0 GROUP BY artistId ORDER BY SUM(duration * playCount) DESC LIMIT :limit")
 	fun getTopArtistIds(limit: Int): Flow<List<String>>
 
 	@Query("SELECT SUM(playCount) FROM SongEntity WHERE artistId = :artistId")
