@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.model.DomainFilter
@@ -28,7 +28,7 @@ class SongListViewModel(
 	private val repository: SongRepository,
 	private val sessionManager: SessionManager,
 	private val preferenceManager: PreferenceManager,
-	connectivityManager: ConnectivityManager
+	reachability: ReachabilityFlow
 ) : SelectableViewModel<DomainSong>() {
 
 	val selectedSorting = MutableStateFlow(initialListType ?: preferenceManager.songSortType)
@@ -39,7 +39,7 @@ class SongListViewModel(
 		initialFilters ?: preferenceManager.songFilters.toDomainFilters()
 	)
 
-	val isOnline = connectivityManager.isOnline
+	val isReachable = reachability.isReachable
 
 	init {
 		launch {

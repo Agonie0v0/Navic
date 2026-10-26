@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import paige.navic.database.dao.SyncActionDao
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.SyncManager
 import paige.navic.domain.repository.DbRepository
@@ -27,7 +27,7 @@ class SettingsDataStorageViewModel(
 	private val dbRepository: DbRepository,
 	private val syncDao: SyncActionDao,
 	private val downloadManager: DownloadManager,
-	connectivityManager: ConnectivityManager
+	reachability: ReachabilityFlow
 ) : ViewModel() {
 
 	val syncState = syncManager.syncState
@@ -49,7 +49,7 @@ class SettingsDataStorageViewModel(
 
 	val isDownloadingLibrary = downloadManager.isDownloadingLibrary
 	val libraryDownloadProgress = downloadManager.libraryDownloadProgress
-	val isOnline = connectivityManager.isOnline
+	val isReachable = reachability.isReachable
 
 	init {
 		loadPendingActions()

@@ -128,7 +128,7 @@ fun ArtistDetailScreen(
 	val layoutDirection = LocalLayoutDirection.current
 	val artistState by viewModel.artistState.collectAsStateWithLifecycle()
 	val starred by viewModel.starred.collectAsState()
-	val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(
 		initialValue = emptyList()
 	)
@@ -357,7 +357,7 @@ fun ArtistDetailScreen(
 													onPlayNext = { player.playNextSingle(song) },
 													onAddToQueue = { player.addToQueueSingle(song) },
 													onShare = { shareId = song.id },
-													isOnline = isOnline,
+													isOnline = isReachable,
 													rating = selectedSongRating,
 													onSetRating = { viewModel.rateSelectedSong(it) }
 												)

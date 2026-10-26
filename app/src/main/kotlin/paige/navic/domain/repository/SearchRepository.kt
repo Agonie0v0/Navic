@@ -13,7 +13,7 @@ import paige.navic.database.dao.PlaylistDao
 import paige.navic.database.dao.SongDao
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.database.mapper.toEntity
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
 
@@ -23,12 +23,12 @@ class SearchRepository(
 	private val songDao: SongDao,
 	private val playlistDao: PlaylistDao,
 	private val sessionManager: SessionManager,
-	connectivityManager: ConnectivityManager
+	reachability: ReachabilityFlow
 ) {
-	val isOnline = connectivityManager.isOnline
+	val isReachable = reachability.isReachable
 
 	suspend fun search(query: String): List<Any> {
-		return if (isOnline.value) {
+		return if (isReachable.value) {
 			try {
 				val data = sessionManager.api.searchID3(query)
 

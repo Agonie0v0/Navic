@@ -50,7 +50,7 @@ fun buildKtorEngine(
 
 			dnsResolver?.let {
 				dns(it)
-				if (it is NavicularDnsResolver) {
+				if (it is NavicDnsResolver) {
 					this@create.addInterceptor(it.requestInterceptor)
 				}
 			}
@@ -87,7 +87,7 @@ fun createOkHttpClient(
 
 		dnsResolver?.let {
 			dns(it)
-			if (it is NavicularDnsResolver) {
+			if (it is NavicDnsResolver) {
 				this.addInterceptor(it.requestInterceptor)
 			}
 		}
@@ -148,7 +148,7 @@ fun extractProxyConfigFromUrl(url: String): ProxyConfig? {
 
 fun createHttpClientWithPreferences(
 	preferenceManager: PreferenceManager,
-	dnsResolver: NavicularDnsResolver
+	dnsResolver: NavicDnsResolver
 ): HttpClient {
 	return createHttpClient(
 		preferenceManager.dangerousSslNoopEnabled,

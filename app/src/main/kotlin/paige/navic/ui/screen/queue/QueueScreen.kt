@@ -66,7 +66,7 @@ fun QueueScreen() {
 	val viewModel = koinViewModel<QueueViewModel>()
 	val player = koinInject<MediaPlayer>()
 	val playerState by player.uiState.collectAsStateWithLifecycle()
-	val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 	val downloadedSongs by viewModel.downloadedSongs.collectAsStateWithLifecycle()
 	val queue = playerState.queue
 	val haptic = LocalHapticFeedback.current
@@ -204,7 +204,7 @@ fun QueueScreen() {
 					queue = queue,
 					currentIndex = playerState.currentIndex,
 					isPaused = playerState.isPaused,
-					isOnline = isOnline,
+					isOnline = isReachable,
 					downloadedSongs = downloadedSongs,
 					onPlay = { index ->
 						if (playerState.currentIndex != index) {

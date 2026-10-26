@@ -116,7 +116,7 @@ fun SettingsDataStorageScreen() {
 	val hasExternalStorage = remember { storageManager.isExternalStorageAvailable() }
 	var pendingDownloadStorage by remember { mutableStateOf<DownloadStorage?>(null) }
 
-	val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 
 	val calculating = stringResource(R.string.info_status_calculating)
 	var imageCacheSizeMb by remember { mutableStateOf(calculating) }
@@ -145,7 +145,7 @@ fun SettingsDataStorageScreen() {
 	)
 
 	val offlineIcon = @Composable {
-		if (!isOnline) {
+		if (!isReachable) {
 			Icon(
 				Icons.Outlined.Offline,
 				stringResource(R.string.info_not_available_offline),
@@ -319,7 +319,7 @@ fun SettingsDataStorageScreen() {
 
 					SegmentedListItem(
 						onClick = viewModel::triggerManualSync,
-						enabled = isOnline,
+						enabled = isReachable,
 						content = { Text(stringResource(R.string.action_trigger_sync)) },
 						supportingContent = { Text(stringResource(R.string.subtitle_trigger_sync)) },
 						trailingContent = offlineIcon,
@@ -392,7 +392,7 @@ fun SettingsDataStorageScreen() {
 								showLibraryDownloadDialog = true
 							}
 						},
-						enabled = isOnline,
+						enabled = isReachable,
 						content = { Text(stringResource(R.string.title_library_download)) },
 						supportingContent = {
 							Column(Modifier.fillMaxWidth()) {
@@ -520,7 +520,7 @@ fun SettingsDataStorageScreen() {
 					)
 					SegmentedListItem(
 						onClick = viewModel::rebuildDatabase,
-						enabled = isOnline,
+						enabled = isReachable,
 						content = { Text(stringResource(R.string.action_rebuild_database)) },
 						supportingContent = { Text(stringResource(R.string.subtitle_rebuild_database)) },
 						trailingContent = offlineIcon,

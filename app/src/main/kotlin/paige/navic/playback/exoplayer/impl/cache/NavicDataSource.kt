@@ -27,24 +27,24 @@ import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.playback.PlaybackUtils
-import paige.navic.util.network.NavicularDnsResolver
+import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.createOkHttpClient
 import java.io.File
 
 @OptIn(UnstableApi::class)
 class NavicDataSource(
-	private val downloadManager: DownloadManager,
-	private val sessionManager: SessionManager,
-	private val streamCacheManager: StreamCacheManager,
-	preferenceManager: PreferenceManager,
-	dnsResolver: NavicularDnsResolver,
+    private val downloadManager: DownloadManager,
+    private val sessionManager: SessionManager,
+    private val streamCacheManager: StreamCacheManager,
+    preferenceManager: PreferenceManager,
+    dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
 	class NavicDataSourceFactory(
-		private val downloadManager: DownloadManager,
-		private val sessionManager: SessionManager,
-		private val streamCacheManager: StreamCacheManager,
-		private val preferenceManager: PreferenceManager,
-		private val dnsResolver: NavicularDnsResolver,
+        private val downloadManager: DownloadManager,
+        private val sessionManager: SessionManager,
+        private val streamCacheManager: StreamCacheManager,
+        private val preferenceManager: PreferenceManager,
+        private val dnsResolver: NavicDnsResolver,
 	) : DataSource.Factory {
 		override fun createDataSource(): DataSource {
 			return NavicDataSource(

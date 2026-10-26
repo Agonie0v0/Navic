@@ -27,7 +27,7 @@ import paige.navic.domain.manager.playback.ScrobbleManager
 import paige.navic.domain.manager.runtime.NotificationIds
 import paige.navic.domain.manager.runtime.NotificationStringIds
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SyncManager
 import paige.navic.playback.exoplayer.impl.playback.ExoEqualizerManager
@@ -40,7 +40,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 	private val stateHolder: ExoStateHolder by inject()
 
-	private val connectivityManager: ConnectivityManager by inject()
+	private val reachability: ReachabilityFlow by inject()
 
 	private val syncManager: SyncManager by inject()
 	private val sessionManager: SessionManager by inject()
@@ -76,7 +76,7 @@ class ExoPlaybackService : MediaSessionService(), KoinComponent {
 
 			scrobbleManager = ScrobbleManager(
 				player,
-				connectivityManager,
+				reachability,
 				syncManager,
 				sessionManager,
 				preferenceManager

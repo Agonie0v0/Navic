@@ -10,13 +10,8 @@ import androidx.core.net.toUri
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -24,12 +19,13 @@ import okhttp3.Dns
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.NetworkStatus
 import paige.navic.util.TTLLruCache
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
-class NavicularDnsResolver(
+class NavicDnsResolver(
 	val preferenceManager: PreferenceManager,
 	val settings: Settings,
 	val connectivityManager: ConnectivityManager
@@ -44,11 +40,16 @@ class NavicularDnsResolver(
 
 	init {
 		scope.launch {
-			connectivityManager.isOnline.collect {
-				if (it) lookupCache.clear()
-			}
+			connectivityManager.status
+				.filter { it is NetworkStatus.NetworkAvailable || it is NetworkStatus.NetworkLost }
+				.collect {
+					invalidate()
+				}
 		}
 	}
+
+	/* shorthand for invalidating the lookup cache */
+	fun invalidate() = lookupCache.clear()
 
 	override fun lookup(hostname: String): List<InetAddress> {
 		val fromCache = lookupCache.get(hostname)
@@ -60,29 +61,17 @@ class NavicularDnsResolver(
 		return fromCache
 	}
 
-	@OptIn(ExperimentalCoroutinesApi::class)
-	fun resolve(hostname: String): List<InetAddress> = runBlocking {
+	fun resolve(hostname: String): List<InetAddress> {
 		val serverDomain = settings.getStringOrNull("instanceUrl")?.toUri()?.host
 		val systemAddresses = Dns.SYSTEM.lookup(hostname)
-		if (hostname == serverDomain) {
-			val alternativeAddresses = hosts.asFlow()
-				.flatMapMerge { host ->
-					flow {
-						try {
-							val address = InetAddress.getByName(host)
-							if (address.isReachable(500)) {
-								emit(address)
-							}
-						} catch (_: Exception) {
-						}
-					}
-				}
-				.flowOn(Dispatchers.IO)
-				.toList()
-
-			return@runBlocking (systemAddresses + alternativeAddresses).sortedByDescending { it.isLocalOrPrivate() }
+		if (hostname != serverDomain) return systemAddresses
+		val alternates = hosts.mapNotNull {
+			runCatching {
+				InetAddress.getByName(it)
+			}.getOrNull()
 		}
-		return@runBlocking systemAddresses
+
+		return (systemAddresses + alternates).sortedByDescending { it.isLocalOrPrivate() }
 	}
 
 	private val addresses: List<String>
@@ -102,7 +91,7 @@ class NavicularDnsResolver(
 			val lookupResult = runBlocking {
 				withContext(Dispatchers.IO) {
 					try {
-						this@NavicularDnsResolver.lookup(host)
+						this@NavicDnsResolver.lookup(host)
 					} catch (_: Exception) {
 						emptyList()
 					}

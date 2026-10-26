@@ -108,7 +108,7 @@ fun StarredScreen() {
 	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
 	val downloadDeletionHandler = rememberDownloadDeletionHandler()
 
-	val isOnline by songsViewModel.isOnline.collectAsStateWithLifecycle()
+	val isReachable by songsViewModel.isReachable.collectAsStateWithLifecycle()
 
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(R.string.title_starred)) }) },
@@ -148,7 +148,7 @@ fun StarredScreen() {
 				innerPadding = innerPadding,
 				isLoading = isLoading,
 				onSetShareId = { shareId = it },
-				isOnline = isOnline,
+				isOnline = isReachable,
 
 				songs = songsLazyItems,
 				selectedSong = songsState.data?.selected,

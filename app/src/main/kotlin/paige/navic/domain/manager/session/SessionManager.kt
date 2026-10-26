@@ -30,7 +30,7 @@ import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.Logger
 import paige.navic.util.getEncryptedString
 import paige.navic.util.insertEncryptedString
-import paige.navic.util.network.NavicularDnsResolver
+import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.buildKtorEngine
 
 sealed interface SessionState {
@@ -46,7 +46,7 @@ sealed interface SessionState {
 class SessionManager(
 	private val settings: Settings,
 	private val preferenceManager: PreferenceManager,
-	private val dnsResolver: NavicularDnsResolver
+	private val dnsResolver: NavicDnsResolver
 ) {
 	private companion object {
 		const val USER_AGENT = "Navic"

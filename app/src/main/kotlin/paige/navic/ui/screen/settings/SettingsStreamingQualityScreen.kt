@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.model.settings.StreamingQuality
 import paige.navic.domain.model.settings.description
 import paige.navic.ui.component.common.SegmentedListItemDefaults
@@ -51,9 +51,9 @@ import paige.navic.ui.screen.settings.component.SettingsToggleItem
 @Composable
 fun SettingsStreamingQualityScreen() {
 	val preferenceManager = koinInject<PreferenceManager>()
-	val connectivityManager = koinInject<ConnectivityManager>()
-	val isOnline by connectivityManager.isOnline.collectAsStateWithLifecycle()
-	val isCellular by connectivityManager.isCellular.collectAsStateWithLifecycle()
+	val reachability = koinInject<ReachabilityFlow>()
+	val isReachable by reachability.isReachable.collectAsStateWithLifecycle()
+	val isMetered by reachability.isMetered.collectAsStateWithLifecycle()
 
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(R.string.title_streaming_quality)) }) }
@@ -75,7 +75,7 @@ fun SettingsStreamingQualityScreen() {
 						title = {
 							Text(buildString {
 								append(stringResource(R.string.title_wifi))
-								if (isOnline && !isCellular) {
+								if (isReachable && !isMetered) {
 									append(' ' + stringResource(R.string.info_in_use))
 								}
 							})
@@ -96,7 +96,7 @@ fun SettingsStreamingQualityScreen() {
 						title = {
 							Text(buildString {
 								append(stringResource(R.string.title_cellular))
-								if (isOnline && isCellular) {
+								if (isReachable && isMetered) {
 									append(' ' + stringResource(R.string.info_in_use))
 								}
 							})

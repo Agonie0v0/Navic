@@ -7,13 +7,13 @@
 package paige.navic.ui.screen.queue.viewmodel
 
 import androidx.lifecycle.ViewModel
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.DownloadManager
 
 class QueueViewModel(
-	connectivityManager: ConnectivityManager,
+	reachability: ReachabilityFlow,
 	downloadManager: DownloadManager
 ) : ViewModel() {
-	val isOnline = connectivityManager.isOnline
+	val isReachable = reachability.isReachable
 	val downloadedSongs = downloadManager.downloadedSongs
 }

@@ -104,7 +104,7 @@ fun CollectionDetailScreen(
 	val collection = state.data?.collection
 
 	val selectedAlbum = state.data?.selectedAlbum
-	val isOnline by viewModel.isOnline.collectAsState()
+	val isReachable by viewModel.isReachable.collectAsState()
 
 	var shareId by remember { mutableStateOf<String?>(null) }
 
@@ -274,7 +274,7 @@ fun CollectionDetailScreen(
 											},
 											isStarred = song.starredAt != null,
 											download = download,
-											isOffline = !isOnline,
+											isOffline = !isReachable,
 											showArtist = song.artists.toSet() != song.albumArtists.toSet()
 										)
 										CollectionDetailScreenSongRowDropdown(
@@ -332,7 +332,7 @@ fun CollectionDetailScreen(
 									},
 									isStarred = song.starredAt != null,
 									download = download,
-									isOffline = !isOnline
+									isOffline = !isReachable
 								)
 								CollectionDetailScreenSongRowDropdown(
 									expanded = state.data?.selectedIndex == index && state.data?.selectedSong?.id == song.id,

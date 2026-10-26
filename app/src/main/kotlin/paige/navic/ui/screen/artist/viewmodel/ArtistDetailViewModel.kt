@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import paige.navic.database.dao.AlbumDao
 import paige.navic.database.dao.ArtistDao
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainArtist
 import paige.navic.domain.model.DomainSong
@@ -45,7 +45,7 @@ class ArtistDetailViewModel(
 	private val albumRepository: AlbumRepository,
 	private val artistDao: ArtistDao,
 	private val albumDao: AlbumDao,
-	connectivityManager: ConnectivityManager
+	reachability: ReachabilityFlow
 ) : ViewModel() {
 	val artistState: StateFlow<UiState<ArtistState>>
 		field = MutableStateFlow<UiState<ArtistState>>(UiState.Loading())
@@ -71,7 +71,7 @@ class ArtistDetailViewModel(
 	val selectedAlbumRating: StateFlow<Int>
 		field = MutableStateFlow(0)
 
-	val isOnline = connectivityManager.isOnline
+	val isReachable = reachability.isReachable
 
 	val scrollState = ScrollState(initial = 0)
 

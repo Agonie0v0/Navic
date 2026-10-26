@@ -72,7 +72,7 @@ fun GenreDetailScreen(
 	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(
 		initialValue = emptyList()
 	)
-	val isOnline by songsViewModel.isOnline.collectAsStateWithLifecycle()
+	val isReachable by songsViewModel.isReachable.collectAsStateWithLifecycle()
 
 	var shareId by rememberSaveable { mutableStateOf<String?>(null) }
 	var songToQueue by remember { mutableStateOf<DomainSong?>(null) }
@@ -106,7 +106,7 @@ fun GenreDetailScreen(
 				genreName = genreName,
 				innerPadding = innerPadding,
 				onSetShareId = { shareId = it },
-				isOnline = isOnline,
+				isOnline = isReachable,
 
 				songs = songsLazyItems,
 				selectedSong = songsState.data?.selected,

@@ -16,7 +16,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import paige.navic.database.entity.SyncActionType
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SyncManager
 import kotlin.time.Clock
@@ -24,7 +24,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ScrobbleManager(
 	private val player: Player,
-	val connectivityManager: ConnectivityManager,
+	val reachability: ReachabilityFlow,
 	val syncManager: SyncManager,
 	val sessionManager: SessionManager,
 	val preferenceManager: PreferenceManager
@@ -43,7 +43,7 @@ class ScrobbleManager(
 	private fun scrobbleNowPlaying(songId: String?) {
 		if (!preferenceManager.enableScrobbling || songId == null) return
 
-		if (!connectivityManager.isOnline.value) return
+		if (!reachability.isReachable.value) return
 
 		scope.launch(Dispatchers.IO) {
 			try {
@@ -59,7 +59,7 @@ class ScrobbleManager(
 		scope.launch(Dispatchers.IO) {
 			val currentTime = Clock.System.now()
 
-			if (connectivityManager.isOnline.value) {
+			if (reachability.isReachable.value) {
 				try {
 					sessionManager.api.scrobble(songId, submission = true, time = currentTime)
 				} catch (_: Exception) {

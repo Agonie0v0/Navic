@@ -42,7 +42,7 @@ import paige.navic.ui.screen.song.viewmodel.SongDetailViewModel
 import paige.navic.ui.screen.song.viewmodel.SongListViewModel
 import paige.navic.ui.screen.stats.viewmodel.StatisticsViewModel
 import paige.navic.ui.viewmodel.RootViewModel
-import paige.navic.util.network.NavicularDnsResolver
+import paige.navic.util.network.NavicDnsResolver
 
 val viewModelModule = module {
 	single<MediaPlayer> {
@@ -58,8 +58,8 @@ val viewModelModule = module {
 			audioGainManager = get(),
 		)
 	}
-	single<NavicularDnsResolver> {
-		NavicularDnsResolver(
+	single<NavicDnsResolver> {
+		NavicDnsResolver(
 			preferenceManager = get(),
 			settings = get(),
 			connectivityManager = get()
@@ -75,7 +75,7 @@ val viewModelModule = module {
 			albumRepository = get(),
 			artistDao = get(),
 			albumDao = get(),
-			connectivityManager = get()
+			reachability = get()
 		)
 	}
 
@@ -111,7 +111,7 @@ val viewModelModule = module {
 			repository = get(),
 			sessionManager = get(),
 			preferenceManager = get(),
-			connectivityManager = get()
+			reachability = get()
 		)
 	}
 	viewModel { params ->
@@ -155,7 +155,7 @@ val viewModelModule = module {
 			albumRepository = get(),
 			sessionManager = get(),
 			snackBarManager = get(),
-			connectivityManager = get()
+			reachability = get()
 		)
 	}
 	viewModelOf(::SongDetailViewModel)

@@ -20,14 +20,14 @@ import coil3.request.crossfade
 import coil3.serviceLoaderEnabled
 import coil3.size.Dimension
 import paige.navic.domain.manager.runtime.PreferenceManager
-import paige.navic.util.network.NavicularDnsResolver
+import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.createHttpClientWithPreferences
 import kotlin.math.abs
 
 class CoilSingleton(
 	private val context: Context,
 	preferenceManager: PreferenceManager,
-	dnsResolver: NavicularDnsResolver
+	dnsResolver: NavicDnsResolver
 ) {
 	private var sharedDiskCache: DiskCache? = null
 	private var sharedMemoryCache: MemoryCache? = null

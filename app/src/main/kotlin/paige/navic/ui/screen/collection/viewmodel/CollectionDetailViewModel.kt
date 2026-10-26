@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import paige.navic.R
 import paige.navic.database.mapper.toDomainModel
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SessionState
 import paige.navic.domain.manager.ui.SnackBarManager
@@ -50,7 +50,7 @@ class CollectionDetailViewModel(
 	private val albumRepository: AlbumRepository,
 	private val sessionManager: SessionManager,
 	private val snackBarManager: SnackBarManager,
-	connectivityManager: ConnectivityManager
+	reachability: ReachabilityFlow
 ) : AsyncViewModel<CollectionViewState>() {
 
 	init {
@@ -63,7 +63,7 @@ class CollectionDetailViewModel(
 
 	val listState = LazyListState()
 
-	val isOnline = connectivityManager.isOnline
+	val isReachable = reachability.isReachable
 
 	val pagedSongs: Flow<PagingData<DomainSong>> = repository
 		.getPagedPlaylistSongs(collectionId)

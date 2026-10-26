@@ -17,7 +17,8 @@ import paige.navic.domain.manager.runtime.NotificationManager
 import paige.navic.domain.manager.runtime.PermissionManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.runtime.StorageManager
-import paige.navic.domain.manager.session.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ConnectivityManager
+import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.LoginManager
 import paige.navic.domain.manager.session.SessionManager
@@ -45,6 +46,7 @@ val managerModule = module {
 	singleOf(::NotificationManager)
 	singleOf(::PermissionManager)
 	singleOf(::PreferenceManager)
+	singleOf(::ReachabilityFlow)
 	singleOf(::SessionManager)
 	singleOf(::ShareManager)
 	singleOf(::SleepTimerManager)
