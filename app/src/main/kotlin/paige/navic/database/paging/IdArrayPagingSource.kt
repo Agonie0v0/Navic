@@ -15,7 +15,7 @@ import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import kotlin.coroutines.cancellation.CancellationException
 
 suspend fun <Entity : Any, Domain : Any> createPagedFlow(
@@ -47,10 +47,10 @@ suspend fun <Value : Any> createRandomPagingSourceFactory(
 	getId: (Value) -> String,
 	fetchByIds: suspend (List<String>) -> List<Value>
 ): () -> PagingSource<Int, Value> {
-	val shuffledIds = withContext(Dispatchers.Default) {
-		getIds().shuffled()
-	}
 	return {
+		val shuffledIds = runBlocking(Dispatchers.Default) {
+			getIds().shuffled()
+		}
 		IdArrayPagingSource(
 			ids = shuffledIds,
 			getId = getId,
