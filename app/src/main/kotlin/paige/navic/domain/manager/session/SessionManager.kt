@@ -9,8 +9,8 @@ package paige.navic.domain.manager.session
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.set
 import dev.zt64.subsonic.api.model.Role
+import dev.zt64.subsonic.api.model.SubsonicErrorCode
 import dev.zt64.subsonic.api.model.SubsonicException
-import dev.zt64.subsonic.api.model.SubsonicResponse
 import dev.zt64.subsonic.api.model.User
 import dev.zt64.subsonic.client.SubsonicAuth
 import dev.zt64.subsonic.client.SubsonicClient
@@ -37,9 +37,9 @@ sealed interface SessionState {
 	data object Unauthenticated : SessionState
 	data object Restoring : SessionState
 	data class Authenticated(
-		val currentUser: User,
+		val currentUser: User?,
 		/* use this to check the music server being used */
-		val serverInfo: SubsonicResponse<Nothing>
+		val serverInfo: Any? = null
 	) : SessionState
 }
 
@@ -52,7 +52,12 @@ class SessionManager(
 		const val USER_AGENT = "Navic"
 	}
 
-	private val _state = MutableStateFlow<SessionState>(SessionState.Unauthenticated)
+	private val hasStoredCredentials: Boolean
+		get() = username.isNotBlank() && password.isNotBlank() && instanceUrl.isNotBlank()
+
+	private val _state = MutableStateFlow(
+		if (hasStoredCredentials) SessionState.Restoring else SessionState.Unauthenticated
+	)
 	val sessionState: StateFlow<SessionState> = _state.asStateFlow()
 
 	private val mutex = Mutex()
@@ -83,19 +88,25 @@ class SessionManager(
 	)
 		private set
 
-	private val hasStoredCredentials: Boolean
-		get() = username.isNotBlank() && password.isNotBlank() && instanceUrl.isNotBlank()
-
 	init {
 		if (hasStoredCredentials) {
-			_state.value = SessionState.Restoring
-
 			scope.launch {
 				try {
 					login(instanceUrl, username, password)
+				} catch (e: SubsonicException) {
+					if (e.code == SubsonicErrorCode.WRONG_USERNAME_OR_PASSWORD) {
+						Logger.e("SessionManager", "Credentials invalid, logging out", e)
+						logout()
+					} else {
+						Logger.w("SessionManager", "SubsonicException during restoration: $e")
+						_state.value = SessionState.Authenticated(currentUser = null, serverInfo = null)
+					}
 				} catch (e: Exception) {
-					Logger.e("SessionManager", "Failed to restore session", e)
-					_state.value = SessionState.Unauthenticated
+					Logger.w("SessionManager", "Failed to reach server during restoration, treating as offline authenticated", e)
+					_state.value = SessionState.Authenticated(
+						currentUser = null,
+						serverInfo = null
+					)
 				}
 			}
 		}
