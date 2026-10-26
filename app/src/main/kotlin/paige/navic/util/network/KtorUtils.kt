@@ -33,42 +33,21 @@ fun createSSLSocketFactory(trustManagers: Array<TrustManager>): SSLSocketFactory
 }
 
 fun buildKtorEngine(
-	proxyUrl: String? = null,
-	trustAllCerts: Boolean = false,
-	dnsResolver: Dns? = null
+	okHttpClient: OkHttpClient
 ): HttpClientEngine {
 	return OkHttp.create {
 		config {
-			if (trustAllCerts) {
-				val noopTrustManager = NoopTrustManager()
-				createSSLSocketFactory(
-					arrayOf(noopTrustManager)
-				)?.let {
-					sslSocketFactory(it, noopTrustManager)
-				}
-			}
-
-			dnsResolver?.let {
-				dns(it)
-				if (it is NavicDnsResolver) {
-					this@create.addInterceptor(it.requestInterceptor)
-				}
-			}
-
-			proxyUrl?.let {
-				proxy(extractProxyConfigFromUrl(it))
-			}
+			preconfigured = okHttpClient
 		}
 	}
 }
 
-// media3's ktor data source is bugged
-fun createOkHttpClient(
-	trustAllCerts: Boolean,
-	customHeaders: Map<String, String>?,
-	proxyUrl: String?,
-	dnsResolver: Dns? = null
-): OkHttpClient {
+fun buildOkHttpConfig(
+	proxyUrl: String? = null,
+	trustAllCerts: Boolean = false,
+	dnsResolver: Dns? = null,
+	customHeaders: Map<String, String>? = null
+): OkHttpClient.Builder {
 	return OkHttpClient.Builder().apply {
 		proxyUrl?.let {
 			proxy(extractProxyConfigFromUrl(it))
@@ -103,7 +82,22 @@ fun createOkHttpClient(
 				it.proceed(request)
 			}
 		}
-	}.build()
+	}
+}
+
+// media3's ktor data source is bugged
+fun createOkHttpClient(
+	proxyUrl: String?,
+	trustAllCerts: Boolean,
+	dnsResolver: Dns? = null,
+	customHeaders: Map<String, String>? = null
+): OkHttpClient {
+	return buildOkHttpConfig(
+		proxyUrl,
+		trustAllCerts,
+		dnsResolver,
+		customHeaders
+	).build()
 }
 
 fun createHttpClient(
@@ -113,9 +107,11 @@ fun createHttpClient(
 	dnsResolver: Dns? = null
 ): HttpClient {
 	val engine = buildKtorEngine(
-		proxyUrl,
-		trustAllCerts,
-		dnsResolver
+		createOkHttpClient(
+			proxyUrl,
+			trustAllCerts,
+			dnsResolver
+		)
 	)
 	val block: HttpClientConfig<*>.() -> Unit = {
 		if (customHeaders?.isNotEmpty() == true) {

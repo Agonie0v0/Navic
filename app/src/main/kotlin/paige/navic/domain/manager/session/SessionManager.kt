@@ -24,14 +24,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.Logger
 import paige.navic.util.getEncryptedString
 import paige.navic.util.insertEncryptedString
 import paige.navic.util.network.NavicDnsResolver
+import paige.navic.util.network.PROXY_URL_REGEX
 import paige.navic.util.network.buildKtorEngine
+import paige.navic.util.network.createOkHttpClient
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 sealed interface SessionState {
 	data object Unauthenticated : SessionState
@@ -137,9 +143,13 @@ class SessionManager(
 			}
 		},
 		engine = buildKtorEngine(
-			preferenceManager.proxyUrl,
-			preferenceManager.dangerousSslNoopEnabled,
-			dnsResolver
+			createOkHttpClient(
+				proxyUrl = preferenceManager.proxyUrl
+					.trim()
+					.takeIf { PROXY_URL_REGEX.matches(it) },
+				trustAllCerts = preferenceManager.dangerousSslNoopEnabled,
+				dnsResolver
+			)
 		)
 	)
 
@@ -151,7 +161,10 @@ class SessionManager(
 	) {
 		val client = createClient(instanceUrl, username, password)
 
-		val pingResult = client.ping()
+		// TODO: proper timeout...?
+		val pingResult = withTimeout(2.seconds) {
+			client.ping()
+		}
 		Logger.i(TAG, "Ping result: $pingResult")
 
 		val user = fetchCurrentUser(username, client)
