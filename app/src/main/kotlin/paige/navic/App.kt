@@ -163,18 +163,17 @@ fun App() {
 	)
 
 	LaunchedEffect(sessionState) {
-		when {
-			sessionState is SessionState.Unauthenticated &&
-				backStack.lastOrNull() != Screen.Login -> {
+		when (sessionState) {
+			is SessionState.Unauthenticated if backStack.lastOrNull() != Screen.Login -> {
 				backStack.clear()
 				backStack.add(Screen.Login)
 			}
 
-			sessionState is SessionState.Authenticated &&
-				backStack.lastOrNull() == Screen.Login -> {
+			is SessionState.Authenticated if backStack.lastOrNull() == Screen.Login -> {
 				backStack.clear()
 				backStack.add(Screen.Library())
 			}
+			else -> {}
 		}
 	}
 

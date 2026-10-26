@@ -49,13 +49,18 @@ fun NavicTheme(
 	}
 	val activity = LocalActivity.current as? ComponentActivity
 
-	activity?.enableEdgeToEdge(
-		statusBarStyle = SystemBarStyle.auto(
-			darkScrim = (colorScheme ?: chosenScheme).scrim.toArgb(),
-			lightScrim = (colorScheme ?: chosenScheme).scrim.toArgb(),
-			detectDarkMode = { isDark }
+	val edgeScrim = (colorScheme ?: chosenScheme).background.toArgb()
+
+	SystemBarStyle.auto(
+		darkScrim = edgeScrim,
+		lightScrim = edgeScrim,
+		detectDarkMode = { isDark }
+	).let {
+		activity?.enableEdgeToEdge(
+			statusBarStyle = it,
+			navigationBarStyle = it
 		)
-	)
+	}
 
 	MaterialExpressiveTheme(
 		colorScheme = colorScheme
