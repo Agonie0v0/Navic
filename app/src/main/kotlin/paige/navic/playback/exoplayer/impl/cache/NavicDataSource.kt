@@ -29,6 +29,7 @@ import paige.navic.domain.manager.session.SessionManager
 import paige.navic.playback.PlaybackUtils
 import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.createOkHttpClient
+import paige.navic.util.network.getProxyUrlOrNull
 import java.io.File
 
 @OptIn(UnstableApi::class)
@@ -71,10 +72,11 @@ class NavicDataSource(
 	// TODO: figure out why KtorDataSource causes #650
 	private val upstreamFactory = OkHttpDataSource.Factory(
 		createOkHttpClient(
-			preferenceManager.dangerousSslNoopEnabled,
-			preferenceManager.customHeadersMap(),
-			preferenceManager.proxyUrl.takeIf { it.isNotEmpty() },
-			dnsResolver
+			proxyUrl = preferenceManager.proxyUrl.getProxyUrlOrNull(),
+			trustAllCerts = preferenceManager.dangerousSslNoopEnabled,
+			dnsResolver,
+			customHeaders = preferenceManager.customHeadersMap(),
+
 		)
 	).setDefaultRequestProperties(
 		mapOf(

@@ -36,6 +36,7 @@ import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.PROXY_URL_REGEX
 import paige.navic.util.network.buildKtorEngine
 import paige.navic.util.network.createOkHttpClient
+import paige.navic.util.network.getProxyUrlOrNull
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
@@ -144,9 +145,7 @@ class SessionManager(
 		},
 		engine = buildKtorEngine(
 			createOkHttpClient(
-				proxyUrl = preferenceManager.proxyUrl
-					.trim()
-					.takeIf { PROXY_URL_REGEX.matches(it) },
+				proxyUrl = preferenceManager.proxyUrl.getProxyUrlOrNull(),
 				trustAllCerts = preferenceManager.dangerousSslNoopEnabled,
 				dnsResolver
 			)

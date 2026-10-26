@@ -26,6 +26,10 @@ import javax.net.ssl.TrustManager
 
 val PROXY_URL_REGEX = Regex("(socks[4-5]?|https?)?://(.+):?(\\d+)")
 
+fun String.getProxyUrlOrNull(): String? {
+	return this.trim().takeIf { PROXY_URL_REGEX.matches(it) }
+}
+
 fun createSSLSocketFactory(trustManagers: Array<TrustManager>): SSLSocketFactory? {
 	return SSLContext.getInstance("SSL").also {
 		it.init(null, trustManagers, SecureRandom())
