@@ -6,6 +6,8 @@
 
 package paige.navic.ui.screen.song.viewmodel
 
+import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.ConnectivityManager
@@ -51,7 +53,7 @@ class SongListViewModel(
 			selectedSorting.value,
 			selectedReversed.value,
 			selectedFilters.value
-		)
+		).cachedIn(viewModelScope)
 	}
 
 	fun starSong(isStarred: Boolean) {

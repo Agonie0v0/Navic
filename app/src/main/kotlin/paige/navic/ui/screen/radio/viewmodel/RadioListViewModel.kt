@@ -8,6 +8,7 @@ package paige.navic.ui.screen.radio.viewmodel
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import kotlinx.coroutines.launch
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.SessionState
@@ -28,6 +29,6 @@ class RadioListViewModel(
 	}
 
 	fun refreshRadios(fullRefresh: Boolean) = launch {
-		items = repository.getRadios(fullRefresh)
+		items = repository.getRadios(fullRefresh).cachedIn(viewModelScope)
 	}
 }

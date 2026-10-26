@@ -8,6 +8,7 @@ package paige.navic.ui.screen.playlist.viewmodel
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -52,7 +53,7 @@ class PlaylistListViewModel(
 			selectedSorting.value,
 			selectedReversed.value,
 			selectedFilters.value
-		)
+		).cachedIn(viewModelScope)
 	}
 
 	fun setSorting(sorting: DomainPlaylistListType) {

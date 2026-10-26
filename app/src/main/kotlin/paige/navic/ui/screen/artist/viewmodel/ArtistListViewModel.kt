@@ -8,6 +8,7 @@ package paige.navic.ui.screen.artist.viewmodel
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,7 +65,7 @@ class ArtistListViewModel(
 			fullRefresh,
 			listType.value,
 			selectedFilters.value
-		)
+		).cachedIn(viewModelScope)
 		letterCountsJob?.cancel()
 		letterCountsJob = viewModelScope.launch {
 			repository.getArtistLetterCounts(selectedFilters.value).collect {

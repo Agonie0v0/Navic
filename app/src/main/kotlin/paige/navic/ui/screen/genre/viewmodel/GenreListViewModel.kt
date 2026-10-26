@@ -9,6 +9,7 @@ package paige.navic.ui.screen.genre.viewmodel
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import paige.navic.domain.manager.session.SessionManager
@@ -32,7 +33,7 @@ class GenreListViewModel(
 
 	fun refreshGenres(fullRefresh: Boolean) {
 		execute {
-			repository.getGenres(fullRefresh)
+			repository.getGenres(fullRefresh).cachedIn(viewModelScope)
 		}
 	}
 }

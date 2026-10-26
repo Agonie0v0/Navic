@@ -8,6 +8,7 @@ package paige.navic.ui.screen.album.viewmodel
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +61,7 @@ class AlbumListViewModel(
 			fullRefresh, listType.value,
 			selectedReversed.value,
 			selectedFilters.value
-		)
+		).cachedIn(viewModelScope)
 		letterCountsJob?.cancel()
 		letterCountsJob = viewModelScope.launch {
 			repository.getAlbumLetterCounts(selectedReversed.value, selectedFilters.value).collect {
