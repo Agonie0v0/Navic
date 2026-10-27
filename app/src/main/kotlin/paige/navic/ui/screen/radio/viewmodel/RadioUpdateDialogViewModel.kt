@@ -11,12 +11,13 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.model.DomainRadio
+import paige.navic.ui.core.UiState
 import paige.navic.ui.viewmodel.AsyncViewModel
 
 class RadioUpdateDialogViewModel(
 	private val initialRadio: DomainRadio,
 	private val sessionManager: SessionManager
-) : AsyncViewModel<Nothing>() {
+) : AsyncViewModel<Nothing?>(UiState.Success(null)) {
 	private val _events = Channel<Event>()
 	val events = _events.receiveAsFlow()
 

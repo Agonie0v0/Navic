@@ -12,12 +12,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import paige.navic.R
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.ui.SnackBarManager
+import paige.navic.ui.core.UiState
 import paige.navic.ui.viewmodel.AsyncViewModel
 
 class RadioCreateDialogViewModel(
 	private val sessionManager: SessionManager,
 	private val snackBarManager: SnackBarManager
-) : AsyncViewModel<Nothing>() {
+) : AsyncViewModel<Nothing?>(UiState.Success(null)) {
 	private val _events = Channel<Event>()
 	val events = _events.receiveAsFlow()
 
