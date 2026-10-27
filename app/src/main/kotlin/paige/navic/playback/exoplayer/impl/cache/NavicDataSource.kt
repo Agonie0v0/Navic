@@ -163,11 +163,7 @@ class NavicDataSource(
 		wrappedDataSource = null
 		currentUri = null
 		songId = null
-		try {
-			transferEnded()
-		} catch (_: NullPointerException) {
-			// why does this give a NPE in the first place?
-		}
+		transferEnded()
 	}
 
 	// TODO: make transcoding options work again
