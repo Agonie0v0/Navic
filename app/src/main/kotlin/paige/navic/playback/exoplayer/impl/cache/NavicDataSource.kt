@@ -22,7 +22,6 @@ import dev.zt64.subsonic.api.model.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import paige.navic.database.dao.SongDao
 import paige.navic.domain.manager.playback.StreamCacheManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
@@ -38,7 +37,6 @@ class NavicDataSource(
 	private val downloadManager: DownloadManager,
 	private val sessionManager: SessionManager,
 	private val streamCacheManager: StreamCacheManager,
-	private val songDao: SongDao,
 	preferenceManager: PreferenceManager,
 	dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
@@ -143,18 +141,16 @@ class NavicDataSource(
 	}
 
 	suspend fun getCurrentEstimateBitrate(durationSeconds: Long): Int? {
-		val headerSize = runCatching {
-			songId
-				?.let { songId -> downloadManager.getDownloadedFilePath(songId)?.toFile() }
-				?.length()
-				?.takeIf { it > 0L }
-		}.getOrNull()
-			?: songId?.let { streamCacheManager.getSongFileSize(it) }
-			// Song bitRate is stored in kbps, playbackBitrate is compared in bps
-			?: return songId?.let { songDao.getSongById(it)?.bitRate?.times(1000) }
+		val size = songId?.let { id ->
+			runCatching {
+				downloadManager.getDownloadedFilePath(id)?.toFile()
+					?.length()
+					?.takeIf { it > 0L }
+			}.getOrNull() ?: streamCacheManager.getSongFileSize(id)
+		} ?: return null
 
-		if (durationSeconds <= 0 || headerSize <= 0) return null
-		return ((headerSize * 8) / durationSeconds).toInt()
+		if (durationSeconds <= 0 || size <= 0) return null
+		return ((size * 8) / durationSeconds).toInt()
 	}
 
 	fun String.toFile() = File(this)

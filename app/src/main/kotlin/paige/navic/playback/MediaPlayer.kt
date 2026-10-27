@@ -509,12 +509,12 @@ class MediaPlayer(
 							state.copy(
 								playbackBitrate = format.bitrate.takeIf { it > 0 }
 									?: format.averageBitrate.takeIf { it > 0 }
-									?: _uiState.value.currentSong?.duration?.let {
+									?: _uiState.value.currentSong?.let {
 										dataSource.getCurrentEstimateBitrate(
-											it.toLong(
+											it.duration.toLong(
 												DurationUnit.SECONDS
 											)
-										)
+										) ?: songRepository.getSongById(it.id)?.bitRate
 									},
 								playbackSampleRate = format.sampleRate.takeIf { it != Format.NO_VALUE },
 								playbackMimeType = format.sampleMimeType,
