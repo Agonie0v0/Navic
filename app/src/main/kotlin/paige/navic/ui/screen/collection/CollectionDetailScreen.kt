@@ -27,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,13 +103,13 @@ fun CollectionDetailScreen(
 	val collection = state.data?.collection
 
 	val selectedAlbum = state.data?.selectedAlbum
-	val isReachable by viewModel.isReachable.collectAsState()
+	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 
 	var shareId by remember { mutableStateOf<String?>(null) }
 
-	val otherAlbums by viewModel.otherAlbums.collectAsState()
+	val otherAlbums by viewModel.otherAlbums.collectAsStateWithLifecycle()
 	val downloadManager = koinInject<DownloadManager>()
-	val allDownloads by downloadManager.allDownloads.collectAsState(emptyList())
+	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(emptyList())
 	val downloadsMap = remember(allDownloads) { allDownloads.associateBy { it.songId } }
 	val backStack = LocalNavStack.current
 

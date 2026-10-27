@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.playback.MediaPlayer
@@ -31,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 fun NowPlayingDurationsRow() {
 	val preferenceManager = koinInject<PreferenceManager>()
 	val player = koinInject<MediaPlayer>()
-	val playerState by player.uiState.collectAsState()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
 	val duration = playerState.currentSong?.duration
 	val style = MaterialTheme.typography.bodyMedium
 		.copy(

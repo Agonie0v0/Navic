@@ -39,7 +39,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +57,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
@@ -94,7 +94,7 @@ fun MiniPlayer(
 	val player = koinInject<MediaPlayer>()
 	val preferenceManager = koinInject<PreferenceManager>()
 	val navtabsViewModel = koinViewModel<NavtabsViewModel>()
-	val navtabsState by navtabsViewModel.state.collectAsState()
+	val navtabsState by navtabsViewModel.state.collectAsStateWithLifecycle()
 	val tabs = ((navtabsState as? UiState.Success)?.data ?: NavbarConfig.default)
 		.tabs.filter { tab -> tab.visible }
 	val backStack = LocalNavStack.current
@@ -103,7 +103,7 @@ fun MiniPlayer(
 		with(LocalDensity.current) { WindowInsets.navigationBars.getBottom(this).toDp() }
 	else 0.dp
 
-	val playerState by player.uiState.collectAsState()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
 	val song = playerState.currentSong
 
 	val coilPlatformContext = LocalCoilPlatformContext.current

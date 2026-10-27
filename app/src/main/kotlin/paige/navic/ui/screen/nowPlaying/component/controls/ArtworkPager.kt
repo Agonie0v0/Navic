@@ -14,7 +14,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,6 +22,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import org.koin.compose.koinInject
 import paige.navic.di.LocalNavStack
@@ -40,7 +40,7 @@ fun NowPlayingArtworkPager(
 	val backStack = LocalNavStack.current
 	val preferenceManager = koinInject<PreferenceManager>()
 	val player = koinInject<MediaPlayer>()
-	val playerState by player.uiState.collectAsState()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
 
 	val pagerState = rememberPagerState(
 		initialPage = playerState.currentIndex.coerceAtLeast(0),

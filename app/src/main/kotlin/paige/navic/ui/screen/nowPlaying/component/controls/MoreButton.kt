@@ -11,7 +11,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,20 +19,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import kotlinx.collections.immutable.persistentListOf
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.di.LocalNavStack
 import paige.navic.domain.model.DomainPlaylist
-import paige.navic.ui.icons.Icons
-import paige.navic.ui.icons.outlined.MoreHoriz
 import paige.navic.playback.MediaPlayer
+import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.component.sheet.SleepTimerSheet
 import paige.navic.ui.component.sheet.SongSheet
+import paige.navic.ui.icons.Icons
+import paige.navic.ui.icons.outlined.MoreHoriz
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screen.playlist.dialog.PlaylistUpdateDialog
-import paige.navic.ui.component.dialog.ShareDialog
 import paige.navic.ui.theme.NavicTheme
 import paige.navic.ui.util.rememberColorSchemeFromCoverArt
 
@@ -44,7 +44,7 @@ fun NowPlayingMoreButton(
 ) {
 	val backStack = LocalNavStack.current
 	val player = koinInject<MediaPlayer>()
-	val playerState by player.uiState.collectAsState()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
 	val song = playerState.currentSong
 	var expanded by remember { mutableStateOf(false) }
 	var sleepTimerSheetShown by rememberSaveable { mutableStateOf(false) }

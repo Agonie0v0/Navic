@@ -17,7 +17,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.paging.LoadState
@@ -76,14 +76,14 @@ fun ArtistListScreen(
 			koinInject<PersistentViewModelStoreOwner>()
 		}
 	)
-	val state by viewModel.uiState.collectAsState()
+	val state by viewModel.uiState.collectAsStateWithLifecycle()
 	val lazyPagingItems = state.data?.items?.collectAsLazyPagingItems()
 
 	val selectedArtist = state.data?.selected
 	val selectedArtistAlbums = null
-	val selectedSorting by viewModel.listType.collectAsState()
-	val selectedFilters by viewModel.selectedFilters.collectAsState()
-	val letterCounts by viewModel.letterCounts.collectAsState()
+	val selectedSorting by viewModel.listType.collectAsStateWithLifecycle()
+	val selectedFilters by viewModel.selectedFilters.collectAsStateWithLifecycle()
+	val letterCounts by viewModel.letterCounts.collectAsStateWithLifecycle()
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
 	val player = koinInject<MediaPlayer>()

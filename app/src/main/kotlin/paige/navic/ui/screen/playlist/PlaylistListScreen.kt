@@ -31,7 +31,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,7 +96,7 @@ fun PlaylistListScreen(
 		}
 	)
 	val player = koinInject<MediaPlayer>()
-	val state by viewModel.uiState.collectAsState()
+	val state by viewModel.uiState.collectAsStateWithLifecycle()
 	val lazyPagingItems = state.data?.items?.collectAsLazyPagingItems()
 	val selectedSorting by viewModel.selectedSorting.collectAsStateWithLifecycle()
 	val selectedReversed by viewModel.selectedReversed.collectAsStateWithLifecycle()

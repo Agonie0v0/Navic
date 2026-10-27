@@ -31,7 +31,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,9 +60,9 @@ import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.ContentUnavailable
 import paige.navic.ui.component.common.ErrorBox
 import paige.navic.ui.component.dialog.DeleteDownloadTarget
-import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.QueueDuplicateDialog
 import paige.navic.ui.component.dialog.ShareDialog
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.layout.ArtGrid
 import paige.navic.ui.component.layout.RootBottomBar
 import paige.navic.ui.component.layout.artGridPlaceholder
@@ -115,16 +114,16 @@ fun SearchScreen(
 	val artistListViewModel = koinViewModel<ArtistListViewModel> {
 		parametersOf(DomainArtistListType.AlphabeticalByName)
 	}
-	val artistListSelection by artistListViewModel.uiState.collectAsState()
+	val artistListSelection by artistListViewModel.uiState.collectAsStateWithLifecycle()
 
 	val albumListViewModel = koinViewModel<AlbumListViewModel> {
 		parametersOf(DomainAlbumListType.AlphabeticalByName)
 	}
-	val albumListSelection by albumListViewModel.uiState.collectAsState()
+	val albumListSelection by albumListViewModel.uiState.collectAsStateWithLifecycle()
 
 	val query = viewModel.searchQuery
-	val state by viewModel.searchState.collectAsState()
-	val searchHistory by viewModel.searchHistory.collectAsState(initial = emptyList())
+	val state by viewModel.searchState.collectAsStateWithLifecycle()
+	val searchHistory by viewModel.searchHistory.collectAsStateWithLifecycle()
 
 	val player = koinInject<MediaPlayer>()
 

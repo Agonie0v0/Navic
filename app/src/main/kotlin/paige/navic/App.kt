@@ -40,7 +40,6 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -363,7 +362,7 @@ private fun entryProvider(
 		}
 		entry<Screen.Lyrics>(metadata = NowPlayingSceneStrategy.bottomSheet(isTransparent = true)) {
 			val player = koinInject<MediaPlayer>()
-			val playerState by player.uiState.collectAsState()
+			val playerState by player.uiState.collectAsStateWithLifecycle()
 			val song = playerState.currentSong
 			LyricsScreen(song)
 		}

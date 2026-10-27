@@ -14,12 +14,12 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.NowPlayingSliderStyle
@@ -33,7 +33,7 @@ import paige.navic.ui.component.common.SpermSliderDefaults
 fun NowPlayingProgressBar() {
 	val preferenceManager = koinInject<PreferenceManager>()
 	val player = koinInject<MediaPlayer>()
-	val playerState by player.uiState.collectAsState()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
 	val enabled = playerState.currentSong != null
 	val sliderState = rememberSliderState(value = playerState.progress)
 	val onValueChange: (Float) -> Unit = { value ->

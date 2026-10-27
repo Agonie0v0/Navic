@@ -43,7 +43,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,8 +82,8 @@ import paige.navic.ui.component.common.SongRow
 import paige.navic.ui.component.dialog.BulkDownloadDialog
 import paige.navic.ui.component.dialog.BulkDownloadTarget
 import paige.navic.ui.component.dialog.DeleteDownloadTarget
-import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.dialog.ShareDialog
+import paige.navic.ui.component.dialog.rememberDownloadDeletionHandler
 import paige.navic.ui.component.layout.ArtCarousel
 import paige.navic.ui.component.layout.ArtCarouselItem
 import paige.navic.ui.component.layout.RootBottomBar
@@ -127,7 +126,7 @@ fun ArtistDetailScreen(
 	val backStack = LocalNavStack.current
 	val layoutDirection = LocalLayoutDirection.current
 	val artistState by viewModel.artistState.collectAsStateWithLifecycle()
-	val starred by viewModel.starred.collectAsState()
+	val starred by viewModel.starred.collectAsStateWithLifecycle()
 	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 	val allDownloads by downloadManager.allDownloads.collectAsStateWithLifecycle(
 		initialValue = emptyList()
@@ -137,7 +136,7 @@ fun ArtistDetailScreen(
 		artistState.data?.albums.orEmpty().flatMap { album ->
 			album.songs.map { it.id }
 		}
-	).collectAsState(DownloadStatus.NOT_DOWNLOADED)
+	).collectAsStateWithLifecycle(DownloadStatus.NOT_DOWNLOADED)
 
 	val spatialSpec = MaterialTheme.motionScheme.slowSpatialSpec<Float>()
 	val effectSpec = MaterialTheme.motionScheme.slowEffectsSpec<Float>()

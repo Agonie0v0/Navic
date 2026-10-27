@@ -10,10 +10,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.ImageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
@@ -83,7 +83,7 @@ fun rememberColorSchemeFromCoverArt(
 @Composable
 fun rememberColorSchemeForCurrentSong(forceDark: Boolean = true): ColorScheme {
 	val player = koinInject<MediaPlayer>()
-	val playerState by player.uiState.collectAsState()
+	val playerState by player.uiState.collectAsStateWithLifecycle()
 	val coverArtId = playerState.currentSong?.coverArtId
 	return rememberColorSchemeFromCoverArt(
 		coverArtId = coverArtId,
