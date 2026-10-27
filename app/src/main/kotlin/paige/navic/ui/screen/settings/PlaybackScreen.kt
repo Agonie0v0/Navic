@@ -117,13 +117,14 @@ fun SettingsPlaybackScreen() {
 
 				SettingsGroup(title = { Text(stringResource(R.string.title_integrations)) }) {
 					val enableDiscordIntegration = preferenceManager.enableDiscordIntegration
+					val count = if (enableDiscordIntegration) 5 else 1
 
 					SettingsToggleItem(
 						checked = preferenceManager.enableDiscordIntegration,
 						onCheckedChange = { preferenceManager.enableDiscordIntegration = it },
 						content = { Text(stringResource(R.string.option_enable_discord_integration)) },
 						supportingContent = { Text(stringResource(R.string.subtitle_enable_discord_integration)) },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 5)
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = count)
 					)
 
 					AnimatedVisibility(visible = enableDiscordIntegration) {
@@ -134,7 +135,7 @@ fun SettingsPlaybackScreen() {
 							label = { stringResource(it.displayName) },
 							shapes = SegmentedListItemDefaults.segmentedShapes(
 								index = 1,
-								count = 5
+								count = count
 							),
 							content = { Text(stringResource(R.string.option_discord_rpc_status_type)) }
 						)
@@ -149,7 +150,7 @@ fun SettingsPlaybackScreen() {
 							content = { Text(stringResource(R.string.action_edit_discord_app_id)) },
 							shapes = SegmentedListItemDefaults.segmentedShapes(
 								index = 2,
-								count = 5
+								count = count
 							)
 						)
 					}
@@ -161,7 +162,7 @@ fun SettingsPlaybackScreen() {
 							content = { Text(stringResource(R.string.option_disable_rpc_when_power_saving)) },
 							shapes = SegmentedListItemDefaults.segmentedShapes(
 								index = 3,
-								count = 5
+								count = count
 							)
 						)
 					}
@@ -173,7 +174,7 @@ fun SettingsPlaybackScreen() {
 							supportingContent = { Text(stringResource(R.string.subtitle_cover_art_providers)) },
 							shapes = SegmentedListItemDefaults.segmentedShapes(
 								index = 4,
-								count = 5
+								count = count
 							)
 						)
 					}
