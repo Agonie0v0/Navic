@@ -527,14 +527,24 @@ class MediaPlayer(
 				if (audioGroups.isTrackSelected(i)) {
 					val format = audioGroups.getTrackFormat(i)
 					Logger.i("MediaPlayer", "active track format: $format")
+
 					scope.launch(Dispatchers.IO) {
+						// i don't like this but oh well
+						val currentSong = _uiState.value.currentSong ?: return@launch
+						val songMimeType = currentSong.mimeType
+						val isOriginalFile = format.sampleMimeType == songMimeType || format.containerMimeType == songMimeType
+						val fallbackBitrate = if (isOriginalFile) {
+							currentSong.bitRate
+						} else {
+							withContext(Dispatchers.Main) {
+								getEstimateBitrate()
+							}
+						}
+
 						_uiState.update { state ->
 							state.copy(
 								playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE }
-									?: withContext(Dispatchers.Main) { getEstimateBitrate() }
-									?: _uiState.value.currentSong?.let {
-										songRepository.getSongById(it.id)?.bitRate
-									},
+									?: fallbackBitrate,
 								playbackSampleRate = format.sampleRate.takeIf { it != Format.NO_VALUE },
 								playbackMimeType = format.sampleMimeType,
 								playbackBitDepth = when (format.pcmEncoding) {
