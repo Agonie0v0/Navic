@@ -12,8 +12,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import night.milkyway.antisocialcord.DiscordRpcClient
 import night.milkyway.antisocialcord.model.Activity
 import night.milkyway.antisocialcord.model.ActivityAssets
@@ -46,6 +51,23 @@ class ExoDiscordIntegration(
 
 	private val client = DiscordRpcClient(context)
 	private val scope = CoroutineScope(Dispatchers.Main)
+	private val mutex = Mutex()
+	private val powerSaveChangedFlow = callbackFlow {
+		val receiver = object : BroadcastReceiver() {
+			override fun onReceive(p0: Context?, p1: Intent?) {
+				scope.launch {
+					trySend(powerManager.isPowerSaveMode)
+				}
+			}
+		}
+
+		context.registerReceiver(
+			receiver,
+			IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+		)
+
+		awaitClose { context.unregisterReceiver(receiver) }
+	}.distinctUntilChanged()
 
 	init {
 		launch {
@@ -53,20 +75,11 @@ class ExoDiscordIntegration(
 				snapshotFlow { preferenceManager.enableDiscordIntegration },
 				snapshotFlow { preferenceManager.disableRpcWhenPowerSaving },
 				snapshotFlow { preferenceManager.discordStatusType },
-				snapshotFlow { preferenceManager.discordAppId }
+				snapshotFlow { preferenceManager.discordAppId },
+				powerSaveChangedFlow
 			).collect {
 				setCurrentActivity(player.currentMediaItem)
 			}
-			context.registerReceiver(
-				object : BroadcastReceiver() {
-					override fun onReceive(p0: Context?, p1: Intent?) {
-						scope.launch {
-							setCurrentActivity(player.currentMediaItem)
-						}
-					}
-				},
-				IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
-			)
 		}
 	}
 
@@ -75,7 +88,7 @@ class ExoDiscordIntegration(
 	}
 
 	override fun onPlaybackStateChanged(playbackState: @Player.State Int) {
-		scope.launch {
+		launch {
 			if (playbackState == Player.STATE_READY) {
 				setCurrentActivity(player.currentMediaItem)
 			}
@@ -116,11 +129,16 @@ class ExoDiscordIntegration(
 		&& (!preferenceManager.disableRpcWhenPowerSaving
 		|| !powerManager.isPowerSaveMode)
 
-	private suspend fun setCurrentActivity(mediaItem: MediaItem?) {
+	private suspend fun setCurrentActivity(mediaItem: MediaItem?) = mutex.withLock {
 		try {
 			if (isIntegrationEnabled()) {
 				if (!client.isConnectionReady) {
 					client.connect(preferenceManager.discordAppId)
+				}
+
+				if ((!player.isPlaying || mediaItem == null) && client.isConnectionReady) {
+					client.clearActivity()
+					return@withLock
 				}
 
 				val song = mediaItem?.let { songRepository.getSongById(it.mediaId) }
@@ -129,16 +147,14 @@ class ExoDiscordIntegration(
 				if (song != null) {
 					val activity = createDiscordActivity(song = song, album = album)
 					client.setActivity(activity)
-					return
-				}
-			} else {
-				if (client.isConnectionReady) {
-					client.clearActivity()
-					client.disconnect()
+					return@withLock
 				}
 			}
-
 			client.clearActivity()
+
+			if (client.isConnectionReady && !isIntegrationEnabled()) {
+				client.disconnect()
+			}
 		} catch (ex: Exception) {
 			Log.e(TAG, "could not set current activity", ex)
 		}
