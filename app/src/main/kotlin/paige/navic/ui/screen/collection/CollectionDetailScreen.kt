@@ -260,7 +260,7 @@ fun CollectionDetailScreen(
 											onClick = {
 												player.playNow(
 													collection = album,
-													startIndex = index
+													startIndex = album.songs.indexOf(song)
 												)
 											},
 											onLongClick = {
