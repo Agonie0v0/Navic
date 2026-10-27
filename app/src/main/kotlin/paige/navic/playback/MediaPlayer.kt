@@ -57,7 +57,6 @@ import java.io.File
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
 
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -498,9 +497,11 @@ class MediaPlayer(
 	}
 
 	private suspend fun getEstimateBitrate(): Int? {
-		_uiState.value.currentSong?.let { song ->
-			val duration = song.duration.toLong(DurationUnit.SECONDS)
+		val controller = controller ?: return null
+		val duration =
+			(controller.currentMediaItem?.mediaMetadata?.durationMs?.div(1000)) ?: return null
 
+		_uiState.value.currentSong?.let { song ->
 			val fileSize = runCatching {
 				downloadManager.getDownloadedFilePath(song.id)?.toFile()
 					?.length()
@@ -528,9 +529,8 @@ class MediaPlayer(
 					scope.launch(Dispatchers.IO) {
 						_uiState.update { state ->
 							state.copy(
-								playbackBitrate = format.bitrate.takeIf { it > 0 }
-									?: format.averageBitrate.takeIf { it > 0 }
-									?: getEstimateBitrate()
+								playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE }
+									?: withContext(Dispatchers.Main) { getEstimateBitrate() }
 									?: _uiState.value.currentSong?.let {
 										songRepository.getSongById(it.id)?.bitRate
 									},
