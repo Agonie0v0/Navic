@@ -534,7 +534,7 @@ class MediaPlayer(
 						val songMimeType = currentSong.mimeType
 						val isOriginalFile = format.sampleMimeType == songMimeType || format.containerMimeType == songMimeType
 						val fallbackBitrate = if (isOriginalFile) {
-							currentSong.bitRate
+							currentSong.bitRate?.times(1000)
 						} else {
 							withContext(Dispatchers.Main) {
 								getEstimateBitrate()
