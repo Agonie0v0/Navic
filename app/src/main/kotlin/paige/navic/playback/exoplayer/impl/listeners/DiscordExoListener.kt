@@ -12,7 +12,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import night.milkyway.antisocialcord.DiscordRpcClient
 import night.milkyway.antisocialcord.model.Activity
@@ -28,7 +28,7 @@ import paige.navic.domain.repository.AlbumRepository
 import paige.navic.domain.repository.SongRepository
 
 class ExoDiscordIntegration(
-    val player: Player,
+	val player: Player,
 ) : Player.Listener, KoinComponent {
 	private val context: Context by inject()
 	private val preferenceManager: PreferenceManager by inject()
@@ -48,39 +48,30 @@ class ExoDiscordIntegration(
 	private val scope = CoroutineScope(Dispatchers.Main)
 
 	init {
-		// idk how to combine flows of different types
-		scope.launch {
-			combine(
-                snapshotFlow { preferenceManager.enableDiscordIntegration },
-                snapshotFlow { preferenceManager.disableRpcWhenPowerSaving }
-            ) { it }.collect {
+		launch {
+			merge(
+				snapshotFlow { preferenceManager.enableDiscordIntegration },
+				snapshotFlow { preferenceManager.disableRpcWhenPowerSaving },
+				snapshotFlow { preferenceManager.discordStatusType },
+				snapshotFlow { preferenceManager.discordAppId }
+			).collect {
 				setCurrentActivity(player.currentMediaItem)
 			}
-		}
-		scope.launch {
-			combine(
-                snapshotFlow { preferenceManager.discordStatusType }
-            ) { it }.collect {
-				setCurrentActivity(player.currentMediaItem)
-			}
-		}
-		scope.launch {
-			combine(
-                snapshotFlow { preferenceManager.discordAppId }
-            ) { it }.collect {
-				setCurrentActivity(player.currentMediaItem)
-			}
-		}
-		context.registerReceiver(
-			object : BroadcastReceiver() {
-				override fun onReceive(p0: Context?, p1: Intent?) {
-					scope.launch {
-						setCurrentActivity(player.currentMediaItem)
+			context.registerReceiver(
+				object : BroadcastReceiver() {
+					override fun onReceive(p0: Context?, p1: Intent?) {
+						scope.launch {
+							setCurrentActivity(player.currentMediaItem)
+						}
 					}
-				}
-			},
-            IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
-		)
+				},
+				IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+			)
+		}
+	}
+
+	private fun launch(block: suspend CoroutineScope.() -> Unit) {
+		scope.launch(block = block)
 	}
 
 	override fun onPlaybackStateChanged(playbackState: @Player.State Int) {
@@ -92,9 +83,9 @@ class ExoDiscordIntegration(
 	}
 
 	override fun onPositionDiscontinuity(
-        oldPosition: Player.PositionInfo,
-        newPosition: Player.PositionInfo,
-        reason: @Player.DiscontinuityReason Int
+		oldPosition: Player.PositionInfo,
+		newPosition: Player.PositionInfo,
+		reason: @Player.DiscontinuityReason Int
 	) {
 		scope.launch {
 			val isSeekOrRepeat = reason == Player.DISCONTINUITY_REASON_SEEK ||
@@ -121,12 +112,13 @@ class ExoDiscordIntegration(
 		}
 	}
 
+	private fun isIntegrationEnabled() = preferenceManager.enableDiscordIntegration
+		&& (!preferenceManager.disableRpcWhenPowerSaving
+		|| !powerManager.isPowerSaveMode)
+
 	private suspend fun setCurrentActivity(mediaItem: MediaItem?) {
 		try {
-			val cock = preferenceManager.enableDiscordIntegration
-			val balls = !preferenceManager.disableRpcWhenPowerSaving
-				|| !powerManager.isPowerSaveMode
-			if (cock && balls) {
+			if (isIntegrationEnabled()) {
 				if (!client.isConnectionReady) {
 					client.connect(preferenceManager.discordAppId)
 				}
@@ -141,6 +133,7 @@ class ExoDiscordIntegration(
 				}
 			} else {
 				if (client.isConnectionReady) {
+					client.clearActivity()
 					client.disconnect()
 				}
 			}
@@ -166,20 +159,20 @@ class ExoDiscordIntegration(
 		}
 
 		return Activity(
-            name = "Navic",
-            activityType = ActivityType.LISTENING,
-            state = song.artistName?.padEnd(2, INVISIBLE_CHARACTER),
-            details = song.title.padEnd(2, INVISIBLE_CHARACTER),
-            statusDisplayType = preferenceManager.discordStatusType.wrappedType,
-            assets = ActivityAssets(
-                largeUrl = null,
-                largeImage = largeImage,
-                largeText = song.albumTitle?.padEnd(2, INVISIBLE_CHARACTER),
-                smallImage = null,
-                smallText = null,
-                smallUrl = null
-            ),
-            timestamps = endSec?.let { ActivityTimestamps(startSec, endSec) }
-        )
+			name = "Navic",
+			activityType = ActivityType.LISTENING,
+			state = song.artistName?.padEnd(2, INVISIBLE_CHARACTER),
+			details = song.title.padEnd(2, INVISIBLE_CHARACTER),
+			statusDisplayType = preferenceManager.discordStatusType.wrappedType,
+			assets = ActivityAssets(
+				largeUrl = null,
+				largeImage = largeImage,
+				largeText = song.albumTitle?.padEnd(2, INVISIBLE_CHARACTER),
+				smallImage = null,
+				smallText = null,
+				smallUrl = null
+			),
+			timestamps = endSec?.let { ActivityTimestamps(startSec, endSec) }
+		)
 	}
 }
