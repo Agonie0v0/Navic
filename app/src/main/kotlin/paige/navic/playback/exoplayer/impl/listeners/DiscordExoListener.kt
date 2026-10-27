@@ -134,7 +134,7 @@ class ExoDiscordIntegration(
 	private suspend fun setCurrentActivity(mediaItem: MediaItem?) = mutex.withLock {
 		try {
 			if (isIntegrationEnabled()) {
-				if (!client.isConnectionReady) {
+				if (!client.isConnectionReady && mediaItem != null) {
 					client.connect(preferenceManager.discordAppId)
 				}
 
