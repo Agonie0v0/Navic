@@ -16,6 +16,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSourceBitmapLoader
 import coil3.ImageLoader
+import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
@@ -64,9 +65,9 @@ class ExoArtworkLoader(
 			}
 
 			val actualUrl = sessionManager.getCoverArtUrl(coverId)
-			bitmapLoader.loadBitmap(actualUrl.toUri())
+			return bitmapLoader.loadBitmap(actualUrl.toUri())
 		}
 
-		error("could not load cover art bitmap")
+		return Futures.immediateFuture(null)
 	}
 }
