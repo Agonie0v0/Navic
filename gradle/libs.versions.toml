@@ -31,6 +31,7 @@ coil = "3.6.3"
 
 # Misc
 koin = "4.2.2"
+mimeTypes = "2.0.0"
 pagingCommon = "3.5.2"
 recyclerview = "1.4.0"
 
@@ -87,6 +88,7 @@ kmpalette-core = { module = "com.kmpalette:kmpalette-core", version.ref = "kmpal
 kmpalette-network = { module = "com.kmpalette:extensions-network", version.ref = "kmpalette" }
 materialKolor = { module = "com.materialkolor:material-kolor", version = "5.0.1" }
 composePipette = { module = "dev.zt64.compose.pipette:compose-pipette", version = "2.0.0" }
+mimetypes = { module = "org.overviewproject:mime-types", version.ref = "mimeTypes" }
 multiplatformSettings = { module = "com.russhwolf:multiplatform-settings-no-arg", version = "1.3.0" }
 
 # Misc

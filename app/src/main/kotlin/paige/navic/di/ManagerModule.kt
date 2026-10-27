@@ -8,6 +8,7 @@ package paige.navic.di
 
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import paige.navic.discord.CoverArtUploadManager
 import paige.navic.domain.download.DownloadProcessor
 import paige.navic.domain.manager.playback.AudioGainManager
 import paige.navic.domain.manager.playback.EqualizerManager
@@ -37,6 +38,7 @@ val managerModule = module {
 	singleOf(::AppIconManager)
 	singleOf(::AudioGainManager)
 	singleOf(::ConnectivityManager)
+	singleOf(::CoverArtUploadManager)
 	singleOf(::DownloadManager)
 	singleOf(::DownloadProcessor)
 	singleOf(::EqualizerManager)

@@ -279,5 +279,6 @@ dependencies {
 	implementation(libs.antisocialcord)
 	ksp(libs.androidx.room3.compiler)
 	implementation(libs.cryptohash)
+	implementation(libs.mimetypes)
 	coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

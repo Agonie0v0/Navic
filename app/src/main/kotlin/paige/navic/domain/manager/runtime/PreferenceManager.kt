@@ -19,6 +19,7 @@ import paige.navic.domain.model.settings.AppIconVariant
 import paige.navic.domain.model.settings.ArtistAlbumViewMode
 import paige.navic.domain.model.settings.BottomBarCollapseMode
 import paige.navic.domain.model.settings.BottomBarVisibilityMode
+import paige.navic.domain.model.settings.CoverArtProvidersConfig
 import paige.navic.domain.model.settings.CoverArtQuality
 import paige.navic.domain.model.settings.CoverArtShape
 import paige.navic.domain.model.settings.CoverArtTapAction
@@ -185,6 +186,8 @@ class PreferenceManager(
 	var disableRpcWhenPowerSaving by preference(true)
 	var discordAppId by preference(ExoDiscordIntegration.DISCORD_APPLICATION_ID)
 	var discordStatusType by preference(DiscordStatusType.AppName)
+	var discordCoverArtProviders by jsonPreference(CoverArtProvidersConfig.Default)
+	var discordCoverArtApiKeyProviders by encryptedJsonPreference<Map<String, String>>(emptyMap())
 
 	var proxyUrl by preference("")
 	var dangerousSslNoopEnabled by preference(false)

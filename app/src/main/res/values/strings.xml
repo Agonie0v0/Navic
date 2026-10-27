@@ -236,6 +236,9 @@
 	<string name="option_discord_rpc_status_type_song_name">Song name</string>
 	<string name="option_discord_rpc_status_type_app_name">App name</string>
 	<string name="option_disable_rpc_when_power_saving">Disable presence on power saving mode</string>
+	<string name="title_cover_art_providers">Cover art providers</string>
+	<string name="subtitle_cover_art_providers">Upload cover art so Discord can display it</string>
+	<string name="subtitle_cover_art_key_required">API key required</string>
 
 	<string name="info_status_idle">Idle</string>
 	<string name="info_status_calculating">Calculating...</string>
@@ -545,4 +548,6 @@
 	<string name="title_storage_management">Storage management</string>
 	<string name="media_session_channel_name">Media playback</string>
 	<string name="info_incorrect_credentials">Incorrect credentials. Please double-check and try again.</string>
+	<string name="title_integrations">Integrations</string>
+	<string name="action_edit_api_key">Edit %1$s API key</string>
 </resources>

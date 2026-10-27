@@ -26,6 +26,7 @@ import night.milkyway.antisocialcord.model.ActivityTimestamps
 import night.milkyway.antisocialcord.model.ActivityType
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import paige.navic.discord.CoverArtUploadManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainSong
@@ -39,6 +40,7 @@ class ExoDiscordIntegration(
 	private val preferenceManager: PreferenceManager by inject()
 	private val songRepository: SongRepository by inject()
 	private val albumRepository: AlbumRepository by inject()
+	private val coverArtUploadManager: CoverArtUploadManager by inject()
 
 	private val powerManager =
 		context.getSystemService<PowerManager>()!! // idk why this would ever be null but yk
@@ -160,7 +162,7 @@ class ExoDiscordIntegration(
 		}
 	}
 
-	private fun createDiscordActivity(song: DomainSong, album: DomainAlbum?): Activity {
+	private suspend fun createDiscordActivity(song: DomainSong, album: DomainAlbum?): Activity {
 		val nowMs = System.currentTimeMillis()
 		val currentPosMs = player.currentPosition.coerceAtLeast(0L)
 		val startSec = (nowMs - currentPosMs)
@@ -170,9 +172,8 @@ class ExoDiscordIntegration(
 			null
 		}
 
-		val largeImage = album?.musicBrainzId?.let { mbzId ->
-			"https://coverartarchive.org/release/$mbzId/front-250"
-		}
+		val largeImage = (song.coverArtId ?: album?.coverArtId)
+			?.let { coverArtUploadManager.getPublicUrl(it) }
 
 		return Activity(
 			name = "Navic",

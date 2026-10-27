@@ -33,6 +33,7 @@ import paige.navic.ui.screen.radio.viewmodel.RadioCreateDialogViewModel
 import paige.navic.ui.screen.radio.viewmodel.RadioListViewModel
 import paige.navic.ui.screen.radio.viewmodel.RadioUpdateDialogViewModel
 import paige.navic.ui.screen.search.viewmodel.SearchViewModel
+import paige.navic.ui.screen.settings.viewmodel.CoverArtProvidersViewModel
 import paige.navic.ui.screen.settings.viewmodel.LyricsPriorityViewModel
 import paige.navic.ui.screen.settings.viewmodel.NavtabsViewModel
 import paige.navic.ui.screen.settings.viewmodel.SettingsDataStorageViewModel
@@ -168,6 +169,7 @@ val viewModelModule = module {
 		)
 	}
 	viewModelOf(::NavtabsViewModel)
+	viewModelOf(::CoverArtProvidersViewModel)
 	viewModelOf(::LyricsPriorityViewModel)
 	viewModelOf(::RootViewModel)
 	viewModelOf(::StatisticsViewModel)
