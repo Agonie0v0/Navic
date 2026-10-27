@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -46,16 +47,17 @@ import paige.navic.R
 import paige.navic.di.LocalNavStack
 import paige.navic.domain.model.settings.NavbarConfig
 import paige.navic.domain.model.settings.NavbarTab
+import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.common.CoverArt
 import paige.navic.ui.component.common.WideNavigationRailItem
 import paige.navic.ui.icons.Icons
 import paige.navic.ui.icons.filled.Note
 import paige.navic.ui.icons.outlined.Menu
 import paige.navic.ui.icons.outlined.MenuOpen
-import paige.navic.playback.MediaPlayer
 import paige.navic.ui.navigation.NavigationTab
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screen.settings.viewmodel.NavtabsViewModel
+import paige.navic.ui.util.appendArtists
 import paige.navic.ui.viewmodel.RootViewModel
 
 @Composable
@@ -179,9 +181,11 @@ private fun SideBarMiniPlayer(
 						overflow = TextOverflow.Ellipsis,
 						style = MaterialTheme.typography.bodyMedium
 					)
-					song?.artistName?.let { artistName ->
+					song?.artists?.let { artists ->
 						Text(
-							text = artistName,
+							text = buildAnnotatedString {
+								appendArtists(artists)
+							},
 							maxLines = 1,
 							overflow = TextOverflow.Ellipsis,
 							color = MaterialTheme.colorScheme.onSurfaceVariant,

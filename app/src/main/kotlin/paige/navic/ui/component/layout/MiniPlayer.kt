@@ -55,6 +55,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
@@ -80,6 +81,7 @@ import paige.navic.ui.icons.filled.Note
 import paige.navic.ui.icons.filled.SkipNext
 import paige.navic.ui.navigation.Screen
 import paige.navic.ui.screen.settings.viewmodel.NavtabsViewModel
+import paige.navic.ui.util.appendArtists
 import paige.navic.ui.util.playPauseIconPainter
 import coil3.compose.LocalPlatformContext as LocalCoilPlatformContext
 
@@ -309,11 +311,14 @@ fun MiniPlayer(
 						}
 					},
 					supportingContent = {
-						if (song != null) {
-							MarqueeText(song.artistName ?: "[unknown artist]")
-						} else {
-							MarqueeText(stringResource(R.string.info_not_playing))
-						}
+						val notPlayingString = stringResource(R.string.info_not_playing)
+						MarqueeText(buildAnnotatedString {
+							if (song != null) {
+								appendArtists(song.artists)
+							} else {
+								append(notPlayingString)
+							}
+						})
 					},
 					enabled = enabled
 				)
