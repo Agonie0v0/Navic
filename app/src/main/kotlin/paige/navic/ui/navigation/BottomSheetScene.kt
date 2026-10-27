@@ -62,7 +62,10 @@ class BottomSheetScene<T : Any>(
 
 
 	override val content = @Composable {
-		sheetState = rememberBottomSheetState(SheetValue.Hidden)
+		sheetState = rememberBottomSheetState(
+			initialValue = SheetValue.Hidden,
+			enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
+		)
 		val lifecycleOwner = rememberLifecycleOwner()
 		val backStack = LocalNavStack.current
 		val coverArtId = entry.metadata[CoverArtIdKey]
