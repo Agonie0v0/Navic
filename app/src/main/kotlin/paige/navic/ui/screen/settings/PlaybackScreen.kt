@@ -181,7 +181,7 @@ fun SettingsPlaybackScreen() {
 
 				SettingsGroup(title = { Text(stringResource(R.string.title_behaviour)) }) {
 					val enableScrobbling = preferenceManager.enableScrobbling
-					var count = 2
+					var count = 1
 					if (enableScrobbling) count += 2
 
 					SettingsToggleItem(
@@ -190,7 +190,7 @@ fun SettingsPlaybackScreen() {
 						content = { Text(stringResource(R.string.option_enable_scrobbling)) },
 						supportingContent = { Text(stringResource(R.string.subtitle_enable_scrobbling)) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(
-							index = 1,
+							index = 0,
 							count = count
 						)
 					)
@@ -203,7 +203,7 @@ fun SettingsPlaybackScreen() {
 							trailingContent = { Text("${(preferenceManager.scrobblePercentage * 100).roundToInt()}%") },
 							content = { Text(stringResource(R.string.option_scrobble_percentage)) },
 							shapes = SegmentedListItemDefaults.segmentedShapes(
-								index = 2,
+								index = 1,
 								count = count
 							)
 						)
@@ -217,7 +217,7 @@ fun SettingsPlaybackScreen() {
 							trailingContent = { Text("${preferenceManager.minDurationToScrobble.toInt()}s") },
 							content = { Text(stringResource(R.string.option_min_duration_to_scrobble)) },
 							shapes = SegmentedListItemDefaults.segmentedShapes(
-								index = 3,
+								index = 2,
 								count = count
 							)
 						)
