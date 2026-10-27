@@ -40,6 +40,9 @@ class NavicDataSource(
 	preferenceManager: PreferenceManager,
 	dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
+	val ttlLruCache
+		get() = sessionManager.ttlLruCache
+
 	class NavicDataSourceFactory(
 		private val downloadManager: DownloadManager,
 		private val sessionManager: SessionManager,
@@ -172,6 +175,15 @@ class NavicDataSource(
 
 	// TODO: make transcoding options work again
 	private suspend fun resolveStreamUrl(id: String): Uri {
+		val cachedStreamUrl = ttlLruCache.get(id)
+
+		if (cachedStreamUrl != null) {
+			return cachedStreamUrl.toUri()
+				.buildUpon()
+				.appendQueryParameter("estimateContentLength", "true")
+				.build()
+		}
+
 		val defaultStreamUrl = sessionManager.api.getStreamUrl(id, 0)
 		return try {
 			val transcodeDecision = withContext(Dispatchers.IO) {
@@ -186,11 +198,15 @@ class NavicDataSource(
 				} else {
 					defaultStreamUrl
 				}
+
+			ttlLruCache.put(id, streamUrlStr)
+
 			streamUrlStr.toUri()
 				.buildUpon()
 				.appendQueryParameter("estimateContentLength", "true")
 				.build()
 		} catch (_: Exception) {
+			ttlLruCache.put(id, defaultStreamUrl)
 			defaultStreamUrl.toUri()
 		}
 	}

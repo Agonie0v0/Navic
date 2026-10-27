@@ -30,13 +30,16 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.Logger
+import paige.navic.util.TTLLruCache
 import paige.navic.util.getEncryptedString
 import paige.navic.util.insertEncryptedString
 import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.buildKtorEngine
 import paige.navic.util.network.createOkHttpClient
 import paige.navic.util.network.getProxyUrlOrNull
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 sealed interface SessionState {
 	data object Unauthenticated : SessionState
@@ -53,6 +56,11 @@ class SessionManager(
 	private val preferenceManager: PreferenceManager,
 	private val dnsResolver: NavicDnsResolver
 ) {
+	val ttlLruCache = TTLLruCache<String, String>(
+		maxSize = 500,
+		defaultTtlMillis = 30.minutes.toLong(DurationUnit.MILLISECONDS)
+	)
+
 	private companion object {
 		const val TAG = "SessionManager"
 		const val USER_AGENT = "Navic"
