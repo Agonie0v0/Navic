@@ -42,6 +42,7 @@ import paige.navic.work.DownloadMigrationWorker
 import paige.navic.work.DownloadWorker
 import paige.navic.work.WorkKeys
 import paige.navic.work.WorkNames
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 class DownloadManager(

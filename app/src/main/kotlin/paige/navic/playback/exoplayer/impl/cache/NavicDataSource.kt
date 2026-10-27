@@ -7,6 +7,7 @@
 package paige.navic.playback.exoplayer.impl.cache
 
 import android.net.Uri
+import android.os.StatFs
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.C
@@ -15,6 +16,7 @@ import androidx.media3.datasource.BaseDataSource
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.FileDataSource
+import androidx.media3.datasource.HttpUtil
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.extractor.metadata.icy.IcyHeaders
@@ -41,20 +43,10 @@ class NavicDataSource(
     dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
 	class NavicDataSourceFactory(
-        private val downloadManager: DownloadManager,
-        private val sessionManager: SessionManager,
-        private val streamCacheManager: StreamCacheManager,
-        private val preferenceManager: PreferenceManager,
-        private val dnsResolver: NavicDnsResolver,
+        private val dataSource: NavicDataSource
 	) : DataSource.Factory {
 		override fun createDataSource(): DataSource {
-			return NavicDataSource(
-				downloadManager,
-				sessionManager,
-				streamCacheManager,
-				preferenceManager,
-				dnsResolver
-			)
+			return dataSource
 		}
 	}
 
@@ -66,6 +58,8 @@ class NavicDataSource(
 			return "$NAVIC_SCHEME://$NAVIC_HOST/$this".toUri()
 		}
 	}
+
+	private var totalBytesRead: Long = 0L
 
 	private val clientInfo = PlaybackUtils.buildClientInfo()
 
@@ -96,6 +90,7 @@ class NavicDataSource(
 
 	override fun open(dataSpec: DataSpec): Long {
 		transferInitializing(dataSpec)
+		totalBytesRead = 0L
 		val uri = dataSpec.uri
 		currentUri = uri
 
@@ -146,9 +141,26 @@ class NavicDataSource(
 	override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
 		val bytesRead = wrappedDataSource?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT
 		if (bytesRead > 0) {
+			totalBytesRead += bytesRead
 			bytesTransferred(bytesRead)
 		}
 		return bytesRead
+	}
+
+	suspend fun calculateCurrentVariableBitrate(durationMs: Long): Int {
+		val headerSize = responseHeaders["Content-Length"]?.firstOrNull()?.let {
+			HttpUtil.getContentLength(
+				it, null
+			)
+		}
+			?: currentUri
+				?.lastPathSegment
+				?.let { songId -> downloadManager.getDownloadedFilePath(songId) }
+				?.let { StatFs(it).freeBytes }
+			?: totalBytesRead
+
+		if (durationMs <= 0 || headerSize <= 0) return -1
+		return (((headerSize * 8) / durationMs) / 1000).toInt()
 	}
 
 	override fun getUri(): Uri? {
@@ -172,7 +184,7 @@ class NavicDataSource(
 
 	// TODO: make transcoding options work again
 	private suspend fun resolveStreamUrl(id: String): Uri {
-		val defaultStreamUrl = sessionManager.api.getStreamUrl(id, 0, estimateContentLength = true)
+		val defaultStreamUrl = sessionManager.api.getStreamUrl(id, 0)
 		return try {
 			val transcodeDecision = withContext(Dispatchers.IO) {
 				sessionManager.api.getTranscodeDecision(id, MediaType.SONG, clientInfo)
@@ -187,6 +199,9 @@ class NavicDataSource(
 					defaultStreamUrl
 				}
 			streamUrlStr.toUri()
+				.buildUpon()
+				.appendQueryParameter("estimateContentLength", "true")
+				.build()
 		} catch (_: Exception) {
 			defaultStreamUrl.toUri()
 		}

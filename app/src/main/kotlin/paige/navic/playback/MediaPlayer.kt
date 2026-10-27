@@ -49,12 +49,14 @@ import paige.navic.domain.model.settings.ReplayGainMode
 import paige.navic.domain.repository.PlayerStateRepository
 import paige.navic.domain.repository.SongRepository
 import paige.navic.playback.exoplayer.ExoStateHolder
+import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.Companion.buildSongUri
 import paige.navic.ui.core.PlayerUiState
 import paige.navic.util.Logger
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.DurationUnit
 
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -67,7 +69,8 @@ class MediaPlayer(
 	private val application: Application,
 	private val albumDao: AlbumDao,
 	private val sessionManager: SessionManager,
-	private val snackBarManager: SnackBarManager
+	private val snackBarManager: SnackBarManager,
+	private val dataSource: NavicDataSource
 ) {
 	private val _uiState = MutableStateFlow(PlayerUiState())
 	val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
@@ -493,7 +496,6 @@ class MediaPlayer(
 		}
 	}
 
-	@UnstableApi
 	private fun updatePlaybackProperties(tracks: Tracks) {
 		val audioGroups =
 			tracks.groups.firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.isSelected }
@@ -502,19 +504,28 @@ class MediaPlayer(
 				if (audioGroups.isTrackSelected(i)) {
 					val format = audioGroups.getTrackFormat(i)
 					Logger.i("MediaPlayer", "active track format: $format")
-					_uiState.update { state ->
-						state.copy(
-							playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE },
-							playbackSampleRate = format.sampleRate.takeIf { it != Format.NO_VALUE },
-							playbackMimeType = format.sampleMimeType,
-							playbackBitDepth = when (format.pcmEncoding) {
-								C.ENCODING_PCM_8BIT -> 8
-								C.ENCODING_PCM_16BIT -> 16
-								C.ENCODING_PCM_24BIT -> 24
-								C.ENCODING_PCM_32BIT, C.ENCODING_PCM_FLOAT -> 32
-								else -> -1
-							}
-						)
+					scope.launch(Dispatchers.IO) {
+						_uiState.update { state ->
+							state.copy(
+								playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE }
+									?: _uiState.value.currentSong?.duration?.let {
+										dataSource.calculateCurrentVariableBitrate(
+											it.toLong(
+												DurationUnit.SECONDS
+											)
+										)
+									},
+								playbackSampleRate = format.sampleRate.takeIf { it != Format.NO_VALUE },
+								playbackMimeType = format.sampleMimeType,
+								playbackBitDepth = when (format.pcmEncoding) {
+									C.ENCODING_PCM_8BIT -> 8
+									C.ENCODING_PCM_16BIT -> 16
+									C.ENCODING_PCM_24BIT -> 24
+									C.ENCODING_PCM_32BIT, C.ENCODING_PCM_FLOAT -> 32
+									else -> -1
+								}
+							)
+						}
 					}
 					break
 				}

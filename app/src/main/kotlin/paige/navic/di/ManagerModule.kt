@@ -32,6 +32,7 @@ import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.sync.SyncActionProcessor
 import paige.navic.domain.sync.SyncCoordinator
 import paige.navic.playback.exoplayer.ExoStateHolder
+import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.NavicDataSourceFactory
 
 val managerModule = module {
@@ -61,12 +62,17 @@ val managerModule = module {
 		SyncManager(get(), get(), get(), get(), get())
 	}
 	single {
-		NavicDataSourceFactory(
+		NavicDataSource(
 			downloadManager = get(),
 			sessionManager = get(),
 			streamCacheManager = get(),
 			preferenceManager = get(),
 			dnsResolver = get()
+		)
+	}
+	single {
+		NavicDataSourceFactory(
+			dataSource = get()
 		)
 	}
 	singleOf(::ExoStateHolder)

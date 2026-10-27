@@ -56,18 +56,16 @@ fun NowPlayingTechnicalInfoRow() {
 				modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				val sampleRateFormatted =
-					(playerState.playbackSampleRate ?: song?.sampleRate)?.let {
+				val sampleRateFormatted = (playerState.playbackSampleRate)?.let {
 						if (it >= 1000) "${it / 1000.0} kHz" else "$it Hz"
 					} ?: "-- kHz"
 
-				val bitDepthFormatted = (playerState.playbackBitDepth ?: song?.bitDepth)
+				val bitDepthFormatted = (playerState.playbackBitDepth)
 					?.takeIf { it > 16 }
 					?.let { "$it bit" }
 
 				val bitrateFormatted =
-					(playerState.playbackBitrate?.let { it / 1000 }
-						?: song?.bitRate)?.let { "$it kbps" }
+					(playerState.playbackBitrate?.let { it / 1000 })?.let { "$it kbps" }
 						?: "-- kbps"
 
 				val format =
