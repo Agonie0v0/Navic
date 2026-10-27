@@ -6,26 +6,18 @@
 
 package paige.navic.ui.screen.radio
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MediumFloatingActionButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,11 +25,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -92,8 +83,6 @@ fun RadioListScreen(
 	val lazyPagingItems = state.data?.items?.collectAsLazyPagingItems()
 
 	val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-	val slideSpec = MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>()
-	val scaleInSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
 	var createDialogShown by rememberSaveable { mutableStateOf(false) }
 	var updateDialogShown by rememberSaveable { mutableStateOf(false) }
 	var deleteDialogShown by rememberSaveable { mutableStateOf(false) }
@@ -120,35 +109,20 @@ fun RadioListScreen(
 			}
 		},
 		floatingActionButton = {
-			AnimatedContent(
-				!scrollManager.isTriggered
-					|| preferenceManager.bottomBarCollapseMode == BottomBarCollapseMode.Never,
-				transitionSpec = {
-					val transformOrigin = TransformOrigin(0f, 1f)
-					(slideInHorizontally(slideSpec) { it / 2 }
-						+ scaleIn(scaleInSpec, transformOrigin = transformOrigin)
-						+ slideInVertically(slideSpec) { it / 2 })
-						.togetherWith(slideOutHorizontally(slideSpec) { it / 2 }
-							+ scaleOut(transformOrigin = transformOrigin)
-							+ slideOutVertically(slideSpec) { it / 2 })
-						.using(SizeTransform(clip = false))
-				}
-			) { notScrolled ->
-				if (notScrolled) {
-					MediumFloatingActionButton(
-						shape = MaterialTheme.shapes.large,
-						containerColor = MaterialTheme.colorScheme.primary,
-						onClick = {
-							createDialogShown = true
-						}
-					) {
-						Icon(
-							imageVector = Icons.Outlined.Add,
-							contentDescription = stringResource(R.string.title_create_playlist),
-							modifier = Modifier.size(26.dp)
-						)
-					}
-				}
+			FloatingActionButton(
+				modifier = Modifier.animateFloatingActionButton(
+					visible = !scrollManager.isTriggered
+						|| preferenceManager.bottomBarCollapseMode == BottomBarCollapseMode.Never,
+					alignment = Alignment.BottomEnd
+				),
+				containerColor = MaterialTheme.colorScheme.primary,
+				onClick = { createDialogShown = true }
+			) {
+				Icon(
+					imageVector = Icons.Outlined.Add,
+					contentDescription = stringResource(R.string.title_create_radio),
+					modifier = Modifier.size(26.dp)
+				)
 			}
 		},
 		bottomBar = {
