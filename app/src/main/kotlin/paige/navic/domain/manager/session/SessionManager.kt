@@ -15,6 +15,7 @@ import dev.zt64.subsonic.api.model.User
 import dev.zt64.subsonic.client.SubsonicAuth
 import dev.zt64.subsonic.client.SubsonicClient
 import io.ktor.client.plugins.UserAgent
+import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import kotlinx.coroutines.CoroutineScope
@@ -132,6 +133,7 @@ class SessionManager(
 			install(UserAgent) {
 				agent = USER_AGENT
 			}
+			install(HttpCache)
 
 			val customHeaders = preferenceManager.customHeadersMap()
 			if (customHeaders.isNotEmpty()) {
