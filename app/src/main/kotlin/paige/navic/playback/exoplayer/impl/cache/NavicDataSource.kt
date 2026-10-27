@@ -60,10 +60,15 @@ class NavicDataSource(
 
 	companion object {
 		const val NAVIC_SCHEME = "navic"
-		const val NAVIC_HOST = "song"
+		const val NAVIC_SONG_HOST = "song"
+		const val NAVIC_COVER_HOST = "cover"
 
 		fun String.buildSongUri(): Uri {
-			return "$NAVIC_SCHEME://$NAVIC_HOST/$this".toUri()
+			return "$NAVIC_SCHEME://$NAVIC_SONG_HOST/$this".toUri()
+		}
+
+		fun String.buildCoverUri(): Uri {
+			return "$NAVIC_SCHEME://$NAVIC_COVER_HOST/$this".toUri()
 		}
 	}
 
@@ -100,7 +105,7 @@ class NavicDataSource(
 		val uri = dataSpec.uri
 		currentUri = uri
 
-		songId = if (uri.scheme == NAVIC_SCHEME && uri.host == NAVIC_HOST) {
+		songId = if (uri.scheme == NAVIC_SCHEME && uri.host == NAVIC_SONG_HOST) {
 			uri.lastPathSegment
 		} else {
 			null

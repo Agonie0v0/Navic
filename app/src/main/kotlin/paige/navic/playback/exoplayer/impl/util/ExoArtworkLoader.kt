@@ -9,23 +9,27 @@ package paige.navic.playback.exoplayer.impl.util
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.util.BitmapLoader
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSourceBitmapLoader
 import coil3.ImageLoader
 import com.google.common.util.concurrent.ListenableFuture
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
 
 /**
  * Small util for attempting to load cached artworks from Coil first,
  * before resorting to doing the normal behavior of ExoPlayer (which just fetches the provided image url)
  */
-@UnstableApi
+@OptIn(UnstableApi::class)
 class ExoArtworkLoader(
 	context: Context,
 	dataSourceFactory: DataSource.Factory,
 	private val imageLoader: ImageLoader,
+	private val sessionManager: SessionManager,
 ): BitmapLoader {
 	private val bitmapLoader = DataSourceBitmapLoader.Builder(context)
 		.setDataSourceFactory(dataSourceFactory)
@@ -40,14 +44,13 @@ class ExoArtworkLoader(
 	}
 
 	override fun loadBitmap(uri: Uri): ListenableFuture<Bitmap> {
-		// this expects to be the coverArtId from Subsonic's API, since currently the cache is keyed against it
-		val coverId = uri.getQueryParameter("id")
+		val coverId = uri.lastPathSegment
 
 		if (coverId != null) {
 			try {
 				val diskCache = imageLoader.diskCache
 				val snapshot = diskCache?.openSnapshot(coverId)
-					?: listOf("512", "1024", "200", "4096", "100", "50").firstNotNullOfOrNull { size ->
+					?: listOf("1024", "4096").firstNotNullOfOrNull { size ->
 						diskCache?.openSnapshot("$coverId#size=$size")
 					}
 				val imageBytes = snapshot.use {
@@ -59,8 +62,11 @@ class ExoArtworkLoader(
 			} catch (e: Exception) {
 				Logger.w("BitmapLoader", "could not read artwork data", e)
 			}
+
+			val actualUrl = sessionManager.getCoverArtUrl(coverId)
+			bitmapLoader.loadBitmap(actualUrl.toUri())
 		}
 
-		return bitmapLoader.loadBitmap(uri)
+		error("could not load cover art bitmap")
 	}
 }

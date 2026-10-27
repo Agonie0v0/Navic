@@ -56,6 +56,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import paige.navic.playback.exoplayer.impl.listeners.ExoDiscordIntegration
 import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.playback.ExoAudioGainProcessor
 import paige.navic.playback.exoplayer.impl.util.ExoArtworkLoader
@@ -65,6 +66,7 @@ class ExoStateHolder : KoinComponent {
 	private val context: Context by inject()
 	private val preferenceManager: PreferenceManager by inject()
 	private val dataSource: NavicDataSource.NavicDataSourceFactory by inject()
+	private val sessionManager: SessionManager by inject()
 	private val imageLoader: ImageLoader by inject()
 	private val mutex = Mutex()
 
@@ -283,7 +285,8 @@ class ExoStateHolder : KoinComponent {
 		val bitmapLoader = ExoArtworkLoader(
 			context,
 			dataSourceFactory = dataSource,
-			imageLoader
+			imageLoader,
+			sessionManager
 		)
 		val sessionIntent = context.packageManager
 			.getLaunchIntentForPackage(context.packageName)

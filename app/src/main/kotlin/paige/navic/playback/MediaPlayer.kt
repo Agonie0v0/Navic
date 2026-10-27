@@ -50,6 +50,7 @@ import paige.navic.domain.model.settings.ReplayGainMode
 import paige.navic.domain.repository.PlayerStateRepository
 import paige.navic.domain.repository.SongRepository
 import paige.navic.playback.exoplayer.ExoStateHolder
+import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.Companion.buildCoverUri
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.Companion.buildSongUri
 import paige.navic.ui.core.PlayerUiState
 import paige.navic.util.Logger
@@ -879,9 +880,7 @@ class MediaPlayer(
 				setAlbumArtist(albumArtistName)
 				setAlbumTitle(albumTitle)
 				setDurationMs(duration.inWholeMilliseconds)
-				setArtworkUri(
-					coverArtId?.let { sessionManager.getCoverArtUrl(it).toUri() }
-				)
+				setArtworkUri(coverArtId?.buildCoverUri())
 				setMediaType(MediaMetadata.MEDIA_TYPE_MUSIC)
 			}
 
