@@ -80,9 +80,8 @@ class NavicDataSource(
 			proxyUrl = preferenceManager.proxyUrl.getProxyUrlOrNull(),
 			trustAllCerts = preferenceManager.dangerousSslNoopEnabled,
 			dnsResolver,
-			customHeaders = preferenceManager.customHeadersMap(),
-
-			)
+			customHeaders = preferenceManager.customHeadersMap()
+		)
 	).setDefaultRequestProperties(
 		mapOf(
 			IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_NAME to IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE

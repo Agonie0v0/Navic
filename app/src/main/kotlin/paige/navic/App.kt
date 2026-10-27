@@ -173,6 +173,11 @@ fun App() {
 				backStack.clear()
 				backStack.add(Screen.Library())
 			}
+
+			is SessionState.Restoring if backStack.lastOrNull() == Screen.Login -> {
+				backStack.clear()
+				backStack.add(Screen.Library())
+			}
 			else -> {}
 		}
 	}
