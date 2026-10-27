@@ -146,10 +146,12 @@ class NavicDataSource(
 	suspend fun getCurrentEstimateBitrate(durationMs: Long): Int? {
 		val songId = currentUri?.lastPathSegment
 
-		val headerSize = songId
-					?.let { songId -> downloadManager.getDownloadedFilePath(songId)?.toFile() }
-					?.length()
-					?.takeIf { it > 0L }
+		val headerSize = runCatching {
+			songId
+				?.let { songId -> downloadManager.getDownloadedFilePath(songId)?.toFile() }
+				?.length()
+				?.takeIf { it > 0L }
+		}.getOrNull()
 			?: songId?.let { streamCacheManager.getSongFileSize(it) }
 			?: return songId?.let { songDao.getSongById(it)?.bitRate }
 
