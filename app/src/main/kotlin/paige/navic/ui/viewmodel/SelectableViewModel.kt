@@ -47,3 +47,31 @@ abstract class SelectableViewModel<T : Any> : AsyncViewModel<Selectable<T>>() {
 		selected = null
 	}
 }
+
+abstract class SelectableListViewModel<T : Any> : AsyncViewModel<SelectableList<T>>() {
+	var items
+		get() = data?.items
+		set(value) {
+			execute {
+				SelectableList(
+					items = value,
+					selected = selected
+				)
+			}
+		}
+
+	var selected
+		get() = data?.selected
+		set(value) {
+			execute {
+				SelectableList(
+					items = items,
+					selected = value
+				)
+			}
+		}
+
+	fun clear() {
+		selected = null
+	}
+}

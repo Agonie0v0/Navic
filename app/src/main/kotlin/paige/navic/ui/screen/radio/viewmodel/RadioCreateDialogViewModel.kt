@@ -28,13 +28,15 @@ class RadioCreateDialogViewModel(
 
 	fun create() {
 		launch {
+			setLoading()
 			sessionManager.api.createInternetRadioStation(
 				name = name.text.toString(),
 				streamUrl = streamUrl.text.toString(),
 				homepageUrl = homepageUrl.text.toString().trim().takeIf { it.isNotBlank() }
 			)
-			_events.send(Event.Dismiss)
 			snackBarManager.notify(R.string.notice_created_radio, name.text.toString())
+			setSuccess(null)
+			_events.send(Event.Dismiss)
 		}
 	}
 

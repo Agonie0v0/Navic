@@ -27,12 +27,14 @@ class RadioUpdateDialogViewModel(
 
 	fun update() {
 		launch {
+			setLoading()
 			sessionManager.api.updateInternetRadioStation(
 				id = initialRadio.id,
 				streamUrl = streamUrl.text.toString(),
 				name = name.text.toString(),
 				homepageUrl = homepageUrl.text.toString().takeIf { it.isNotBlank() }
 			)
+			setSuccess(null)
 			_events.send(Event.Dismiss)
 		}
 	}
