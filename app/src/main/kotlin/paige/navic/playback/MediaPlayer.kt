@@ -509,7 +509,7 @@ class MediaPlayer(
 							state.copy(
 								playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE }
 									?: _uiState.value.currentSong?.duration?.let {
-										dataSource.calculateCurrentVariableBitrate(
+										dataSource.getCurrentEstimateBitrate(
 											it.toLong(
 												DurationUnit.SECONDS
 											)

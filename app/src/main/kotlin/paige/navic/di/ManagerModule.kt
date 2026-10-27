@@ -67,7 +67,8 @@ val managerModule = module {
 			sessionManager = get(),
 			streamCacheManager = get(),
 			preferenceManager = get(),
-			dnsResolver = get()
+			dnsResolver = get(),
+			songDao = get()
 		)
 	}
 	single {

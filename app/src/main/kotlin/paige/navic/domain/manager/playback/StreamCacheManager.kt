@@ -41,6 +41,14 @@ class StreamCacheManager(
 	val size: Long
 		get() = cache.cacheSpace
 
+	fun getSongFileSize(songId: String): Long? {
+		val key = keyFor(songId)
+
+		if (cacheInstance.isCached(key, 0, -1)) {
+			return cacheInstance.getCachedBytes(key, 0, -1)
+		}
+		return null
+	}
 
 	fun keyFor(songId: String): String {
 		val server = "${sessionManager.instanceUrl}:${sessionManager.username}"

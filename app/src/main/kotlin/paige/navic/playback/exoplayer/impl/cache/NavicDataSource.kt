@@ -7,7 +7,6 @@
 package paige.navic.playback.exoplayer.impl.cache
 
 import android.net.Uri
-import android.os.StatFs
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.C
@@ -16,7 +15,6 @@ import androidx.media3.datasource.BaseDataSource
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.FileDataSource
-import androidx.media3.datasource.HttpUtil
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.extractor.metadata.icy.IcyHeaders
@@ -24,6 +22,7 @@ import dev.zt64.subsonic.api.model.MediaType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import paige.navic.database.dao.SongDao
 import paige.navic.domain.manager.playback.StreamCacheManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
@@ -36,14 +35,15 @@ import java.io.File
 
 @OptIn(UnstableApi::class)
 class NavicDataSource(
-    private val downloadManager: DownloadManager,
-    private val sessionManager: SessionManager,
-    private val streamCacheManager: StreamCacheManager,
-    preferenceManager: PreferenceManager,
-    dnsResolver: NavicDnsResolver,
+	private val downloadManager: DownloadManager,
+	private val sessionManager: SessionManager,
+	private val streamCacheManager: StreamCacheManager,
+	private val songDao: SongDao,
+	preferenceManager: PreferenceManager,
+	dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
 	class NavicDataSourceFactory(
-        private val dataSource: NavicDataSource
+		private val dataSource: NavicDataSource
 	) : DataSource.Factory {
 		override fun createDataSource(): DataSource {
 			return dataSource
@@ -59,8 +59,6 @@ class NavicDataSource(
 		}
 	}
 
-	private var totalBytesRead: Long = 0L
-
 	private val clientInfo = PlaybackUtils.buildClientInfo()
 
 	// TODO: figure out why KtorDataSource causes #650
@@ -71,7 +69,7 @@ class NavicDataSource(
 			dnsResolver,
 			customHeaders = preferenceManager.customHeadersMap(),
 
-		)
+			)
 	).setDefaultRequestProperties(
 		mapOf(
 			IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_NAME to IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE
@@ -90,7 +88,6 @@ class NavicDataSource(
 
 	override fun open(dataSpec: DataSpec): Long {
 		transferInitializing(dataSpec)
-		totalBytesRead = 0L
 		val uri = dataSpec.uri
 		currentUri = uri
 
@@ -141,27 +138,26 @@ class NavicDataSource(
 	override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
 		val bytesRead = wrappedDataSource?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT
 		if (bytesRead > 0) {
-			totalBytesRead += bytesRead
 			bytesTransferred(bytesRead)
 		}
 		return bytesRead
 	}
 
-	suspend fun calculateCurrentVariableBitrate(durationMs: Long): Int {
-		val headerSize = responseHeaders["Content-Length"]?.firstOrNull()?.let {
-			HttpUtil.getContentLength(
-				it, null
-			)
-		}
-			?: currentUri
-				?.lastPathSegment
-				?.let { songId -> downloadManager.getDownloadedFilePath(songId) }
-				?.let { StatFs(it).freeBytes }
-			?: totalBytesRead
+	suspend fun getCurrentEstimateBitrate(durationMs: Long): Int? {
+		val songId = currentUri?.lastPathSegment
+
+		val headerSize = songId
+					?.let { songId -> downloadManager.getDownloadedFilePath(songId)?.toFile() }
+					?.length()
+					?.takeIf { it > 0L }
+			?: songId?.let { streamCacheManager.getSongFileSize(it) }
+			?: return songId?.let { songDao.getSongById(it)?.bitRate }
 
 		if (durationMs <= 0 || headerSize <= 0) return -1
-		return (((headerSize * 8) / durationMs) / 1000).toInt()
+		return ((headerSize * 8) / durationMs).toInt()
 	}
+
+	fun String.toFile() = File(this)
 
 	override fun getUri(): Uri? {
 		return wrappedDataSource?.uri ?: currentUri
@@ -177,7 +173,7 @@ class NavicDataSource(
 		currentUri = null
 		try {
 			transferEnded()
-		} catch(_: NullPointerException) {
+		} catch (_: NullPointerException) {
 			// why does this give a NPE in the first place?
 		}
 	}
