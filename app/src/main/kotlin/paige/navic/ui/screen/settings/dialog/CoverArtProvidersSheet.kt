@@ -128,9 +128,11 @@ fun CoverArtProvidersSheet(
 		keyDialogHost?.let {
 			KeyDialog(
 				title = stringResource(R.string.action_edit_api_key, it.displayName),
-				value = preferenceManager.discordCoverArtApiKeyProviders[it.name] ?: return@let,
+				value = preferenceManager.discordCoverArtApiKeyProviders[it.name] ?: "",
 				onDismiss = { keyDialogHost = null },
 				onConfirm = { value ->
+					if (value.isBlank()) return@KeyDialog
+
 					val setting = preferenceManager.discordCoverArtApiKeyProviders.toMutableMap()
 					setting[it.name] = value
 					preferenceManager.discordCoverArtApiKeyProviders = setting
