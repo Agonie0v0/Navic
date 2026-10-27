@@ -24,11 +24,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy.Companion.detailPane
@@ -84,6 +84,7 @@ import paige.navic.playback.MediaPlayer
 import paige.navic.ui.component.layout.SideBar
 import paige.navic.ui.component.sheet.ChangelogSheet
 import paige.navic.ui.component.snackbar.NavicSnackBar
+import paige.navic.ui.component.snackbar.SwipeableSnackBarHost
 import paige.navic.ui.navigation.BottomSheetSceneStrategy
 import paige.navic.ui.navigation.NowPlayingSceneStrategy
 import paige.navic.ui.navigation.Screen
@@ -221,8 +222,11 @@ fun App() {
 					Scaffold(
 						modifier = Modifier.nestedScroll(scrollManager.connection),
 						snackbarHost = {
-							SnackbarHost(hostState = snackBarState) { snackBarData ->
-								NavicSnackBar(snackBarData = snackBarData)
+							SwipeableSnackBarHost(hostState = snackBarState) { snackBarData, offset ->
+								NavicSnackBar(
+									snackBarData = snackBarData,
+									modifier = Modifier.offset(x = offset)
+								)
 							}
 						}
 					) { _ ->

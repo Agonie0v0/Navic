@@ -419,6 +419,7 @@
 	<string name="action_rebuild_database">Rebuild database</string>
 	<string name="action_trigger_sync">Trigger manual sync</string>
 	<string name="action_test_exception_handler">Test exception handler</string>
+	<string name="action_test_snack_bar">Test snack bar</string>
 	<string name="action_dont_show_again">Don\'t show again</string>
 	<string name="action_open_settings">Open settings</string>
 	<string name="action_reset">Reset</string>

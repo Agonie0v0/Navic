@@ -31,6 +31,7 @@ import paige.navic.R
 import paige.navic.di.LocalNavStack
 import paige.navic.di.LocalSizeClass
 import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.ui.component.common.SegmentedListButton
 import paige.navic.ui.component.common.SegmentedListButtonDefaults
 import paige.navic.ui.component.common.SegmentedListItem
@@ -50,6 +51,7 @@ fun SettingsDeveloperScreen() {
 	val hideBack = sizeClass.widthSizeClass >= WindowWidthSizeClass.Medium
 	var exceptionConfirmationShown by rememberSaveable { mutableStateOf(false) }
 	val preferenceManager = koinInject<PreferenceManager>()
+	val snackBarManager = koinInject<SnackBarManager>()
 
 	Scaffold(
 		topBar = {
@@ -97,9 +99,14 @@ fun SettingsDeveloperScreen() {
 
 				SettingsGroup {
 					SegmentedListItem(
+						onClick = { snackBarManager.notify(R.string.action_test_snack_bar) },
+						content = { Text(stringResource(R.string.action_test_snack_bar)) },
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 2)
+					)
+					SegmentedListItem(
 						onClick = { exceptionConfirmationShown = true },
 						content = { Text(stringResource(R.string.action_test_exception_handler)) },
-						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 1),
+						shapes = SegmentedListItemDefaults.segmentedShapes(index = 1, count = 2),
 						colors = SegmentedListItemDefaults.segmentedErrorColors()
 					)
 				}
