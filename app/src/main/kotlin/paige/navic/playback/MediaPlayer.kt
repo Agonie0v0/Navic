@@ -507,7 +507,8 @@ class MediaPlayer(
 					scope.launch(Dispatchers.IO) {
 						_uiState.update { state ->
 							state.copy(
-								playbackBitrate = format.bitrate.takeIf { it != Format.NO_VALUE }
+								playbackBitrate = format.bitrate.takeIf { it > 0 }
+									?: format.averageBitrate.takeIf { it > 0 }
 									?: _uiState.value.currentSong?.duration?.let {
 										dataSource.getCurrentEstimateBitrate(
 											it.toLong(

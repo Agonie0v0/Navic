@@ -85,13 +85,14 @@ class NavicDataSource(
 
 	private var wrappedDataSource: DataSource? = null
 	private var currentUri: Uri? = null
+	private var songId: String? = null
 
 	override fun open(dataSpec: DataSpec): Long {
 		transferInitializing(dataSpec)
 		val uri = dataSpec.uri
 		currentUri = uri
 
-		val songId = if (uri.scheme == NAVIC_SCHEME && uri.host == NAVIC_HOST) {
+		songId = if (uri.scheme == NAVIC_SCHEME && uri.host == NAVIC_HOST) {
 			uri.lastPathSegment
 		} else {
 			null
@@ -99,21 +100,19 @@ class NavicDataSource(
 
 		var cacheKey: String? = null
 
-		val targetUri = runBlocking {
-			withContext(Dispatchers.IO) {
-				if (songId != null) {
-					val localPath = downloadManager.getDownloadedFilePath(songId)
+		val targetUri = songId?.let {
+			runBlocking {
+				withContext(Dispatchers.IO) {
+					val localPath = downloadManager.getDownloadedFilePath(it)
 					if (localPath != null) {
 						Uri.fromFile(File(localPath))
 					} else {
-						cacheKey = streamCacheManager.keyFor(songId)
-						resolveStreamUrl(songId)
+						cacheKey = streamCacheManager.keyFor(it)
+						resolveStreamUrl(it)
 					}
-				} else {
-					uri
 				}
 			}
-		}
+		} ?: uri
 
 		val resolvedDataSpecBuilder = dataSpec.buildUpon().setUri(targetUri)
 		if (cacheKey != null) {
@@ -143,9 +142,7 @@ class NavicDataSource(
 		return bytesRead
 	}
 
-	suspend fun getCurrentEstimateBitrate(durationMs: Long): Int? {
-		val songId = currentUri?.lastPathSegment
-
+	suspend fun getCurrentEstimateBitrate(durationSeconds: Long): Int? {
 		val headerSize = runCatching {
 			songId
 				?.let { songId -> downloadManager.getDownloadedFilePath(songId)?.toFile() }
@@ -153,10 +150,11 @@ class NavicDataSource(
 				?.takeIf { it > 0L }
 		}.getOrNull()
 			?: songId?.let { streamCacheManager.getSongFileSize(it) }
-			?: return songId?.let { songDao.getSongById(it)?.bitRate }
+			// Song bitRate is stored in kbps, playbackBitrate is compared in bps
+			?: return songId?.let { songDao.getSongById(it)?.bitRate?.times(1000) }
 
-		if (durationMs <= 0 || headerSize <= 0) return -1
-		return ((headerSize * 8) / durationMs).toInt()
+		if (durationSeconds <= 0 || headerSize <= 0) return null
+		return ((headerSize * 8) / durationSeconds).toInt()
 	}
 
 	fun String.toFile() = File(this)
@@ -173,6 +171,7 @@ class NavicDataSource(
 		wrappedDataSource?.close()
 		wrappedDataSource = null
 		currentUri = null
+		songId = null
 		try {
 			transferEnded()
 		} catch (_: NullPointerException) {

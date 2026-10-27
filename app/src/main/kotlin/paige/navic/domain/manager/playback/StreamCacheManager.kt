@@ -8,8 +8,10 @@ package paige.navic.domain.manager.playback
 
 import android.content.Context
 import androidx.annotation.OptIn
+import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import paige.navic.domain.manager.session.SessionManager
@@ -42,12 +44,8 @@ class StreamCacheManager(
 		get() = cache.cacheSpace
 
 	fun getSongFileSize(songId: String): Long? {
-		val key = keyFor(songId)
-
-		if (cacheInstance.isCached(key, 0, -1)) {
-			return cacheInstance.getCachedBytes(key, 0, -1)
-		}
-		return null
+		return ContentMetadata.getContentLength(cacheInstance.getContentMetadata(keyFor(songId)))
+			.takeIf { it != C.LENGTH_UNSET.toLong() }
 	}
 
 	fun keyFor(songId: String): String {
