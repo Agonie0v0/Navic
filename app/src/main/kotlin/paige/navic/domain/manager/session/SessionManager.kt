@@ -189,6 +189,7 @@ class SessionManager(
 	fun logout() {
 		settings["username"] = null
 		settings.remove("password")
+		ttlLruCache.clear()
 		_state.value = SessionState.Unauthenticated
 	}
 
