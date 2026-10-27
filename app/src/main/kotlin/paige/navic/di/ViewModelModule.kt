@@ -57,7 +57,7 @@ val viewModelModule = module {
 			preferenceManager = get(),
 			snackBarManager = get(),
 			audioGainManager = get(),
-			dataSource = get()
+			streamCacheManager = get()
 		)
 	}
 	single<NavicDnsResolver> {

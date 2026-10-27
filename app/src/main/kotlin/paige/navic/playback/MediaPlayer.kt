@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 import paige.navic.database.dao.AlbumDao
 import paige.navic.database.mapper.toDomainModel
 import paige.navic.domain.manager.playback.AudioGainManager
+import paige.navic.domain.manager.playback.StreamCacheManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.SessionManager
@@ -49,10 +50,10 @@ import paige.navic.domain.model.settings.ReplayGainMode
 import paige.navic.domain.repository.PlayerStateRepository
 import paige.navic.domain.repository.SongRepository
 import paige.navic.playback.exoplayer.ExoStateHolder
-import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.Companion.buildSongUri
 import paige.navic.ui.core.PlayerUiState
 import paige.navic.util.Logger
+import java.io.File
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -70,7 +71,7 @@ class MediaPlayer(
 	private val albumDao: AlbumDao,
 	private val sessionManager: SessionManager,
 	private val snackBarManager: SnackBarManager,
-	private val dataSource: NavicDataSource
+	private val streamCacheManager: StreamCacheManager
 ) {
 	private val _uiState = MutableStateFlow(PlayerUiState())
 	val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
@@ -496,6 +497,26 @@ class MediaPlayer(
 		}
 	}
 
+	private suspend fun getEstimateBitrate(): Int? {
+		_uiState.value.currentSong?.let { song ->
+			val duration = song.duration.toLong(DurationUnit.SECONDS)
+
+			val fileSize = runCatching {
+				downloadManager.getDownloadedFilePath(song.id)?.toFile()
+					?.length()
+					?.takeIf { it > 0L }
+			}.getOrNull()
+				?: streamCacheManager.getSongFileSize(song.id)
+				?: return null
+
+			if (duration <= 0 || fileSize <= 0) return null
+			return ((fileSize * 8) / duration).toInt()
+		}
+		return null
+	}
+
+	private fun String.toFile() = File(this)
+
 	private fun updatePlaybackProperties(tracks: Tracks) {
 		val audioGroups =
 			tracks.groups.firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.isSelected }
@@ -509,12 +530,9 @@ class MediaPlayer(
 							state.copy(
 								playbackBitrate = format.bitrate.takeIf { it > 0 }
 									?: format.averageBitrate.takeIf { it > 0 }
+									?: getEstimateBitrate()
 									?: _uiState.value.currentSong?.let {
-										dataSource.getCurrentEstimateBitrate(
-											it.duration.toLong(
-												DurationUnit.SECONDS
-											)
-										) ?: songRepository.getSongById(it.id)?.bitRate
+										songRepository.getSongById(it.id)?.bitRate
 									},
 								playbackSampleRate = format.sampleRate.takeIf { it != Format.NO_VALUE },
 								playbackMimeType = format.sampleMimeType,

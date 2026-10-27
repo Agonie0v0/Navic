@@ -41,10 +41,20 @@ class NavicDataSource(
 	dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
 	class NavicDataSourceFactory(
-		private val dataSource: NavicDataSource
+		private val downloadManager: DownloadManager,
+		private val sessionManager: SessionManager,
+		private val streamCacheManager: StreamCacheManager,
+		private val preferenceManager: PreferenceManager,
+		private val dnsResolver: NavicDnsResolver,
 	) : DataSource.Factory {
 		override fun createDataSource(): DataSource {
-			return dataSource
+			return NavicDataSource(
+				downloadManager,
+				sessionManager,
+				streamCacheManager,
+				preferenceManager,
+				dnsResolver
+			)
 		}
 	}
 
@@ -139,21 +149,6 @@ class NavicDataSource(
 		}
 		return bytesRead
 	}
-
-	suspend fun getCurrentEstimateBitrate(durationSeconds: Long): Int? {
-		val size = songId?.let { id ->
-			runCatching {
-				downloadManager.getDownloadedFilePath(id)?.toFile()
-					?.length()
-					?.takeIf { it > 0L }
-			}.getOrNull() ?: streamCacheManager.getSongFileSize(id)
-		} ?: return null
-
-		if (durationSeconds <= 0 || size <= 0) return null
-		return ((size * 8) / durationSeconds).toInt()
-	}
-
-	fun String.toFile() = File(this)
 
 	override fun getUri(): Uri? {
 		return wrappedDataSource?.uri ?: currentUri
