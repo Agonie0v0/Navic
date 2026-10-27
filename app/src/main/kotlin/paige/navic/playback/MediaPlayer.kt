@@ -199,7 +199,6 @@ class MediaPlayer(
 				override fun onIsPlayingChanged(isPlaying: Boolean) {
 					if (isPlaying) {
 						startProgressLoop()
-						applyAudioGain()
 					}
 
 					val currentSong = _uiState.value.currentSong
@@ -397,6 +396,7 @@ class MediaPlayer(
 				repeatMode = controller.repeatMode
 			)
 		}
+		applyAudioGain()
 		updateProgress()
 	}
 
