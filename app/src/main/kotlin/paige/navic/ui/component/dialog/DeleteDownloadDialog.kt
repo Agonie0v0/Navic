@@ -88,7 +88,7 @@ class DownloadDeletionHandler(
 					if (target.songIds.isNotEmpty()) {
 						downloadManager.deleteDownloadedCollection(target.songIds)
 					}
-					if (notifySnackBar) snackBarManager.notify(R.string.notice_deleted_download)
+					if (notifySnackBar) snackBarManager.notify(R.string.notice_deleted_downloads)
 					onConfirmed?.invoke()
 				}
 			}
@@ -99,7 +99,7 @@ class DownloadDeletionHandler(
 					pendingCallback = onConfirmed
 				} else {
 					downloadManager.clearAllDownloads()
-					if (notifySnackBar) snackBarManager.notify(R.string.notice_deleted_download)
+					if (notifySnackBar) snackBarManager.notify(R.string.notice_deleted_downloads)
 					onConfirmed?.invoke()
 				}
 			}
