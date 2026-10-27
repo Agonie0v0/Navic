@@ -55,7 +55,7 @@ class ExoDiscordIntegration(
 	private val powerSaveChangedFlow = callbackFlow {
 		val receiver = object : BroadcastReceiver() {
 			override fun onReceive(p0: Context?, p1: Intent?) {
-				scope.launch {
+				launch {
 					trySend(powerManager.isPowerSaveMode)
 				}
 			}
@@ -100,7 +100,7 @@ class ExoDiscordIntegration(
 		newPosition: Player.PositionInfo,
 		reason: @Player.DiscontinuityReason Int
 	) {
-		scope.launch {
+		launch {
 			val isSeekOrRepeat = reason == Player.DISCONTINUITY_REASON_SEEK ||
 				reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION
 
@@ -116,7 +116,7 @@ class ExoDiscordIntegration(
 	}
 
 	override fun onIsPlayingChanged(isPlaying: Boolean) {
-		scope.launch {
+		launch {
 			if (!isPlaying) {
 				setCurrentActivity(null)
 			} else {
