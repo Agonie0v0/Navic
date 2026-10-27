@@ -155,7 +155,9 @@ class ExoDiscordIntegration(
 			client.clearActivity()
 
 			if (client.isConnectionReady && !isIntegrationEnabled()) {
-				client.disconnect()
+				client.setActivity(null) {
+					client.disconnect()
+				}
 			}
 		} catch (ex: Exception) {
 			Log.e(TAG, "could not set current activity", ex)
