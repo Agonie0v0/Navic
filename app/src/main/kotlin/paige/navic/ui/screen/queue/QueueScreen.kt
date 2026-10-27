@@ -68,7 +68,8 @@ fun QueueScreen() {
 	val playerState by player.uiState.collectAsStateWithLifecycle()
 	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 	val downloadedSongs by viewModel.downloadedSongs.collectAsStateWithLifecycle()
-	val queue = playerState.queue
+	val queue = playerState.activeQueue
+	val currentIndex = playerState.activeIndex
 	val haptic = LocalHapticFeedback.current
 	val preferenceManager = koinInject<PreferenceManager>()
 	val backStack = LocalNavStack.current
@@ -77,20 +78,20 @@ fun QueueScreen() {
 		QueueInfoType.Full -> pluralStringResource(R.plurals.count_songs, queue.size, queue.size)
 		QueueInfoType.Remaining -> pluralStringResource(
 			R.plurals.count_remaining_songs,
-			queue.size - playerState.currentIndex,
-			queue.size - playerState.currentIndex
+			queue.size - currentIndex,
+			queue.size - currentIndex
 		)
 	}
-	val durationText = remember(queue, playerState.progress, playerState.currentIndex) {
+	val durationText = remember(queue, playerState.progress, currentIndex) {
 		var totalMillis = queue.sumOf { it.duration.inWholeMilliseconds } // ms because precision
 
 		if (preferenceManager.queueInfoType == QueueInfoType.Remaining) {
 			// duration of all songs that are before the current index
 			val pastMillis =
-				queue.take(playerState.currentIndex).sumOf { it.duration.inWholeMilliseconds }
+				queue.take(currentIndex).sumOf { it.duration.inWholeMilliseconds }
 
 			// elapsed duration of the current index
-			val currentTrack = queue.getOrNull(playerState.currentIndex)
+			val currentTrack = queue.getOrNull(currentIndex)
 			val elapsedCurrentSeconds =
 				(currentTrack?.duration?.inWholeMilliseconds ?: 0L) * playerState.progress
 
@@ -202,12 +203,12 @@ fun QueueScreen() {
 				val adapter = recyclerView.adapter as QueueRecyclerAdapter
 				adapter.update(
 					queue = queue,
-					currentIndex = playerState.currentIndex,
+					currentIndex = currentIndex,
 					isPaused = playerState.isPaused,
 					isOnline = isReachable,
 					downloadedSongs = downloadedSongs,
 					onPlay = { index ->
-						if (playerState.currentIndex != index) {
+						if (currentIndex != index) {
 							player.playAt(index)
 						}
 					},
@@ -220,7 +221,7 @@ fun QueueScreen() {
 						player.moveQueueItem(from, to)
 					})
 				if (adapter.shouldScrollToCurrentIndex) {
-					recyclerView.scrollToPosition(playerState.currentIndex.coerceAtLeast(0))
+					recyclerView.scrollToPosition(currentIndex.coerceAtLeast(0))
 					adapter.shouldScrollToCurrentIndex = false
 				}
 			})
