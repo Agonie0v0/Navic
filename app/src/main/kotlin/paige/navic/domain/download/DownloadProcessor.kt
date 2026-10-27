@@ -21,6 +21,7 @@ import io.ktor.client.request.prepareRequest
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
@@ -210,6 +211,7 @@ class DownloadProcessor(
 			preferenceManager.downloadQuality.container
 		}
 
+		val isOriginal = container.isNullOrBlank() && bitrate <= 0
 		val extension = container?.takeIf { it.isNotBlank() } ?: song.fileExtension ?: "bin"
 		val finalPath = storageManager.getDownloadPath(
 			song.id,
@@ -251,7 +253,9 @@ class DownloadProcessor(
 		}
 
 		try {
+			var mimeType = song.mimeType
 			request.execute { response ->
+				mimeType = response.headers[HttpHeaders.ContentType] ?: mimeType
 				Logger.i("DownloadProcessor", "writing download for ${song.id}")
 				storageManager.saveFile(tempPath, response.bodyAsChannel())
 				Logger.i("DownloadProcessor", "wrote download for ${song.id}")
@@ -268,7 +272,10 @@ class DownloadProcessor(
 					song.id,
 					DownloadStatus.DOWNLOADED,
 					1f,
-					finalPath
+					finalPath,
+					storageManager.getFileSize(finalPath),
+					isOriginal,
+					mimeType
 				)
 			)
 		} catch (e: Exception) {

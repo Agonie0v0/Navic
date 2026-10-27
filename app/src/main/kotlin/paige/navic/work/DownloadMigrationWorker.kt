@@ -71,7 +71,10 @@ class DownloadMigrationWorker(
 								songId = download.songId,
 								status = DownloadStatus.DOWNLOADED,
 								progress = 1f,
-								filePath = targetPath
+								filePath = targetPath,
+								fileSize = download.fileSize,
+								isOriginal = download.isOriginal,
+								mimeType = download.mimeType
 							)
 						)
 					} else {

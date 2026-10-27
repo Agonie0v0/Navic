@@ -21,7 +21,10 @@ data class DownloadEntity(
 	@PrimaryKey val songId: String,
 	val status: DownloadStatus,
 	val progress: Float = 0f,
-	val filePath: String? = null
+	val filePath: String? = null,
+	val fileSize: Long? = null,
+	val isOriginal: Boolean? = null,
+	val mimeType: String? = null
 )
 
 @Serializable
