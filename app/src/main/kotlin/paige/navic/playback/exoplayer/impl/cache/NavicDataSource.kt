@@ -128,8 +128,8 @@ class NavicDataSource(
 					if (localPath != null) {
 						Uri.fromFile(File(localPath))
 					} else {
-						// shortcut: the disk cache is keyed by song only, so quality changes still play already-cached audio
-						cacheKey = streamCacheManager.keyFor(it)
+						val (bitrateKbps, format) = currentQuality()
+						cacheKey = streamCacheManager.keyFor(it, bitrateKbps, format)
 						resolveStreamUrl(it)
 					}
 				}

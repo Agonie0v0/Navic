@@ -25,7 +25,7 @@ class StreamCacheManager(
 ) {
 	private companion object {
 		const val MAX_CACHE_BYTES = (1024L * 5) * 1024 * 1024
-		const val CACHE_KEY_VERSION = "v1"
+		const val CACHE_KEY_VERSION = "v2"
 	}
 
 	private val cacheDirectory = File(context.cacheDir, "stream_cache")
@@ -48,10 +48,10 @@ class StreamCacheManager(
 			.takeIf { it != C.LENGTH_UNSET.toLong() }
 	}
 
-	fun keyFor(songId: String): String {
+	fun keyFor(songId: String, bitrateKbps: Int = 0, format: String? = null): String {
 		val server = "${sessionManager.instanceUrl}:${sessionManager.username}"
 
-		return "$CACHE_KEY_VERSION/${server.xxHash32()}/$songId"
+		return "$CACHE_KEY_VERSION/${server.xxHash32()}/$songId|$bitrateKbps|${format.orEmpty()}"
 	}
 
 	fun clear() {
