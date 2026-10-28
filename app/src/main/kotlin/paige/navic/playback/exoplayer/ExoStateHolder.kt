@@ -56,11 +56,11 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import paige.navic.playback.exoplayer.impl.listeners.ExoDiscordIntegration
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.runtime.StorageManager
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
+import paige.navic.playback.exoplayer.impl.listeners.ExoDiscordIntegration
 import paige.navic.playback.exoplayer.impl.playback.ExoAudioGainProcessor
 import paige.navic.playback.exoplayer.impl.util.ExoArtworkLoader
 import kotlin.time.Duration.Companion.seconds
@@ -371,6 +371,21 @@ class ExoStateHolder : KoinComponent {
 			it.release()
 		}
 		isInitialized = !isInitialized
+	}
+
+	fun reloadNetworkDataSource() {
+		if (!isInitialized) return
+
+		val player = playerInstance
+		val mediaItemIndex = player.currentMediaItemIndex
+		val mediaItem = player.currentMediaItem ?: return
+		if (mediaItemIndex == C.INDEX_UNSET) return
+
+		val position = player.currentPosition.coerceAtLeast(0L)
+		val playWhenReady = player.playWhenReady
+		player.replaceMediaItem(mediaItemIndex, mediaItem)
+		player.seekTo(mediaItemIndex, position)
+		player.playWhenReady = playWhenReady
 	}
 
 	companion object {

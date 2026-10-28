@@ -6,6 +6,11 @@
 
 package paige.navic.di
 
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
+import androidx.media3.extractor.metadata.icy.IcyHeaders
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import paige.navic.discord.CoverArtUploadManager
@@ -33,6 +38,9 @@ import paige.navic.domain.sync.SyncActionProcessor
 import paige.navic.domain.sync.SyncCoordinator
 import paige.navic.playback.exoplayer.ExoStateHolder
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.NavicDataSourceFactory
+import paige.navic.util.network.NavicDnsResolver
+import paige.navic.util.network.createOkHttpClient
+import paige.navic.util.network.getProxyUrlOrNull
 
 val managerModule = module {
 	singleOf(::AppIconManager)
@@ -60,6 +68,29 @@ val managerModule = module {
 	single(createdAtStart = true) {
 		SyncManager(get(), get(), get(), get(), get())
 	}
+	single<() -> DataSource.Factory> {
+		val preferenceManager: PreferenceManager = get()
+		val dnsResolver = get<NavicDnsResolver>()
+
+		@OptIn(UnstableApi::class)
+		val provider: () -> DataSource.Factory = {
+			// TODO: figure out why KtorDataSource causes #650
+			OkHttpDataSource.Factory(
+				createOkHttpClient(
+					proxyUrl = preferenceManager.proxyUrl.getProxyUrlOrNull(),
+					trustAllCerts = preferenceManager.dangerousSslNoopEnabled,
+					dnsResolver,
+					customHeaders = preferenceManager.customHeadersMap()
+				)
+			).setDefaultRequestProperties(
+				mapOf(
+					IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_NAME to
+						IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE
+				)
+			)
+		}
+		provider
+	}
 	single {
 		NavicDataSourceFactory(
 			downloadManager = get(),
@@ -67,7 +98,7 @@ val managerModule = module {
 			streamCacheManager = get(),
 			preferenceManager = get(),
 			connectivityManager = get(),
-			dnsResolver = get()
+			upstreamFactoryProvider = get()
 		)
 	}
 	singleOf(::ExoStateHolder)

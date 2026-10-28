@@ -37,6 +37,7 @@ import paige.navic.R
 import paige.navic.di.LocalNavStack
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.playback.exoplayer.ExoStateHolder
 import paige.navic.ui.component.common.SegmentedListItemDefaults
 import paige.navic.ui.component.layout.NestedTopBar
 import paige.navic.ui.navigation.Screen
@@ -52,6 +53,7 @@ fun SettingsConnectionOptionsScreen() {
 
 	val sessionManager = koinInject<SessionManager>()
 	val preferenceManager = koinInject<PreferenceManager>()
+	val exoStateHolder = koinInject<ExoStateHolder>()
 
 	var instanceUrlField by remember(sessionManager.instanceUrl) {
 		mutableStateOf(sessionManager.instanceUrl)
@@ -82,6 +84,7 @@ fun SettingsConnectionOptionsScreen() {
 		if (PROXY_URL_REGEX.matches(proxyUrlField) || proxyUrlField.isBlank()) {
 			preferenceManager.proxyUrl = url
 			sessionManager.refreshClient()
+			exoStateHolder.reloadNetworkDataSource()
 		}
 	}
 
@@ -92,6 +95,7 @@ fun SettingsConnectionOptionsScreen() {
 		sslNoopChecked = bool
 		preferenceManager.dangerousSslNoopEnabled = bool
 		sessionManager.refreshClient()
+		exoStateHolder.reloadNetworkDataSource()
 	}
 
 	Scaffold(

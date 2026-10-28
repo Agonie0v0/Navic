@@ -41,6 +41,7 @@ import paige.navic.domain.manager.playback.StreamCacheManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.connectivity.ConnectivityManager
 import paige.navic.domain.manager.ui.SnackBarManager
 import paige.navic.domain.model.DomainAlbum
 import paige.navic.domain.model.DomainExplicitStatus
@@ -52,6 +53,7 @@ import paige.navic.domain.model.settings.ReplayGainMode
 import paige.navic.domain.repository.PlayerStateRepository
 import paige.navic.domain.repository.SongRepository
 import paige.navic.playback.exoplayer.ExoStateHolder
+import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.Companion.buildCoverUri
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource.Companion.buildSongUri
 import paige.navic.ui.core.PlayerUiState
@@ -73,7 +75,8 @@ class MediaPlayer(
 	private val albumDao: AlbumDao,
 	private val sessionManager: SessionManager,
 	private val snackBarManager: SnackBarManager,
-	private val streamCacheManager: StreamCacheManager
+	private val streamCacheManager: StreamCacheManager,
+	private val connectivityManager: ConnectivityManager
 ) {
 	private val _uiState = MutableStateFlow(PlayerUiState())
 	val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
@@ -111,35 +114,37 @@ class MediaPlayer(
 			compareBy({ it.discNumber }, { it.trackNumber })
 		) else songs
 
-	private fun playNowInternal(songs: List<DomainSong>, startIndex: Int) = this@MediaPlayer.launch {
-		val shuffle = uiState.value.isShuffleEnabled
-		val index = startIndex.coerceIn(0, (songs.size - 1).coerceAtLeast(0))
-		val order = if (shuffle && songs.isNotEmpty()) shuffledOrder(songs.size, index) else emptyList()
-		val items = withContext(Dispatchers.Default) { songs.map { it.toMediaItem() } }
+	private fun playNowInternal(songs: List<DomainSong>, startIndex: Int) =
+		this@MediaPlayer.launch {
+			val shuffle = uiState.value.isShuffleEnabled
+			val index = startIndex.coerceIn(0, (songs.size - 1).coerceAtLeast(0))
+			val order =
+				if (shuffle && songs.isNotEmpty()) shuffledOrder(songs.size, index) else emptyList()
+			val items = withContext(Dispatchers.Default) { songs.map { it.toMediaItem() } }
 
-		_uiState.update { state ->
-			state.copy(
-				queue = songs,
-				shuffleOrder = order,
-				currentIndex = if (songs.isEmpty()) -1 else index,
-				currentSong = songs.getOrNull(index),
-				progress = 0f
-			)
-		}
-
-		controller?.let { player ->
-			if (songs.isEmpty()) {
-				player.clearMediaItems()
-			} else {
-				player.setMediaItems(items, index, 0L)
-				if (order.isNotEmpty()) pushShuffleOrder(order)
-				player.shuffleModeEnabled = shuffle
-				player.prepare()
-				player.play()
+			_uiState.update { state ->
+				state.copy(
+					queue = songs,
+					shuffleOrder = order,
+					currentIndex = if (songs.isEmpty()) -1 else index,
+					currentSong = songs.getOrNull(index),
+					progress = 0f
+				)
 			}
+
+			controller?.let { player ->
+				if (songs.isEmpty()) {
+					player.clearMediaItems()
+				} else {
+					player.setMediaItems(items, index, 0L)
+					if (order.isNotEmpty()) pushShuffleOrder(order)
+					player.shuffleModeEnabled = shuffle
+					player.prepare()
+					player.play()
+				}
+			}
+			checkAndAutoFillQueue()
 		}
-		checkAndAutoFillQueue()
-	}
 
 	fun togglePlay() {
 		if (!uiState.value.isPaused) {
@@ -355,16 +360,28 @@ class MediaPlayer(
 				override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
 					if (shuffleModeEnabled) {
 						val state = _uiState.value
-						val order = if (!state.isShuffleEnabled || !isValidShuffleOrder(state.shuffleOrder, state.queue.size)) {
+						val order = if (!state.isShuffleEnabled || !isValidShuffleOrder(
+								state.shuffleOrder,
+								state.queue.size
+							)
+						) {
 							if (state.queue.isEmpty()) emptyList()
-							else shuffledOrder(state.queue.size, state.currentIndex.coerceAtLeast(0))
+							else shuffledOrder(
+								state.queue.size,
+								state.currentIndex.coerceAtLeast(0)
+							)
 						} else {
 							state.shuffleOrder
 						}
 						_uiState.update { it.copy(isShuffleEnabled = true, shuffleOrder = order) }
 						pushShuffleOrder(order)
 					} else {
-						_uiState.update { it.copy(isShuffleEnabled = false, shuffleOrder = emptyList()) }
+						_uiState.update {
+							it.copy(
+								isShuffleEnabled = false,
+								shuffleOrder = emptyList()
+							)
+						}
 					}
 				}
 
@@ -473,7 +490,8 @@ class MediaPlayer(
 			return
 		}
 
-		val nextNormalIdx = if (state.isShuffled) state.shuffleOrder[nextAvailableIdx] else nextAvailableIdx
+		val nextNormalIdx =
+			if (state.isShuffled) state.shuffleOrder[nextAvailableIdx] else nextAvailableIdx
 
 		if (nextAvailableIdx <= currentIdx) {
 			Logger.i(
@@ -661,7 +679,10 @@ class MediaPlayer(
 					?.takeIf { it > 0L }
 			}.getOrNull()
 				?: streamCacheManager.getSongFileSize(song.id)
-				?: return null
+				?: return NavicDataSource.getCurrentQuality(
+					preferenceManager,
+					connectivityManager
+				).first.takeIf { it > 0 }?.times(1000)
 
 			if (duration <= 0 || fileSize <= 0) return null
 			return ((fileSize * 8) / duration).toInt()
@@ -684,7 +705,8 @@ class MediaPlayer(
 						// i don't like this but oh well
 						val currentSong = _uiState.value.currentSong ?: return@launch
 						val songMimeType = currentSong.mimeType
-						val isOriginalFile = format.sampleMimeType == songMimeType || format.containerMimeType == songMimeType
+						val isOriginalFile =
+							format.sampleMimeType == songMimeType || format.containerMimeType == songMimeType
 						val fallbackBitrate = if (isOriginalFile) {
 							currentSong.bitRate?.times(1000)
 						} else {

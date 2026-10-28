@@ -16,8 +16,6 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.FileDataSource
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.okhttp.OkHttpDataSource
-import androidx.media3.extractor.metadata.icy.IcyHeaders
 import dev.zt64.subsonic.api.model.MediaType
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -30,9 +28,6 @@ import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.connectivity.ConnectivityManager
 import paige.navic.playback.PlaybackUtils
 import paige.navic.util.Logger
-import paige.navic.util.network.NavicDnsResolver
-import paige.navic.util.network.createOkHttpClient
-import paige.navic.util.network.getProxyUrlOrNull
 import java.io.File
 
 @OptIn(UnstableApi::class)
@@ -42,8 +37,10 @@ class NavicDataSource(
 	private val streamCacheManager: StreamCacheManager,
 	private val preferenceManager: PreferenceManager,
 	private val connectivityManager: ConnectivityManager,
-	dnsResolver: NavicDnsResolver,
+	upstreamFactoryProvider: () -> DataSource.Factory
 ) : BaseDataSource(true) {
+	private val upstreamFactory = DataSource.Factory { upstreamFactoryProvider().createDataSource() }
+
 	val ttlLruCache
 		get() = sessionManager.ttlLruCache
 
@@ -53,7 +50,7 @@ class NavicDataSource(
 		private val streamCacheManager: StreamCacheManager,
 		private val preferenceManager: PreferenceManager,
 		private val connectivityManager: ConnectivityManager,
-		private val dnsResolver: NavicDnsResolver,
+		private val upstreamFactoryProvider: () -> DataSource.Factory
 	) : DataSource.Factory {
 		override fun createDataSource(): DataSource {
 			return NavicDataSource(
@@ -62,7 +59,7 @@ class NavicDataSource(
 				streamCacheManager,
 				preferenceManager,
 				connectivityManager,
-				dnsResolver
+				upstreamFactoryProvider
 			)
 		}
 	}
@@ -80,21 +77,21 @@ class NavicDataSource(
 		fun String.buildCoverUri(): Uri {
 			return "$NAVIC_SCHEME://$NAVIC_COVER_HOST/$this".toUri()
 		}
-	}
 
-	// TODO: figure out why KtorDataSource causes #650
-	private val upstreamFactory = OkHttpDataSource.Factory(
-		createOkHttpClient(
-			proxyUrl = preferenceManager.proxyUrl.getProxyUrlOrNull(),
-			trustAllCerts = preferenceManager.dangerousSslNoopEnabled,
-			dnsResolver,
-			customHeaders = preferenceManager.customHeadersMap()
-		)
-	).setDefaultRequestProperties(
-		mapOf(
-			IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_NAME to IcyHeaders.REQUEST_HEADER_ENABLE_METADATA_VALUE
-		)
-	)
+		fun getCurrentQuality(preferenceManager: PreferenceManager, connectivityManager: ConnectivityManager): Pair<Int, String?> {
+			if (preferenceManager.isAdvancedTranscodingActive) {
+				return preferenceManager.customMaxBitrate to
+					preferenceManager.customFormat.trim().takeIf { it.isNotEmpty() }
+			}
+
+			val quality = if (connectivityManager.isMetered.value) {
+				preferenceManager.streamingQualityCellular
+			} else {
+				preferenceManager.streamingQualityWifi
+			}
+			return quality.bitrate to quality.container
+		}
+	}
 
 	private val cacheDataSourceFactory by lazy {
 		CacheDataSource.Factory()
@@ -128,7 +125,7 @@ class NavicDataSource(
 					if (localPath != null) {
 						Uri.fromFile(File(localPath))
 					} else {
-						val (bitrateKbps, format) = currentQuality()
+						val (bitrateKbps, format) = getCurrentQuality(preferenceManager, connectivityManager)
 						cacheKey = streamCacheManager.keyFor(it, bitrateKbps, format)
 						resolveStreamUrl(it)
 					}
@@ -184,19 +181,7 @@ class NavicDataSource(
 		}
 	}
 
-	private fun currentQuality(): Pair<Int, String?> {
-		if (preferenceManager.isAdvancedTranscodingActive) {
-			return preferenceManager.customMaxBitrate to
-				preferenceManager.customFormat.trim().takeIf { it.isNotEmpty() }
-		}
 
-		val quality = if (connectivityManager.isMetered.value) {
-			preferenceManager.streamingQualityCellular
-		} else {
-			preferenceManager.streamingQualityWifi
-		}
-		return quality.bitrate to quality.container
-	}
 
 	private fun String.toStreamUri(): Uri {
 		return toUri().buildUpon()
@@ -205,7 +190,7 @@ class NavicDataSource(
 	}
 
 	private suspend fun resolveStreamUrl(id: String): Uri {
-		val (bitrateKbps, format) = currentQuality()
+		val (bitrateKbps, format) = getCurrentQuality(preferenceManager, connectivityManager)
 		val cacheKey = "$id|$bitrateKbps|${format.orEmpty()}"
 		val cachedStreamUrl = ttlLruCache.get(cacheKey)
 
