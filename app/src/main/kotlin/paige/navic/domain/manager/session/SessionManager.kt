@@ -15,7 +15,6 @@ import dev.zt64.subsonic.api.model.User
 import dev.zt64.subsonic.client.SubsonicAuth
 import dev.zt64.subsonic.client.SubsonicClient
 import io.ktor.client.plugins.UserAgent
-import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import kotlinx.coroutines.CoroutineScope
@@ -27,7 +26,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.util.Logger
 import paige.navic.util.TTLLruCache
@@ -38,7 +36,6 @@ import paige.navic.util.network.buildKtorEngine
 import paige.navic.util.network.createOkHttpClient
 import paige.navic.util.network.getProxyUrlOrNull
 import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 sealed interface SessionState {
@@ -146,7 +143,6 @@ class SessionManager(
 			install(UserAgent) {
 				agent = USER_AGENT
 			}
-			install(HttpCache)
 
 			val customHeaders = preferenceManager.customHeadersMap()
 			if (customHeaders.isNotEmpty()) {
@@ -172,10 +168,7 @@ class SessionManager(
 	) {
 		val client = createClient(instanceUrl, username, password)
 
-		// TODO: proper timeout...?
-		val pingResult = withTimeout(2.seconds) {
-			client.ping()
-		}
+		val pingResult = client.ping()
 		Logger.i(TAG, "Ping result: $pingResult")
 
 		val user = fetchCurrentUser(username, client)
