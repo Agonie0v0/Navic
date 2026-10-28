@@ -400,20 +400,14 @@ private class QueueRecyclerAdapter : RecyclerView.Adapter<QueueRecyclerAdapter.V
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 		val composeView = ComposeView(parent.context).apply {
-			layoutParams = ViewGroup.LayoutParams(
+			layoutParams = RecyclerView.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
 			)
 			setViewCompositionStrategy(
 				ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
 			)
 		}
-		val container = QueueRowLayout(parent.context).apply {
-			layoutParams = RecyclerView.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-			)
-			addView(composeView)
-		}
-		return ViewHolder(composeView, container)
+		return ViewHolder(composeView)
 	}
 
 	override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -447,22 +441,5 @@ private class QueueRecyclerAdapter : RecyclerView.Adapter<QueueRecyclerAdapter.V
 		}
 	}
 
-	class ViewHolder(val view: ComposeView, container: android.view.View) :
-		RecyclerView.ViewHolder(container)
-}
-
-// UGLY HACK: fix queue taking too long to open
-private class QueueRowLayout(context: Context) : android.widget.FrameLayout(context) {
-	// 48dp cover art + 2 * 10dp content padding
-	private val fallbackHeight = (68 * context.resources.displayMetrics.density).toInt()
-
-	override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-		if (measuredHeight == 0) {
-			setMeasuredDimension(
-				measuredWidth.takeIf { it > 0 } ?: MeasureSpec.getSize(widthMeasureSpec),
-				fallbackHeight
-			)
-		}
-	}
+	class ViewHolder(val view: ComposeView) : RecyclerView.ViewHolder(view)
 }
