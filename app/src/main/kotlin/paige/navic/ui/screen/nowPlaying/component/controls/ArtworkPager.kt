@@ -41,8 +41,16 @@ fun NowPlayingArtworkPager(
 	val preferenceManager = koinInject<PreferenceManager>()
 	val player = koinInject<MediaPlayer>()
 	val playerState by player.uiState.collectAsStateWithLifecycle()
-	val queue = playerState.activeQueue
-	val currentIndex = playerState.activeIndex
+	val queue = remember(playerState.queue, playerState.shuffleOrder) {
+		playerState.activeQueue
+	}
+	val currentIndex = remember(
+		playerState.queue,
+		playerState.shuffleOrder,
+		playerState.currentIndex
+	) {
+		playerState.activeIndex
+	}
 
 	val pagerState = rememberPagerState(
 		initialPage = currentIndex.coerceAtLeast(0),

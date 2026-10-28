@@ -46,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.R
@@ -65,58 +67,27 @@ import kotlin.time.Duration.Companion.milliseconds
 fun QueueScreen() {
 	val viewModel = koinViewModel<QueueViewModel>()
 	val player = koinInject<MediaPlayer>()
-	val playerState by player.uiState.collectAsStateWithLifecycle()
+	val playerState by remember(player) {
+		player.uiState
+			.map { it.copy(progress = 0f) }
+			.distinctUntilChanged()
+	}.collectAsStateWithLifecycle(initialValue = player.uiState.value.copy(progress = 0f))
+
 	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 	val downloadedSongs by viewModel.downloadedSongs.collectAsStateWithLifecycle()
-	val queue = playerState.activeQueue
-	val currentIndex = playerState.activeIndex
+	val queue = remember(playerState.queue, playerState.shuffleOrder) {
+		playerState.activeQueue
+	}
+	val currentIndex = remember(
+		playerState.queue,
+		playerState.shuffleOrder,
+		playerState.currentIndex
+	) {
+		playerState.activeIndex
+	}
 	val haptic = LocalHapticFeedback.current
 	val preferenceManager = koinInject<PreferenceManager>()
 	val backStack = LocalNavStack.current
-
-	val songCountText = when (preferenceManager.queueInfoType) {
-		QueueInfoType.Full -> pluralStringResource(R.plurals.count_songs, queue.size, queue.size)
-		QueueInfoType.Remaining -> pluralStringResource(
-			R.plurals.count_remaining_songs,
-			queue.size - currentIndex,
-			queue.size - currentIndex
-		)
-	}
-	val durationText = remember(queue, playerState.progress, currentIndex) {
-		var totalMillis = queue.sumOf { it.duration.inWholeMilliseconds } // ms because precision
-
-		if (preferenceManager.queueInfoType == QueueInfoType.Remaining) {
-			// duration of all songs that are before the current index
-			val pastMillis =
-				queue.take(currentIndex).sumOf { it.duration.inWholeMilliseconds }
-
-			// elapsed duration of the current index
-			val currentTrack = queue.getOrNull(currentIndex)
-			val elapsedCurrentSeconds =
-				(currentTrack?.duration?.inWholeMilliseconds ?: 0L) * playerState.progress
-
-			// deduct previous durations plus current elapsed duration
-			totalMillis -= pastMillis + elapsedCurrentSeconds.toLong()
-
-			// wow, that's confusing as shit for some reason
-		}
-
-		// then we format manually because Duration.toString() doesn't let u disable decimals
-		val totalSeconds = totalMillis.milliseconds.inWholeSeconds
-		val hours = totalSeconds / 3600
-		val minutes = (totalSeconds % 3600) / 60
-		val seconds = totalSeconds % 60
-
-		buildString {
-			if (hours > 0) append("${hours}h ")
-			if (minutes > 0 || hours > 0) append("${minutes}m ")
-			append("${seconds}s")
-		}
-	}
-	val formattedDurationText = when (preferenceManager.queueInfoType) {
-		QueueInfoType.Full -> durationText
-		QueueInfoType.Remaining -> stringResource(R.string.info_duration_left, durationText)
-	}
 
 	Column(modifier = Modifier.fillMaxSize()) {
 		if (queue.isNotEmpty()) {
@@ -137,13 +108,10 @@ fun QueueScreen() {
 								}
 						}, verticalAlignment = Alignment.CenterVertically
 				) {
-					Text(
-						text = "$songCountText • $formattedDurationText",
-						style = MaterialTheme.typography.titleMedium,
-						fontWeight = FontWeight.SemiBold,
-						fontFamily = defaultFont(round = 100f),
-						color = MaterialTheme.colorScheme.onSurfaceVariant,
-						textAlign = TextAlign.Center
+					QueueInfoText(
+						player = player,
+						queue = queue,
+						currentIndex = currentIndex
 					)
 				}
 				FilledTonalButton(
@@ -226,6 +194,83 @@ fun QueueScreen() {
 				}
 			})
 	}
+}
+
+@Composable
+private fun QueueInfoText(
+	player: MediaPlayer,
+	queue: List<DomainSong>,
+	currentIndex: Int
+) {
+	val preferenceManager = koinInject<PreferenceManager>()
+	val queueInfoType = preferenceManager.queueInfoType
+	val progress by remember(player) {
+		player.uiState
+			.map { it.progress }
+			.distinctUntilChanged()
+	}.collectAsStateWithLifecycle(initialValue = player.uiState.value.progress)
+
+	val songCountText = when (queueInfoType) {
+		QueueInfoType.Full -> pluralStringResource(R.plurals.count_songs, queue.size, queue.size)
+		QueueInfoType.Remaining -> pluralStringResource(
+			R.plurals.count_remaining_songs,
+			queue.size - currentIndex,
+			queue.size - currentIndex
+		)
+	}
+	val totalMillis = remember(queue) {
+		queue.sumOf { it.duration.inWholeMilliseconds } // ms because precision
+	}
+	// duration of all songs that are before the current index
+	val pastMillis = remember(queue, currentIndex) {
+		queue.take(currentIndex.coerceIn(0, queue.size))
+			.sumOf { it.duration.inWholeMilliseconds }
+	}
+	val currentTrackMillis = remember(queue, currentIndex) {
+		queue.getOrNull(currentIndex)?.duration?.inWholeMilliseconds ?: 0L
+	}
+	val durationText = remember(
+		queueInfoType,
+		totalMillis,
+		pastMillis,
+		currentTrackMillis,
+		progress
+	) {
+		var remainingMillis = totalMillis
+
+		if (queueInfoType == QueueInfoType.Remaining) {
+			// deduct previous durations plus current elapsed duration
+			val elapsedCurrentMillis = (currentTrackMillis * progress).toLong()
+			remainingMillis -= pastMillis + elapsedCurrentMillis
+
+			// wow, that's confusing as shit for some reason
+		}
+
+		// then we format manually because Duration.toString() doesn't let u disable decimals
+		val totalSeconds = remainingMillis.milliseconds.inWholeSeconds
+		val hours = totalSeconds / 3600
+		val minutes = (totalSeconds % 3600) / 60
+		val seconds = totalSeconds % 60
+
+		buildString {
+			if (hours > 0) append("${hours}h ")
+			if (minutes > 0 || hours > 0) append("${minutes}m ")
+			append("${seconds}s")
+		}
+	}
+	val formattedDurationText = when (queueInfoType) {
+		QueueInfoType.Full -> durationText
+		QueueInfoType.Remaining -> stringResource(R.string.info_duration_left, durationText)
+	}
+
+	Text(
+		text = "$songCountText • $formattedDurationText",
+		style = MaterialTheme.typography.titleMedium,
+		fontWeight = FontWeight.SemiBold,
+		fontFamily = defaultFont(round = 100f),
+		color = MaterialTheme.colorScheme.onSurfaceVariant,
+		textAlign = TextAlign.Center
+	)
 }
 
 private class QueueRecyclerView(context: Context) : RecyclerView(context) {
@@ -347,14 +392,21 @@ private class QueueRecyclerAdapter : RecyclerView.Adapter<QueueRecyclerAdapter.V
 		if (queue.isEmpty()) 0L else queue[position].id.hashCode().toLong()
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-		return ViewHolder(ComposeView(parent.context).apply {
-			layoutParams = RecyclerView.LayoutParams(
+		val composeView = ComposeView(parent.context).apply {
+			layoutParams = ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
 			)
 			setViewCompositionStrategy(
 				ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
 			)
-		})
+		}
+		val container = QueueRowLayout(parent.context).apply {
+			layoutParams = RecyclerView.LayoutParams(
+				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+			)
+			addView(composeView)
+		}
+		return ViewHolder(composeView, container)
 	}
 
 	override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -388,5 +440,22 @@ private class QueueRecyclerAdapter : RecyclerView.Adapter<QueueRecyclerAdapter.V
 		}
 	}
 
-	class ViewHolder(val view: ComposeView) : RecyclerView.ViewHolder(view)
+	class ViewHolder(val view: ComposeView, container: android.view.View) :
+		RecyclerView.ViewHolder(container)
+}
+
+// UGLY HACK: fix queue taking too long to open
+private class QueueRowLayout(context: Context) : android.widget.FrameLayout(context) {
+	// 48dp cover art + 2 * 10dp content padding
+	private val fallbackHeight = (68 * context.resources.displayMetrics.density).toInt()
+
+	override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+		if (measuredHeight == 0) {
+			setMeasuredDimension(
+				measuredWidth.takeIf { it > 0 } ?: MeasureSpec.getSize(widthMeasureSpec),
+				fallbackHeight
+			)
+		}
+	}
 }
