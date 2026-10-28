@@ -74,6 +74,11 @@ class SessionManager(
 	)
 	val sessionState: StateFlow<SessionState> = _state.asStateFlow()
 
+	private val _supportsTranscoding = MutableStateFlow(
+		settings.getBoolean("supportsTranscoding", false)
+	)
+	val supportsTranscoding: StateFlow<Boolean> = _supportsTranscoding.asStateFlow()
+
 	private val mutex = Mutex()
 	private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -175,6 +180,12 @@ class SessionManager(
 
 		val user = fetchCurrentUser(username, client)
 
+		val extensions = runCatching {
+			client.getOpenSubsonicExtensions()
+		}.getOrDefault(emptyList())
+		_supportsTranscoding.value = extensions.any { it.name == "transcoding" }
+		settings["supportsTranscoding"] = _supportsTranscoding.value
+
 		this.instanceUrl = instanceUrl
 		this.username = username
 		this.password = password
@@ -189,6 +200,8 @@ class SessionManager(
 	fun logout() {
 		settings["username"] = null
 		settings.remove("password")
+		_supportsTranscoding.value = false
+		settings["supportsTranscoding"] = false
 		ttlLruCache.clear()
 		_state.value = SessionState.Unauthenticated
 	}

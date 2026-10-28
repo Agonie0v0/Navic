@@ -621,10 +621,16 @@ class MediaPlayer(
 		}
 	}
 
+	private fun Player.effectiveDurationMs(): Long {
+		return duration.takeIf { it > 0 }
+			?: currentMediaItem?.mediaMetadata?.durationMs
+			?: 0L
+	}
+
 	private fun startProgressLoop() = this@MediaPlayer.launch {
 		while (controller?.isPlaying == true) {
 			val player = controller ?: break
-			val duration = player.duration
+			val duration = player.effectiveDurationMs()
 			if (duration > 0) {
 				val progress =
 					(player.currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
@@ -635,7 +641,7 @@ class MediaPlayer(
 	}
 
 	private fun updateProgress() = controller?.also { player ->
-		val duration = player.duration
+		val duration = player.effectiveDurationMs()
 		if (duration > 0) {
 			val pos = player.currentPosition
 			val progress = (pos.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
@@ -1049,7 +1055,7 @@ class MediaPlayer(
 
 	fun seek(normalized: Float) = launch(Dispatchers.Main.immediate) {
 		controller?.let {
-			val target = (it.duration * normalized).toLong()
+			val target = (it.effectiveDurationMs() * normalized).toLong()
 			it.seekTo(target)
 			_uiState.update { state ->
 				state.copy(progress = normalized)

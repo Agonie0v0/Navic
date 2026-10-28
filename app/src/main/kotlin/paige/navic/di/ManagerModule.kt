@@ -66,6 +66,7 @@ val managerModule = module {
 			sessionManager = get(),
 			streamCacheManager = get(),
 			preferenceManager = get(),
+			connectivityManager = get(),
 			dnsResolver = get()
 		)
 	}

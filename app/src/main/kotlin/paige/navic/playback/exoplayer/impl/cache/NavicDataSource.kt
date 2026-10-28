@@ -19,6 +19,7 @@ import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.extractor.metadata.icy.IcyHeaders
 import dev.zt64.subsonic.api.model.MediaType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -26,7 +27,9 @@ import paige.navic.domain.manager.playback.StreamCacheManager
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.manager.session.DownloadManager
 import paige.navic.domain.manager.session.SessionManager
+import paige.navic.domain.manager.session.connectivity.ConnectivityManager
 import paige.navic.playback.PlaybackUtils
+import paige.navic.util.Logger
 import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.createOkHttpClient
 import paige.navic.util.network.getProxyUrlOrNull
@@ -37,7 +40,8 @@ class NavicDataSource(
 	private val downloadManager: DownloadManager,
 	private val sessionManager: SessionManager,
 	private val streamCacheManager: StreamCacheManager,
-	preferenceManager: PreferenceManager,
+	private val preferenceManager: PreferenceManager,
+	private val connectivityManager: ConnectivityManager,
 	dnsResolver: NavicDnsResolver,
 ) : BaseDataSource(true) {
 	val ttlLruCache
@@ -48,6 +52,7 @@ class NavicDataSource(
 		private val sessionManager: SessionManager,
 		private val streamCacheManager: StreamCacheManager,
 		private val preferenceManager: PreferenceManager,
+		private val connectivityManager: ConnectivityManager,
 		private val dnsResolver: NavicDnsResolver,
 	) : DataSource.Factory {
 		override fun createDataSource(): DataSource {
@@ -56,6 +61,7 @@ class NavicDataSource(
 				sessionManager,
 				streamCacheManager,
 				preferenceManager,
+				connectivityManager,
 				dnsResolver
 			)
 		}
@@ -65,6 +71,7 @@ class NavicDataSource(
 		const val NAVIC_SCHEME = "navic"
 		const val NAVIC_SONG_HOST = "song"
 		const val NAVIC_COVER_HOST = "cover"
+		private const val TAG = "NavicDataSource"
 
 		fun String.buildSongUri(): Uri {
 			return "$NAVIC_SCHEME://$NAVIC_SONG_HOST/$this".toUri()
@@ -74,8 +81,6 @@ class NavicDataSource(
 			return "$NAVIC_SCHEME://$NAVIC_COVER_HOST/$this".toUri()
 		}
 	}
-
-	private val clientInfo = PlaybackUtils.buildClientInfo()
 
 	// TODO: figure out why KtorDataSource causes #650
 	private val upstreamFactory = OkHttpDataSource.Factory(
@@ -101,6 +106,7 @@ class NavicDataSource(
 	private var wrappedDataSource: DataSource? = null
 	private var currentUri: Uri? = null
 	private var songId: String? = null
+	private var isTransferStarted = false
 
 	override fun open(dataSpec: DataSpec): Long {
 		transferInitializing(dataSpec)
@@ -122,6 +128,7 @@ class NavicDataSource(
 					if (localPath != null) {
 						Uri.fromFile(File(localPath))
 					} else {
+						// shortcut: the disk cache is keyed by song only, so quality changes still play already-cached audio
 						cacheKey = streamCacheManager.keyFor(it)
 						resolveStreamUrl(it)
 					}
@@ -146,6 +153,7 @@ class NavicDataSource(
 		wrappedDataSource = source as DataSource?
 		val length = source.open(resolvedDataSpec)
 		transferStarted(dataSpec)
+		isTransferStarted = true
 		return length
 	}
 
@@ -170,44 +178,78 @@ class NavicDataSource(
 		wrappedDataSource = null
 		currentUri = null
 		songId = null
-		transferEnded()
+		if (isTransferStarted) {
+			isTransferStarted = false
+			transferEnded()
+		}
 	}
 
-	// TODO: make transcoding options work again
+	private fun currentQuality(): Pair<Int, String?> {
+		if (preferenceManager.isAdvancedTranscodingActive) {
+			return preferenceManager.customMaxBitrate to
+				preferenceManager.customFormat.trim().takeIf { it.isNotEmpty() }
+		}
+
+		val quality = if (connectivityManager.isMetered.value) {
+			preferenceManager.streamingQualityCellular
+		} else {
+			preferenceManager.streamingQualityWifi
+		}
+		return quality.bitrate to quality.container
+	}
+
+	private fun String.toStreamUri(): Uri {
+		return toUri().buildUpon()
+			.appendQueryParameter("estimateContentLength", "true")
+			.build()
+	}
+
 	private suspend fun resolveStreamUrl(id: String): Uri {
-		val cachedStreamUrl = ttlLruCache.get(id)
+		val (bitrateKbps, format) = currentQuality()
+		val cacheKey = "$id|$bitrateKbps|${format.orEmpty()}"
+		val cachedStreamUrl = ttlLruCache.get(cacheKey)
 
 		if (cachedStreamUrl != null) {
 			return cachedStreamUrl.toUri()
-				.buildUpon()
-				.appendQueryParameter("estimateContentLength", "true")
-				.build()
 		}
 
 		val defaultStreamUrl = sessionManager.api.getStreamUrl(id, 0)
+
+		if (!sessionManager.supportsTranscoding.value) {
+			val streamUrl = defaultStreamUrl.toStreamUri().toString()
+			ttlLruCache.put(cacheKey, streamUrl)
+			return streamUrl.toUri()
+		}
+
 		return try {
 			val transcodeDecision = withContext(Dispatchers.IO) {
-				sessionManager.api.getTranscodeDecision(id, MediaType.SONG, clientInfo)
+				sessionManager.api.getTranscodeDecision(
+					id,
+					MediaType.SONG,
+					PlaybackUtils.buildClientInfo(bitrateKbps, format)
+				)
 			}
-			val streamUrlStr =
-				if (!transcodeDecision.canDirectPlay && transcodeDecision.canTranscode && transcodeDecision.transcodeParams != null) {
-					sessionManager.api.getTranscodeStreamUrl(
-						id, MediaType.SONG, 0,
-						transcodeDecision.transcodeParams!!
-					)
-				} else {
-					defaultStreamUrl
-				}
+			val isTranscode = !transcodeDecision.canDirectPlay &&
+				transcodeDecision.canTranscode &&
+				transcodeDecision.transcodeParams != null
+			val streamUrl = if (isTranscode) {
+				sessionManager.api.getTranscodeStreamUrl(
+					id, MediaType.SONG, 0,
+					transcodeDecision.transcodeParams!!
+				).toStreamUri().toString()
+			} else {
+				defaultStreamUrl.toStreamUri().toString()
+			}
 
-			ttlLruCache.put(id, streamUrlStr)
+			ttlLruCache.put(cacheKey, streamUrl)
 
-			streamUrlStr.toUri()
-				.buildUpon()
-				.appendQueryParameter("estimateContentLength", "true")
-				.build()
-		} catch (_: Exception) {
-			ttlLruCache.put(id, defaultStreamUrl)
-			defaultStreamUrl.toUri()
+			streamUrl.toUri()
+		} catch (e: Exception) {
+			if (e is CancellationException) throw e
+			Logger.w(TAG, "transcode decision failed for $id, using direct stream", e)
+			val streamUrl = defaultStreamUrl.toStreamUri().toString()
+			ttlLruCache.put(cacheKey, streamUrl)
+			streamUrl.toUri()
 		}
 	}
 }

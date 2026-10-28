@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.session.SessionManager
 import paige.navic.domain.manager.session.connectivity.ReachabilityFlow
 import paige.navic.domain.model.settings.StreamingQuality
 import paige.navic.domain.model.settings.description
@@ -51,9 +52,11 @@ import paige.navic.ui.screen.settings.component.SettingsToggleItem
 @Composable
 fun SettingsStreamingQualityScreen() {
 	val preferenceManager = koinInject<PreferenceManager>()
+	val sessionManager = koinInject<SessionManager>()
 	val reachability = koinInject<ReachabilityFlow>()
 	val isReachable by reachability.isReachable.collectAsStateWithLifecycle()
 	val isMetered by reachability.isMetered.collectAsStateWithLifecycle()
+	val supportsTranscoding by sessionManager.supportsTranscoding.collectAsStateWithLifecycle()
 
 	Scaffold(
 		topBar = { NestedTopBar({ Text(stringResource(R.string.title_streaming_quality)) }) }
@@ -67,6 +70,24 @@ fun SettingsStreamingQualityScreen() {
 					.verticalScroll(rememberScrollState())
 					.padding(horizontal = 16.dp)
 			) {
+				AnimatedVisibility(visible = !supportsTranscoding) {
+					Row(
+						modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+						horizontalArrangement = Arrangement.spacedBy(16.dp)
+					) {
+						Icon(
+							Icons.Outlined.Info,
+							contentDescription = null,
+							tint = MaterialTheme.colorScheme.onSurfaceVariant
+						)
+						Text(
+							stringResource(R.string.info_transcoding_unsupported),
+							color = MaterialTheme.colorScheme.onSurfaceVariant,
+							style = MaterialTheme.typography.bodyMedium
+						)
+					}
+				}
+
 				AnimatedVisibility(visible = !preferenceManager.isAdvancedTranscodingActive) {
 					SettingsGroup(
 						modifier = Modifier
@@ -83,7 +104,8 @@ fun SettingsStreamingQualityScreen() {
 					) {
 						RadioButtons(
 							value = preferenceManager.streamingQualityWifi,
-							onChangeValue = { preferenceManager.streamingQualityWifi = it }
+							onChangeValue = { preferenceManager.streamingQualityWifi = it },
+							enabled = supportsTranscoding
 						)
 					}
 				}
@@ -104,7 +126,8 @@ fun SettingsStreamingQualityScreen() {
 					) {
 						RadioButtons(
 							value = preferenceManager.streamingQualityCellular,
-							onChangeValue = { preferenceManager.streamingQualityCellular = it }
+							onChangeValue = { preferenceManager.streamingQualityCellular = it },
+							enabled = supportsTranscoding
 						)
 					}
 				}
@@ -115,6 +138,7 @@ fun SettingsStreamingQualityScreen() {
 				) {
 					SettingsToggleItem(
 						checked = preferenceManager.isAdvancedTranscodingActive,
+						enabled = supportsTranscoding,
 						onCheckedChange = { preferenceManager.isAdvancedTranscodingActive = it },
 						content = { Text(stringResource(R.string.option_stream_custom_quality)) },
 						shapes = SegmentedListItemDefaults.segmentedShapes(index = 0, count = 1)
@@ -122,7 +146,7 @@ fun SettingsStreamingQualityScreen() {
 				}
 
 				AnimatedVisibility(visible = preferenceManager.isAdvancedTranscodingActive) {
-					CustomOptions()
+					CustomOptions(enabled = supportsTranscoding)
 				}
 
 				Row(
@@ -148,7 +172,8 @@ fun SettingsStreamingQualityScreen() {
 @Composable
 private fun RadioButtons(
 	value: StreamingQuality,
-	onChangeValue: (StreamingQuality) -> Unit
+	onChangeValue: (StreamingQuality) -> Unit,
+	enabled: Boolean
 ) {
 	StreamingQuality.entries.forEachIndexed { index, quality ->
 		val selected = value == quality
@@ -156,6 +181,7 @@ private fun RadioButtons(
 		SettingsRadioItem(
 			selected = selected,
 			onClick = { onChangeValue(quality) },
+			enabled = enabled,
 			content = { Text(stringResource(quality.displayName)) },
 			supportingContent = {
 				quality.description()?.let { description ->
@@ -173,7 +199,7 @@ private fun RadioButtons(
 }
 
 @Composable
-private fun CustomOptions() {
+private fun CustomOptions(enabled: Boolean) {
 	val preferenceManager = koinInject<PreferenceManager>()
 	var bitrateInput by remember {
 		val current = preferenceManager.customMaxBitrate
@@ -197,6 +223,7 @@ private fun CustomOptions() {
 			placeholder = { Text("0") },
 			keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
 			modifier = Modifier.fillMaxWidth(),
+			enabled = enabled,
 			singleLine = true
 		)
 
@@ -206,6 +233,7 @@ private fun CustomOptions() {
 			label = { Text(stringResource(R.string.option_stream_format)) },
 			supportingText = { Text(stringResource(R.string.info_transcoding_defaults)) },
 			modifier = Modifier.fillMaxWidth(),
+			enabled = enabled,
 			singleLine = true
 		)
 	}

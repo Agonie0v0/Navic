@@ -68,17 +68,19 @@ object PlaybackUtils {
 		return CORRECTED_CODEC_NAME.getOrDefault(name, name)
 	}
 
-	private fun getTranscodingProfiles(): List<ClientInfo.TranscodingProfile> =
-		TRANSCODING_CONTAINERS.map { (codec, container) ->
-			ClientInfo.TranscodingProfile(
-				audioCodec = codec,
-				container = container,
-				protocol = PROTOCOL
-			)
-		}
+	private fun getTranscodingProfile(codec: String) = ClientInfo.TranscodingProfile(
+		audioCodec = codec,
+		container = TRANSCODING_CONTAINERS[codec] ?: codec,
+		protocol = PROTOCOL
+	)
+
+	private fun getTranscodingProfiles(format: String? = null): List<ClientInfo.TranscodingProfile> =
+		format?.let { listOf(getTranscodingProfile(it)) }
+			?: TRANSCODING_CONTAINERS.keys.map(::getTranscodingProfile)
 
 	fun buildClientInfo(
-		transcodingProfiles: List<ClientInfo.TranscodingProfile> = getTranscodingProfiles()
+		bitrateKbps: Int = 0,
+		format: String? = null
 	): ClientInfo {
 		val capabilities = codecCapabilities
 
@@ -132,9 +134,11 @@ object PlaybackUtils {
 		return ClientInfo(
 			name = "Navic",
 			platform = "Android",
+			maxAudioBitrate = bitrateKbps * 1000,
+			maxTranscodingAudioBitrate = bitrateKbps * 1000,
 			directPlayProfiles = directPlayProfiles,
 			codecProfiles = codecProfiles,
-			transcodingProfiles = transcodingProfiles
+			transcodingProfiles = getTranscodingProfiles(format)
 		)
 	}
 
