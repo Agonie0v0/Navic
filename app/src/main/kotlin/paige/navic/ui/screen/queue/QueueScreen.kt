@@ -151,7 +151,7 @@ fun QueueScreen() {
 			factory = { context ->
 				QueueRecyclerView(context).apply {
 					layoutManager = LinearLayoutManager(context)
-					isNestedScrollingEnabled = false
+					clipToOutline = true
 					addItemDecoration(object : RecyclerView.ItemDecoration() {
 						override fun getItemOffsets(
 							outRect: Rect,
@@ -399,14 +399,7 @@ private class QueueRecyclerAdapter : RecyclerView.Adapter<QueueRecyclerAdapter.V
 		if (queue.isEmpty()) 0L else queue[position].id.hashCode().toLong()
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-		val composeView = ComposeView(parent.context).apply {
-			layoutParams = RecyclerView.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-			)
-			setViewCompositionStrategy(
-				ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
-			)
-		}
+		val composeView = ComposeView(parent.context)
 		return ViewHolder(composeView)
 	}
 
