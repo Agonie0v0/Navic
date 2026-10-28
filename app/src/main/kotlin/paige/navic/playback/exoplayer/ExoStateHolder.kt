@@ -63,6 +63,8 @@ import paige.navic.domain.manager.session.SessionManager
 import paige.navic.playback.exoplayer.impl.cache.NavicDataSource
 import paige.navic.playback.exoplayer.impl.playback.ExoAudioGainProcessor
 import paige.navic.playback.exoplayer.impl.util.ExoArtworkLoader
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 @OptIn(UnstableApi::class)
 class ExoStateHolder : KoinComponent {
@@ -295,6 +297,10 @@ class ExoStateHolder : KoinComponent {
 					).build()
 			}
 			.also { player ->
+				player.preloadConfiguration = ExoPlayer.PreloadConfiguration(
+					10.seconds.toLong(DurationUnit.MICROSECONDS)
+				)
+
 				player.addListener(object : Player.Listener {
 					override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
 						mediaSession.setCustomLayout(makeButtons(player))
