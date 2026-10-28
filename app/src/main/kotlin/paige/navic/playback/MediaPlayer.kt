@@ -172,11 +172,13 @@ class MediaPlayer(
 
 	private fun ensureShuffleOrder() {
 		val state = _uiState.value
-		if (state.queue.isEmpty()) return
-		if (isValidShuffleOrder(state.shuffleOrder, state.queue.size)) return
+		if (!state.isShuffleEnabled || state.queue.isEmpty()) return
 
-		val order = shuffledOrder(state.queue.size, state.currentIndex.coerceAtLeast(0))
-		_uiState.update { it.copy(shuffleOrder = order) }
+		val order = state.shuffleOrder.takeIf { isValidShuffleOrder(it, state.queue.size) }
+			?: shuffledOrder(state.queue.size, state.currentIndex.coerceAtLeast(0))
+		if (order != state.shuffleOrder) {
+			_uiState.update { it.copy(shuffleOrder = order) }
+		}
 		pushShuffleOrder(order)
 	}
 
@@ -569,6 +571,7 @@ class MediaPlayer(
 
 		if (state.queue.isEmpty() || player.mediaItemCount > 0) {
 			updatePlaybackState()
+			ensureShuffleOrder()
 			return@launch
 		}
 
@@ -576,7 +579,11 @@ class MediaPlayer(
 			state.queue.map { it.toMediaItem() }
 		}
 
-		val index = if (state.currentIndex in mediaItems.indices) state.currentIndex else 0
+		val index = if (state.currentIndex in mediaItems.indices) {
+			state.currentIndex
+		} else {
+			0
+		}
 		val order = if (state.isShuffleEnabled && mediaItems.isNotEmpty()) {
 			state.shuffleOrder.takeIf { isValidShuffleOrder(it, mediaItems.size) }
 				?: shuffledOrder(mediaItems.size, index)
