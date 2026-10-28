@@ -60,4 +60,13 @@ interface DownloadDao {
 
 	@Query("SELECT songId FROM DownloadEntity WHERE songId IN (:songIds) AND status IN ('DOWNLOADED', 'DOWNLOADING')")
 	suspend fun getActiveOrCompletedDownloadIds(songIds: Collection<String>): List<String>
+
+	@Query(
+		"""
+		SELECT COUNT(*) FROM DownloadEntity d
+		INNER JOIN SongEntity s ON s.songId = d.songId
+		WHERE d.status = 'DOWNLOADED' AND s.coverArtId = :coverArtId
+		"""
+	)
+	suspend fun countDownloadedSongsWithCoverArt(coverArtId: String): Int
 }

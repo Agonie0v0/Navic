@@ -15,11 +15,13 @@ import coil3.disk.directory
 import coil3.intercept.Interceptor
 import coil3.memory.MemoryCache
 import coil3.network.ktor3.KtorNetworkFetcherFactory
+import coil3.request.CachePolicy
 import coil3.request.ImageResult
 import coil3.request.crossfade
 import coil3.serviceLoaderEnabled
 import coil3.size.Dimension
 import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.manager.runtime.StorageManager
 import paige.navic.util.network.NavicDnsResolver
 import paige.navic.util.network.createHttpClientWithPreferences
 import kotlin.math.abs
@@ -27,7 +29,8 @@ import kotlin.math.abs
 class CoilSingleton(
 	private val context: Context,
 	preferenceManager: PreferenceManager,
-	dnsResolver: NavicDnsResolver
+	dnsResolver: NavicDnsResolver,
+	private val storageManager: StorageManager
 ) {
 	private var sharedDiskCache: DiskCache? = null
 	private var sharedMemoryCache: MemoryCache? = null
@@ -93,7 +96,28 @@ class CoilSingleton(
 		}
 	}
 
+	private inner class LocalCoverInterceptor : Interceptor {
+		override suspend fun intercept(chain: Interceptor.Chain): ImageResult {
+			val request = chain.request
+			val coverId = (request.data as? String)
+				?.toUri()
+				?.getQueryParameter("id")
+				?: request.diskCacheKey?.substringBefore("#size=")
+
+			val file = coverId?.let(storageManager::getCoverArtFile)
+				?: return chain.proceed()
+
+			return chain.withRequest(
+				request.newBuilder()
+					.data(file)
+					.diskCachePolicy(CachePolicy.DISABLED)
+					.build()
+			).proceed()
+		}
+	}
+
 	private val sizeInterceptor = SizeInterceptor()
+	private val localCoverInterceptor = LocalCoverInterceptor()
 
 	val coilImageLoader: ImageLoader by lazy { getImageLoader() }
 	val staticCoilImageLoader: ImageLoader by lazy { getStaticImageLoader() }
@@ -115,6 +139,7 @@ class CoilSingleton(
 		return ImageLoader.Builder(context)
 			.components {
 				add(networkFetcher)
+				add(localCoverInterceptor)
 				add(sizeInterceptor)
 			}
 			.diskCache { getDiskCache() }
@@ -133,6 +158,7 @@ class CoilSingleton(
 			.serviceLoaderEnabled(false)
 			.components {
 				add(networkFetcher)
+				add(localCoverInterceptor)
 				add(sizeInterceptor)
 			}
 			.diskCache { getDiskCache() }

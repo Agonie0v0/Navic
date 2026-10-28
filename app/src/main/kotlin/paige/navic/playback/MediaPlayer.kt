@@ -335,8 +335,11 @@ class MediaPlayer(
 							)
 							putExtra(
 								"artUrl",
-								currentSong?.coverArtId?.let {
-									sessionManager.getCoverArtUrl(it)
+								currentSong?.coverArtId?.let { id ->
+									downloadManager.getCoverArtFile(id)
+										?.toUri()
+										?.toString()
+										?: sessionManager.getCoverArtUrl(id)
 								})
 						}
 

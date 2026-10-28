@@ -113,6 +113,10 @@ class DownloadManager(
 		return downloadDao.getDownloadById(songId)?.filePath
 	}
 
+	fun getCoverArtFile(coverArtId: String): File? {
+		return storageManager.getCoverArtFile(coverArtId)
+	}
+
 	fun downloadSong(songId: String) {
 		scope.launch {
 			enqueueSongs(listOf(songId))
@@ -230,6 +234,7 @@ class DownloadManager(
 	fun deleteDownload(songId: String) {
 		scope.launch {
 			val existing = downloadDao.getDownloadById(songId)
+			val coverArtId = songDao.getSongById(songId)?.coverArtId
 			downloadDao.deleteDownload(songId)
 
 			val filePath = existing?.filePath
@@ -238,6 +243,12 @@ class DownloadManager(
 				storageManager.deleteTempFile(filePath)
 			} else {
 				storageManager.deleteSongFiles(songId)
+			}
+
+			if (existing != null && coverArtId != null &&
+				downloadDao.countDownloadedSongsWithCoverArt(coverArtId) == 0
+			) {
+				storageManager.deleteCoverArt(coverArtId)
 			}
 		}
 	}
@@ -276,6 +287,7 @@ class DownloadManager(
 		scope.launch {
 			cancelActiveDownloadsInternal()
 			storageManager.clearDownloads()
+			storageManager.clearCoverArts()
 			downloadDao.clearAllDownloads()
 			Logger.i("DownloadManager", "cleared all downloads")
 		}

@@ -33,6 +33,47 @@ class StorageManager(
 
 	private fun internalDownloadDir(): File = File(context.filesDir, "downloads")
 
+	private fun coverArtDir(): File = File(context.filesDir, "covers")
+
+	private fun coverArtPath(coverArtId: String): File {
+		val hash = coverArtId.xxHash32() + ("$coverArtId|cover").xxHash32() // Yeh
+		return File(
+			File(
+				coverArtDir(), hash.take(2)
+			), hash.drop(2)
+		)
+	}
+
+	fun getCoverArtFile(coverArtId: String): File? =
+		coverArtPath(coverArtId).takeIf { it.isFile && it.length() > 0 }
+
+	fun saveCoverArt(coverArtId: String, bytes: ByteArray): Boolean {
+		if (bytes.isEmpty()) return false
+
+		val file = coverArtPath(coverArtId)
+		val directory = file.parentFile ?: return false
+		directory.mkdirs()
+
+		return try {
+			val temp = File.createTempFile(file.name, ".part", directory)
+			temp.writeBytes(bytes)
+			if (file.exists()) file.delete()
+			val renamed = temp.renameTo(file)
+			if (!renamed) temp.delete()
+			renamed
+		} catch (_: Exception) {
+			false
+		}
+	}
+
+	fun deleteCoverArt(coverArtId: String) {
+		coverArtPath(coverArtId).delete()
+	}
+
+	fun clearCoverArts() {
+		coverArtDir().deleteRecursively()
+	}
+
 	private fun externalDownloadDirs(): List<File> =
 		context.getExternalFilesDirs(null)
 			.filterNotNull()

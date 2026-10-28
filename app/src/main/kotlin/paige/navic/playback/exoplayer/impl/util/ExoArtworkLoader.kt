@@ -18,6 +18,7 @@ import androidx.media3.datasource.DataSourceBitmapLoader
 import coil3.ImageLoader
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import paige.navic.domain.manager.runtime.StorageManager
 import paige.navic.domain.manager.session.SessionManager
 import paige.navic.util.Logger
 
@@ -31,6 +32,7 @@ class ExoArtworkLoader(
 	dataSourceFactory: DataSource.Factory,
 	private val imageLoader: ImageLoader,
 	private val sessionManager: SessionManager,
+	private val storageManager: StorageManager,
 ): BitmapLoader {
 	private val bitmapLoader = DataSourceBitmapLoader.Builder(context)
 		.setDataSourceFactory(dataSourceFactory)
@@ -49,6 +51,11 @@ class ExoArtworkLoader(
 
 		if (coverId != null) {
 			try {
+				val localFile = storageManager.getCoverArtFile(coverId)
+				if (localFile != null) {
+					return this.decodeBitmap(localFile.readBytes())
+				}
+
 				val diskCache = imageLoader.diskCache
 				val snapshot = diskCache?.openSnapshot(coverId)
 					?: listOf("1024", "4096").firstNotNullOfOrNull { size ->

@@ -6,11 +6,6 @@
 
 package paige.navic.domain.download
 
-import android.content.Context
-import coil3.ImageLoader
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
-import coil3.size.Size
 import dev.zt64.subsonic.api.model.SubsonicException
 import dev.zt64.subsonic.api.model.SubsonicResponse
 import io.ktor.client.plugins.ClientRequestException
@@ -48,8 +43,6 @@ import paige.navic.util.network.createHttpClientWithPreferences
 class DownloadCancelledException : Exception("Download was cancelled")
 
 class DownloadProcessor(
-	private val context: Context,
-	private val imageLoader: ImageLoader,
 	private val downloadDao: DownloadDao,
 	private val albumDao: AlbumDao,
 	private val songDao: SongDao,
@@ -103,9 +96,10 @@ class DownloadProcessor(
 		requireQueued(songId)
 
 		val song = resolveSong(songId)
+		val seenCovers = mutableSetOf<String>()
 
-		cacheCoverArt(song.coverArtId)
-		cacheAlbumCoverArt(song.albumId)
+		cacheCoverArt(song.coverArtId, seenCovers)
+		cacheAlbumCoverArt(song.albumId, seenCovers)
 		cacheLyrics(song.id)
 		downloadAudioFile(song, onProgress)
 	}
@@ -126,31 +120,30 @@ class DownloadProcessor(
 		}
 	}
 
-	private suspend fun cacheCoverArt(coverId: String?) {
-		if (coverId == null) return
+	private suspend fun cacheCoverArt(coverId: String?, seen: MutableSet<String>) {
+		if (coverId == null || !seen.add(coverId)) return
+		// shortcut: an existing file wins, so changing cover-art quality only affects future downloads
+		if (storageManager.getCoverArtFile(coverId) != null) return
 
 		try {
-			Logger.i("DownloadProcessor", "caching cover art for $coverId")
-			val coverArtUrl = sessionManager.getCoverArtUrl(coverId)
+			Logger.i("DownloadProcessor", "saving cover art for $coverId")
+			val bytes = sessionManager.api.getCoverArt(
+				coverId,
+				size = preferenceManager.coverArtQuality.value.toString()
+			)
 
-			val imageRequest = ImageRequest.Builder(context)
-				.data(coverArtUrl)
-				.size(Size.ORIGINAL)
-				.memoryCacheKey(coverId)
-				.diskCacheKey(coverId)
-				.diskCachePolicy(CachePolicy.ENABLED)
-				.memoryCachePolicy(CachePolicy.DISABLED)
-				.build()
-
-			imageLoader.execute(imageRequest)
-			Logger.i("DownloadProcessor", "cached cover art for $coverId")
+			if (!storageManager.saveCoverArt(coverId, bytes)) {
+				Logger.w("DownloadProcessor", "could not save cover art for $coverId")
+			} else {
+				Logger.i("DownloadProcessor", "saved cover art for $coverId")
+			}
 		} catch (e: Exception) {
 			if (e is CancellationException) throw e
-			Logger.e("DownloadProcessor", "Failed to cache cover art for $coverId", e)
+			Logger.e("DownloadProcessor", "Failed to save cover art for $coverId", e)
 		}
 	}
 
-	private suspend fun cacheAlbumCoverArt(albumId: String?) {
+	private suspend fun cacheAlbumCoverArt(albumId: String?, seen: MutableSet<String>) {
 		if (albumId == null) return
 
 		try {
@@ -162,7 +155,7 @@ class DownloadProcessor(
 					"DownloadProcessor",
 					"Found album cover $albumCoverId for album $albumId"
 				)
-				cacheCoverArt(albumCoverId)
+				cacheCoverArt(albumCoverId, seen)
 			}
 		} catch (e: Exception) {
 			if (e is CancellationException) throw e
