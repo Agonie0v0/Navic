@@ -67,11 +67,15 @@ import kotlin.time.Duration.Companion.milliseconds
 fun QueueScreen() {
 	val viewModel = koinViewModel<QueueViewModel>()
 	val player = koinInject<MediaPlayer>()
+	val state = player.uiState.collectAsStateWithLifecycle()
+
 	val playerState by remember(player) {
 		player.uiState
 			.map { it.copy(progress = 0f) }
 			.distinctUntilChanged()
-	}.collectAsStateWithLifecycle(initialValue = player.uiState.value.copy(progress = 0f))
+	}.collectAsStateWithLifecycle(
+		initialValue = state.value.copy(progress = 0f)
+	)
 
 	val isReachable by viewModel.isReachable.collectAsStateWithLifecycle()
 	val downloadedSongs by viewModel.downloadedSongs.collectAsStateWithLifecycle()
@@ -204,11 +208,7 @@ private fun QueueInfoText(
 ) {
 	val preferenceManager = koinInject<PreferenceManager>()
 	val queueInfoType = preferenceManager.queueInfoType
-	val progress by remember(player) {
-		player.uiState
-			.map { it.progress }
-			.distinctUntilChanged()
-	}.collectAsStateWithLifecycle(initialValue = player.uiState.value.progress)
+	val state = player.uiState.collectAsStateWithLifecycle()
 
 	val songCountText = when (queueInfoType) {
 		QueueInfoType.Full -> pluralStringResource(R.plurals.count_songs, queue.size, queue.size)
@@ -229,19 +229,26 @@ private fun QueueInfoText(
 	val currentTrackMillis = remember(queue, currentIndex) {
 		queue.getOrNull(currentIndex)?.duration?.inWholeMilliseconds ?: 0L
 	}
+
+	val elapsedMillis by remember(player, currentTrackMillis) {
+		player.uiState.map {
+			(it.progress * currentTrackMillis).toLong() / 1000 * 1000
+		}.distinctUntilChanged()
+	}.collectAsStateWithLifecycle(
+		initialValue =
+			(state.value.progress * currentTrackMillis).toLong() / 1000 * 1000
+	)
 	val durationText = remember(
 		queueInfoType,
 		totalMillis,
 		pastMillis,
-		currentTrackMillis,
-		progress
+		elapsedMillis
 	) {
 		var remainingMillis = totalMillis
 
 		if (queueInfoType == QueueInfoType.Remaining) {
 			// deduct previous durations plus current elapsed duration
-			val elapsedCurrentMillis = (currentTrackMillis * progress).toLong()
-			remainingMillis -= pastMillis + elapsedCurrentMillis
+			remainingMillis -= pastMillis + elapsedMillis
 
 			// wow, that's confusing as shit for some reason
 		}
