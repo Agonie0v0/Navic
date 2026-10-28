@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +37,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kyant.capsule.ContinuousCapsule
 import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.R
 import paige.navic.domain.model.lyrics.LyricsProvider
@@ -76,7 +76,7 @@ fun LyricsPrioritySheet(
 			Surface(
 				modifier = Modifier.padding(vertical = 6.dp),
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				shape = ContinuousCapsule,
+				shape = CircleShape,
 			) {
 				Box(Modifier.size(width = 32.dp, height = 4.dp))
 			}
@@ -110,7 +110,9 @@ fun LyricsPrioritySheet(
 			is UiState.Success -> {
 				val config = (state as UiState.Success).data
 				LazyColumn(
-					modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+					modifier = Modifier
+						.fillMaxWidth()
+						.wrapContentHeight(),
 					state = draggableState.listState,
 					verticalArrangement = Arrangement.spacedBy(8.dp)
 				) {

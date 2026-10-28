@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.kyant.capsule.ContinuousCapsule
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.domain.manager.runtime.PreferenceManager
@@ -58,7 +58,7 @@ fun ConfirmDownloadDeletionSheet(
 			Surface(
 				modifier = Modifier.padding(vertical = 6.dp),
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				shape = ContinuousCapsule,
+				shape = CircleShape,
 			) {
 				Box(Modifier.size(width = 32.dp, height = 4.dp))
 			}

@@ -29,6 +29,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItemShapes
@@ -56,7 +57,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.kyant.capsule.ContinuousRoundedRectangle
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
 import dev.zt64.compose.pipette.HsvColor
@@ -220,7 +220,7 @@ private fun BaseCard(
 			MaterialTheme.colorScheme.primary
 		else Color.Transparent
 	)
-	val shape = ContinuousRoundedRectangle(radius)
+	val shape = RoundedCornerShape(radius)
 
 	Box(
 		modifier = modifier
@@ -243,7 +243,7 @@ private fun BaseCard(
 		Column(
 			modifier = Modifier
 				.size(50.dp)
-				.clip(ContinuousRoundedRectangle(radius - 7.dp))
+				.clip(RoundedCornerShape(radius - 7.dp))
 		) {
 			content()
 		}

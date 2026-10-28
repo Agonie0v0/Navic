@@ -14,12 +14,9 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
-import androidx.compose.material3.ShapeDefaults
-import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toArgb
-import com.kyant.capsule.ContinuousRoundedRectangle
 import org.koin.compose.koinInject
 import paige.navic.domain.manager.runtime.PreferenceManager
 import paige.navic.domain.model.settings.AnimationStyle
@@ -68,16 +65,6 @@ fun NavicTheme(
 			?: chosenScheme,
 		motionScheme = motionScheme,
 		typography = typography(),
-		shapes = Shapes(
-			extraSmall = ContinuousRoundedRectangle(ShapeDefaults.ExtraSmall.topStart),
-			small = ContinuousRoundedRectangle(ShapeDefaults.Small.topStart),
-			medium = ContinuousRoundedRectangle(ShapeDefaults.Medium.topStart),
-			large = ContinuousRoundedRectangle(ShapeDefaults.Large.topStart),
-			extraLarge = ContinuousRoundedRectangle(ShapeDefaults.ExtraLarge.topStart),
-			largeIncreased = ContinuousRoundedRectangle(ShapeDefaults.LargeIncreased.topStart),
-			extraLargeIncreased = ContinuousRoundedRectangle(ShapeDefaults.ExtraLargeIncreased.topStart),
-			extraExtraLarge = ContinuousRoundedRectangle(ShapeDefaults.ExtraExtraLarge.topStart)
-		),
 		content = content
 	)
 }

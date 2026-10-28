@@ -1,5 +1,5 @@
 [versions]
-agp = "9.3.3"
+agp = "9.4.1"
 android-compileSdk = "37"
 android-compileSdkMinor = "2"
 android-minSdk = "24"
@@ -83,7 +83,6 @@ coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.r
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coil" }
 
 # Compose 3rd party
-capsule = { module = "top.ltfan.capsule:capsule", version = "1.2.0" }
 kmpalette-core = { module = "com.kmpalette:kmpalette-core", version.ref = "kmpalette" }
 kmpalette-network = { module = "com.kmpalette:extensions-network", version.ref = "kmpalette" }
 materialKolor = { module = "com.materialkolor:material-kolor", version = "5.0.1" }

@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -41,8 +43,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kyant.capsule.ContinuousCapsule
-import com.kyant.capsule.ContinuousRoundedRectangle
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.playback.MediaPlayer
@@ -74,7 +74,7 @@ fun PlaybackSpeedScreen() {
 		modifier = Modifier
 			.padding(horizontal = 12.dp, vertical = 4.dp)
 			.fillMaxWidth()
-			.clip(ContinuousRoundedRectangle(topStart = 16.dp, topEnd = 16.dp)),
+			.clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
 		state = draggableState.listState,
 		contentPadding = WindowInsets.systemBars
 			.only(WindowInsetsSides.Bottom)
@@ -82,7 +82,9 @@ fun PlaybackSpeedScreen() {
 	) {
 		item {
 			Row(
-				modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(horizontal = 12.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				Slider(
@@ -106,7 +108,9 @@ fun PlaybackSpeedScreen() {
 
 		item {
 			Column(
-				modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(bottom = 16.dp),
 				horizontalAlignment = Alignment.CenterHorizontally,
 				verticalArrangement = Arrangement.Center
 			) {
@@ -117,7 +121,9 @@ fun PlaybackSpeedScreen() {
 				)
 
 				Row(
-					modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(horizontal = 8.dp),
 					verticalAlignment = Alignment.CenterVertically,
 					horizontalArrangement = Arrangement.Center
 				) {
@@ -162,7 +168,7 @@ fun SurfaceButton(
 ) {
 	Surface(
 		modifier = modifier.padding(4.dp),
-		shape = ContinuousCapsule,
+		shape = CircleShape,
 		onClick = onClick,
 		color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
 		contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface

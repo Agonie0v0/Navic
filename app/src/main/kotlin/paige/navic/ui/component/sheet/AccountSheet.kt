@@ -45,7 +45,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.SubcomposeAsyncImage
-import com.kyant.capsule.ContinuousCapsule
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
@@ -129,7 +128,7 @@ fun AccountSheet(
 			Surface(
 				modifier = Modifier.padding(vertical = 6.dp),
 				color = MaterialTheme.colorScheme.onSurfaceVariant,
-				shape = ContinuousCapsule,
+				shape = CircleShape,
 			) {
 				Box(Modifier.size(width = 32.dp, height = 4.dp))
 			}

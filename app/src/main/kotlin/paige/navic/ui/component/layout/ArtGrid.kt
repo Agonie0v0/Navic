@@ -188,8 +188,6 @@ fun ArtGridPlaceholder(
 				modifier = Modifier
 					.fillMaxWidth()
 					.aspectRatio(1f)
-					// placeholders shouldn't use continuous corners
-					// because it's less performant
 					.clip(RoundedCornerShape(16.0.dp))
 					.shimmerLoading()
 			)

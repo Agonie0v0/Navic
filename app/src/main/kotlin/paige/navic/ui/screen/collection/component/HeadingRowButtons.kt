@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kyant.capsule.ContinuousCapsule
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
@@ -72,7 +72,7 @@ fun CollectionDetailScreenHeadingRowButtons(
 			alignment = Alignment.CenterHorizontally
 		)
 	) {
-		val buttonShape = ContinuousCapsule
+		val buttonShape = CircleShape
 		val buttonHeight = 44.dp
 		OutlinedButton(
 			modifier = Modifier.size(width = 52.dp, height = buttonHeight),

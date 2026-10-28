@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,7 +64,6 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
-import com.kyant.capsule.ContinuousRoundedRectangle
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import paige.navic.R
@@ -129,7 +129,7 @@ fun MiniPlayer(
 	)
 	val iconSize = if (detached) 24.dp else 32.dp
 
-	val shape = ContinuousRoundedRectangle(
+	val shape = RoundedCornerShape(
 		if (detached) 16.dp else 0.dp
 	)
 
@@ -234,7 +234,7 @@ fun MiniPlayer(
 									.size(if (detached) 48.dp else 50.dp)
 									.padding(if (playerState.isLoading) 8.dp else 0.dp)
 									.clip(
-										ContinuousRoundedRectangle(coverRounding)
+										RoundedCornerShape(coverRounding)
 									)
 									.background(MaterialTheme.colorScheme.surfaceVariant)
 							)

@@ -257,7 +257,6 @@ dependencies {
 	implementation(libs.coil.gif)
 
 	// Compose 3rd party
-	implementation(libs.capsule)
 	implementation(libs.kmpalette.core)
 	implementation(libs.kmpalette.network)
 	implementation(libs.materialKolor)

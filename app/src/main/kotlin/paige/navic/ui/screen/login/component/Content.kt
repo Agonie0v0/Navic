@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
-import com.kyant.capsule.ContinuousCapsule
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import paige.navic.R
@@ -223,7 +223,7 @@ fun LoginScreenContent(innerPadding: PaddingValues) {
 						login()
 					},
 					enabled = !isBusy,
-					shape = ContinuousCapsule
+					shape = CircleShape
 				) {
 					Text(
 						text = stringResource(R.string.action_log_in),

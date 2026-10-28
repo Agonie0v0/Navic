@@ -35,7 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.kyant.capsule.ContinuousCapsule
 import org.koin.compose.koinInject
 import paige.navic.R
 import paige.navic.domain.manager.runtime.PreferenceManager
@@ -203,14 +202,14 @@ private fun StatPageContent(
 						modifier = Modifier
 							.fillMaxWidth()
 							.height(8.dp)
-							.clip(ContinuousCapsule)
+							.clip(CircleShape)
 							.background(MaterialTheme.colorScheme.surfaceVariant)
 					) {
 						Box(
 							modifier = Modifier
 								.fillMaxWidth(ratio.coerceIn(0.05f, 1f))
 								.fillMaxHeight()
-								.clip(ContinuousCapsule)
+								.clip(CircleShape)
 								.background(barColor)
 						)
 					}
