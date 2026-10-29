@@ -41,6 +41,7 @@ fun main() {
 	val ids = DomainSongListType.Year.toSqlQuery(idsOnly = true).sql
 	check(ids.startsWith("SELECT songId FROM SongEntity"))
 	check(ids.endsWith("ORDER BY COALESCE(year, 0) DESC, LOWER(title) ASC"))
+	check(DomainSongListType.Random.toSqlQuery(idsOnly = true).sql == "SELECT songId FROM SongEntity")
 	check(DomainSongListType.Year.toSqlQuery(reversed = true, idsOnly = true).sql
 		.endsWith("ORDER BY COALESCE(year, 0) ASC, LOWER(title) DESC"))
 	runBlocking {

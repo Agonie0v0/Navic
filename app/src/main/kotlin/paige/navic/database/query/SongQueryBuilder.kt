@@ -64,7 +64,8 @@ fun DomainSongListType.toSqlQuery(
 	}
 
 	val columns = if (idsOnly) "songId" else "*"
-	val sql = "SELECT $columns FROM SongEntity$whereSql ORDER BY $orderBy"
+	val ordering = if (idsOnly && this == DomainSongListType.Random) "" else " ORDER BY $orderBy"
+	val sql = "SELECT $columns FROM SongEntity$whereSql$ordering"
 
 	return createRoomRawQuery(sql, args)
 }
