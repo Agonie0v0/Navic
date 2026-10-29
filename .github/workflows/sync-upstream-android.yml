@@ -118,7 +118,7 @@ jobs:
 
       - name: Check queue search and selection order
         if: steps.sync.outputs.should_release == 'true'
-        run: python3 checks/check_queue_search.py
+        run: python3 checks/check_queue_search.py --variant release
 
       - name: Push merged source
         if: steps.sync.outputs.should_release == 'true'
