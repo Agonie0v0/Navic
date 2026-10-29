@@ -42,8 +42,11 @@ init_script.write_text('''gradle.beforeProject { app ->
     app.tasks.register('printCheckRuntimeClasspath') {
         doLast {
             app.configurations.getByName(System.getProperty('navic.check.variant') + 'RuntimeClasspath')
-                .resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                    println("NAVIC_CHECK_ARTIFACT\\t${artifact.moduleVersion.id.group}\\t${artifact.name}\\t${artifact.file.absolutePath}")
+                .incoming.artifactView {
+                    componentFilter { it instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier }
+                }.artifacts.artifacts.each { artifact ->
+                    def component = artifact.id.componentIdentifier
+                    println("NAVIC_CHECK_ARTIFACT\\t${component.group}\\t${component.module}\\t${artifact.file.absolutePath}")
                 }
         }
     }

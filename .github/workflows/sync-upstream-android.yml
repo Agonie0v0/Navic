@@ -88,6 +88,7 @@ jobs:
       - name: Initialize upstream dependencies
         if: steps.sync.outputs.should_release == 'true'
         run: |
+          git config --global url."https://github.com/FFmpeg/FFmpeg.git".insteadOf https://git.ffmpeg.org/ffmpeg.git
           git submodule sync --recursive
           git submodule update --init --recursive --jobs 4
 

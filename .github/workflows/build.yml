@@ -37,8 +37,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          submodules: 'recursive'
+
+      - name: Initialize upstream dependencies
+        run: |
+          git config --global url."https://github.com/FFmpeg/FFmpeg.git".insteadOf https://git.ffmpeg.org/ffmpeg.git
+          git submodule sync --recursive
+          git submodule update --init --recursive --jobs 4
 
       - name: Setup JDK
         uses: actions/setup-java@v5
