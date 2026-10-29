@@ -1,4 +1,4 @@
-"""Run after :androidApp:assembleDebug; uses its cached Kotlin compiler, no test dependencies."""
+"""Run after :app:assembleDebug; uses its cached Kotlin compiler, no test dependencies."""
 import os
 from pathlib import Path
 import subprocess
@@ -23,7 +23,7 @@ compiler = [jar("org.jetbrains.kotlin", name, version) for name in (
 compiler += [jar("org.jetbrains.kotlin", "kotlin-reflect"),
              jar("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
              jar("org.jetbrains", "annotations")]
-model = next((root / "composeApp/build").rglob("paige/navic/domain/models/DomainSong.class"), None)
+model = next((root / "app/build").rglob("paige/navic/domain/model/DomainSong.class"), None)
 if model is None:
     raise SystemExit("Build Android first; DomainSong.class is missing.")
 classes = model.parents[4]
@@ -31,9 +31,9 @@ classpath = os.pathsep.join([str(classes), compiler[1],
     jar("org.jetbrains.kotlinx", "kotlinx-serialization-core-jvm")])
 out = root / "build/queue-search-check"
 out.mkdir(parents=True, exist_ok=True)
-source = root / "composeApp/src/commonMain/kotlin/paige/navic/ui/screens/queue/QueueSearch.kt"
+source = root / "app/src/main/kotlin/paige/navic/ui/screen/queue/QueueSearch.kt"
 subprocess.run(["java", "-cp", os.pathsep.join(compiler), "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
     "-no-stdlib", "-no-reflect", "-classpath", classpath, "-d", str(out),
     str(source), str(root / "checks/QueueSearchCheck.kt")], check=True)
 subprocess.run(["java", "-cp", os.pathsep.join([str(out), classpath]),
-    "paige.navic.ui.screens.queue.QueueSearchCheckKt"], check=True)
+    "paige.navic.ui.screen.queue.QueueSearchCheckKt"], check=True)

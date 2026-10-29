@@ -3,9 +3,9 @@ name: Build
 on:
   push:
     paths:
-      - composeApp/**
+      - app/**
       - gradle/**
-      - iosApp/**
+      - vendor/**
       - build.gradle.kts
       - settings.gradle.kts
       - .github/workflows/build.yml
@@ -16,9 +16,9 @@ on:
       - '*'
   pull_request:
     paths:
-      - composeApp/**
+      - app/**
       - gradle/**
-      - iosApp/**
+      - vendor/**
       - build.gradle.kts
       - settings.gradle.kts
       - .github/workflows/build.yml
@@ -32,10 +32,13 @@ concurrency:
 jobs:
   build-android:
     name: Android
+    #runs-on: codeberg-medium
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          submodules: 'recursive'
 
       - name: Setup JDK
         uses: actions/setup-java@v5
@@ -44,8 +47,15 @@ jobs:
           java-version: 21
           cache: gradle
 
+      #- name: Setup Android SDK
+      #  uses: https://github.com/android-actions/setup-android@035682743ab223ec9c6169af09811dff8247e520
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
+
+      - name: Verify Simplified Chinese coverage
+        if: github.repository == 'Agonie0v0/Navic'
+        run: python3 .github/scripts/check-zh-coverage.py
 
       - name: Build with Gradle (release)
         id: build_release
@@ -57,20 +67,26 @@ jobs:
           SIGNING_STORE_FILE: ${{ github.workspace }}/release.keystore
         run: |
           echo "${{ secrets.KEYSTORE }}" | base64 -d > release.keystore
-          ./gradlew :androidApp:packageRelease --stacktrace
-          mv androidApp/build/outputs/apk/**/*.apk ./
-          ./gradlew :androidApp:packageRelease -Pfdroid=true --stacktrace
-          mv androidApp/build/outputs/apk/**/*.apk ./
+          ./gradlew :app:packageRelease --stacktrace
+          mv app/build/outputs/apk/**/*.apk ./
+          ./gradlew :app:packageRelease -Pfdroid=true --stacktrace
+          mv app/build/outputs/apk/**/*.apk ./
           rm release.keystore
 
       - name: Build with Gradle (debug)
         id: build_debug
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.repository != 'ssalggnikool/Navic'
         run: |
-          ./gradlew :androidApp:assembleDebug --stacktrace
-          mv androidApp/build/outputs/apk/**/*.apk ./
-          ./gradlew :androidApp:assembleDebug -Pfdroid=true --stacktrace
-          mv androidApp/build/outputs/apk/**/*.apk ./
+          ./gradlew :app:assembleDebug --stacktrace
+          mv app/build/outputs/apk/**/*.apk ./
+          if [[ "$GITHUB_REPOSITORY" == 'ssalggnikool/Navic' ]]; then
+            ./gradlew :app:assembleDebug -Pfdroid=true --stacktrace
+            mv app/build/outputs/apk/**/*.apk ./
+          fi
+
+      - name: Check queue search
+        if: github.repository == 'Agonie0v0/Navic'
+        run: python3 checks/check_queue_search.py
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v6
@@ -80,67 +96,10 @@ jobs:
           compression-level: 0
           if-no-files-found: ignore
 
-  build-ios:
-    name: iOS
-    if: github.repository == 'ssalggnikool/Navic'
-    runs-on: macos-26
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup JDK
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-          cache: gradle
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-
-      - name: Cache konan
-        uses: actions/cache@v4
-        with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle.kts', '**/libs.versions.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-konan-
-
-      - name: Run Gradle tasks
-        run: ./gradlew :composeApp:generateValkyrieImageVector
-
-      - name: Build IPA
-        run: |
-          xcodebuild archive \
-            -project iosApp/iosApp.xcodeproj \
-            -scheme iosApp \
-            -configuration Release \
-            -sdk iphoneos \
-            -archivePath "iosApp.xcarchive" \
-            CODE_SIGN_ENTITLEMENTS="iosApp/entitlements.xml" \
-            CODE_SIGN_IDENTITY="-" \
-            CODE_SIGN_STYLE=Manual \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
-
-          mkdir -p Payload
-
-          APP_PATH=$(find "iosApp.xcarchive/Products/Applications" -name "*.app" | head -n 1)
-          cp -r "$APP_PATH" Payload/
-
-          zip -r "Navic.ipa" Payload
-
-      - name: Upload IPA Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: navic-release-ios
-          path: Navic.ipa
-          compression-level: 0
-          if-no-files-found: ignore
-
   upload-artifacts-to-discord:
     name: Upload Artifacts to Discord
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: [ build-android, build-ios ]
+    if: github.repository == 'ssalggnikool/Navic' && github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/bleeding-edge')
+    needs: [ build-android ]
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifacts
@@ -148,15 +107,22 @@ jobs:
 
       - name: Post artifacts to Discord webhook
         shell: bash
-        if: env.CI_BUILD_WEBHOOK
         env:
           CI_BUILD_WEBHOOK: ${{ secrets.CI_BUILD_WEBHOOK }}
+          BLEEDING_EDGE_CI_WEBHOOK: ${{ secrets.BLEEDING_EDGE_CI_WEBHOOK }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           shopt -s nullglob globstar
 
+          if [ "$REF_NAME" = "bleeding-edge" ] && [ -n "$BLEEDING_EDGE_CI_WEBHOOK" ]; then
+            WEBHOOK_URL="$BLEEDING_EDGE_CI_WEBHOOK"
+          else
+            WEBHOOK_URL="$CI_BUILD_WEBHOOK"
+          fi
+
           files=()
           i=1
-          for file in **/*.apk; do  # TODO: Add ipa - too big for Discord 10mb limit (need boooosts)
+          for file in **/*.apk; do
             files+=("-F file${i}=@${file}")
             ((i++))
           done
@@ -168,14 +134,14 @@ jobs:
 
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          payload=$(jq -n --arg content "Builds for [${GITHUB_SHA::7}](<$run_url>)" '{$content}')
+          payload=$(jq -n --arg content "Builds for [${GITHUB_SHA::7}](<$run_url>) https://klipy.com/gifs/new-navic-update" '{$content}')
 
-          curl -XPOST "$CI_BUILD_WEBHOOK" -F "payload_json=$payload" "${files[@]}"
+          curl -XPOST "$WEBHOOK_URL" -F "payload_json=$payload" "${files[@]}"
 
   create-release:
     name: Create GitHub Release
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    needs: [ build-android, build-ios ]
+    if: github.repository == 'ssalggnikool/Navic' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: [ build-android ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -191,7 +157,7 @@ jobs:
         run: |
           shopt -s nullglob globstar
 
-          gh release create "$GITHUB_REF_NAME" **/*.{apk,ipa} \
+          gh release create "$GITHUB_REF_NAME" **/*.apk \
             --repo "$GITHUB_REPOSITORY" \
             --title "$GITHUB_REF_NAME" \
             --draft --generate-notes

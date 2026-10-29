@@ -1,0 +1,213 @@
+/*
+ * Navic, a Subsonic music streaming app for Android
+ * Copyright (c) 2026 paige
+ * SPDX-License-Identifier: GPL-3.0-only
+ */
+
+package paige.navic.ui.screen.queue.component
+
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import paige.navic.R
+import paige.navic.di.LocalNavStack
+import paige.navic.domain.manager.runtime.PreferenceManager
+import paige.navic.domain.model.DomainExplicitStatus
+import paige.navic.domain.model.DomainSong
+import paige.navic.domain.model.settings.ExplicitContentPlayback
+import paige.navic.ui.component.common.CoverArt
+import paige.navic.ui.component.common.MarqueeText
+import paige.navic.ui.component.common.SegmentedListItem
+import paige.navic.ui.component.common.SegmentedListItemDefaults
+import paige.navic.ui.component.common.SwipeToDismissBox
+import paige.navic.ui.component.common.Waveform
+import paige.navic.ui.icons.Icons
+import paige.navic.ui.icons.outlined.Delete
+import paige.navic.ui.icons.outlined.DragHandle
+import paige.navic.ui.icons.outlined.Lock
+import paige.navic.ui.icons.outlined.Offline
+import paige.navic.ui.icons.outlined.QueuePlayNext
+import paige.navic.ui.component.common.TooltipBox
+import paige.navic.ui.util.buildSongInfoString
+
+@Composable
+fun QueueScreenItem(
+	index: Int,
+	count: Int,
+	song: DomainSong,
+	isPlaying: Boolean,
+	isSelected: Boolean,
+	isDragging: Boolean,
+	onDrag: () -> Unit,
+	onClick: () -> Unit,
+	onRemove: () -> Unit,
+	canReorder: Boolean = true,
+	onPlayNext: (() -> Unit)? = null,
+	isOffline: Boolean = false,
+	isDownloaded: Boolean = false
+) {
+	val preferenceManager = koinInject<PreferenceManager>()
+	val isExplicit = song.explicitStatus == DomainExplicitStatus.Explicit
+		&& preferenceManager.explicitContentPlayback != ExplicitContentPlayback.Allowed
+	val maybeUnavailable = isOffline && !isDownloaded
+
+	val elevation by animateDpAsState(
+		targetValue = if (isDragging) 8.dp else 0.dp,
+		animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec()
+	)
+
+	val dismissState = rememberSwipeToDismissBoxState()
+	val scope = rememberCoroutineScope()
+
+	val itemShape = SegmentedListItemDefaults.segmentedShapes(
+		index = index,
+		count = count,
+		dismissDirection = dismissState.dismissDirection
+	)
+
+	val backStack = LocalNavStack.current
+
+	SwipeToDismissBox(
+		state = dismissState,
+		onDismiss = {
+			onRemove()
+			scope.launch {
+				dismissState.reset()
+			}
+		},
+		backgroundContent = {
+			Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.clip(itemShape.shape)
+					.background(MaterialTheme.colorScheme.errorContainer)
+					.padding(horizontal = 20.dp)
+			) {
+				Icon(
+					imageVector = Icons.Outlined.Delete,
+					contentDescription = stringResource(R.string.action_remove_from_queue),
+					tint = MaterialTheme.colorScheme.onErrorContainer,
+					modifier = Modifier.align(
+						when (dismissState.dismissDirection) {
+							SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+							else -> Alignment.CenterEnd
+						}
+					)
+				)
+			}
+		},
+		content = {
+			Surface(
+				shadowElevation = elevation,
+				shape = itemShape.shape
+			) {
+				SegmentedListItem(
+					onClick = onClick,
+					enabled = !isExplicit,
+					selected = isSelected,
+					colors = SegmentedListItemDefaults.segmentedColors(
+						selectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+						selectedContentColor = MaterialTheme.colorScheme.primary,
+						selectedSupportingContentColor = MaterialTheme.colorScheme.primary
+							.copy(alpha = .7f)
+					),
+					shapes = itemShape,
+					verticalAlignment = Alignment.CenterVertically,
+					content = {
+						if (isPlaying) {
+							MarqueeText(song.title)
+						} else {
+							Text(
+								song.title,
+								modifier = Modifier.weight(1f),
+								maxLines = 1
+							)
+						}
+					},
+					supportingContent = {
+						Text(
+							buildSongInfoString(
+								song,
+								showYear = false,
+								showAlbum = false
+							),
+							modifier = Modifier.weight(1f),
+							maxLines = 1
+						)
+					},
+					leadingContent = {
+						CoverArt(
+							modifier = Modifier.size(48.dp),
+							coverArtId = song.coverArtId,
+							shape = RoundedCornerShape(10.dp)
+						)
+					},
+					trailingContent = {
+						Row(
+							horizontalArrangement = Arrangement.spacedBy(8.dp),
+							verticalAlignment = Alignment.CenterVertically
+						) {
+							if (isExplicit) {
+								Icon(
+									Icons.Outlined.Lock,
+									stringResource(R.string.info_explicit),
+									modifier = Modifier.size(20.dp)
+								)
+							}
+							if (maybeUnavailable) {
+								Icon(
+									Icons.Outlined.Offline,
+									stringResource(R.string.info_not_available_offline),
+									modifier = Modifier.size(20.dp)
+								)
+							}
+							if (isSelected) {
+								Waveform(isPlaying = isPlaying)
+							}
+							if (onPlayNext != null) {
+								TooltipBox(stringResource(R.string.action_play_next)) {
+									IconButton(onClick = onPlayNext, enabled = !isExplicit) {
+										Icon(Icons.Outlined.QueuePlayNext, stringResource(R.string.action_play_next))
+									}
+								}
+							}
+							if (canReorder) IconButton(
+								onClick = onDrag
+							) {
+								Icon(
+									Icons.Outlined.DragHandle,
+									contentDescription = stringResource(R.string.action_reorder)
+								)
+							}
+						}
+					},
+					contentPadding = PaddingValues(10.dp)
+				)
+			}
+		}
+	)
+}

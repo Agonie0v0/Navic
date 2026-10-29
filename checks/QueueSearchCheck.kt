@@ -1,6 +1,6 @@
-package paige.navic.ui.screens.queue
+package paige.navic.ui.screen.queue
 
-import paige.navic.domain.models.*
+import paige.navic.domain.model.*
 import kotlin.time.Duration
 
 private fun song(id: String, title: String, artist: String? = null, album: String? = null) = DomainSong(

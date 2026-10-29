@@ -75,7 +75,7 @@
 发现需要更新的版本后，工作流会：
 
 1. 合并对应的上游版本，保留本仓库已有的定制提交。
-2. 检查简体中文资源覆盖情况。
+2. 初始化上游 Git 子模块，并检查简体中文资源覆盖情况。
 3. 构建 Android Release APK。
 4. 将合并后的代码推送到 `master`，使用仓库配置的证书签名并发布 APK。
 
@@ -89,21 +89,16 @@
 
 ## 本地构建与检查
 
-准备 **JDK 21** 和项目要求的 **Android SDK**。当前配置使用 Android API 37 和 Build Tools 37.0.0。
+准备 **JDK 21** 和项目要求的 **Android SDK**。beta01 使用 `app` 模块，并通过 Git 子模块构建 Media3、FFmpeg 和 Subsonic 客户端。Gradle 会按项目配置安装所需的 NDK 与 CMake。
 
-Windows PowerShell：
-
-```powershell
-.\gradlew.bat :androidApp:assembleDebug
-```
-
-macOS / Linux：
+在 **Linux、macOS 或 WSL** 中构建；新版 FFmpeg 构建脚本不支持直接使用 Windows PowerShell：
 
 ```bash
-./gradlew :androidApp:assembleDebug
+git submodule update --init --recursive --jobs 4
+./gradlew :app:assembleDebug
 ```
 
-测试 APK 输出到 `androidApp/build/outputs/apk/debug/Navic.apk`。
+测试 APK 输出到 `app/build/outputs/apk/debug/Navic.apk`。无需本地构建时，可使用本仓库的 GitHub Actions。
 
 构建后可运行队列搜索回归检查与中文覆盖检查（需要 Python 3.11+）：
 

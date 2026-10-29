@@ -1,9 +1,11 @@
 # Android feature checks
 
-Build the Android debug app, then run the dependency-free queue regression check:
+Build the Android debug app on Linux, macOS, or WSL, then run the dependency-free queue regression check.
+The beta01 FFmpeg module does not support a native Windows build.
 
-```powershell
-.\gradlew.bat :androidApp:assembleDebug
+```bash
+git submodule update --init --recursive --jobs 4
+./gradlew :app:assembleDebug
 python checks/check_queue_search.py
 python .github/scripts/check-zh-coverage.py
 ```
@@ -16,6 +18,8 @@ It requires Python 3.11+ and the same Java used for Gradle.
 Device acceptance (requires a connected Android device and a test music account):
 
 - Select several songs, select/deselect all, cancel, and use Back to exit selection.
+  With more than 100 songs, select all and verify that unloaded pages are included;
+  queue and playlist additions must follow the visible sorting, including random order.
   Ordinary taps, long-press menus and swipe actions must still work outside selection.
 - Add a selection to the queue in displayed order; cancel and confirm duplicate warnings.
 - Add a selection to existing playlists and create a new playlist containing that selection.

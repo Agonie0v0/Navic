@@ -85,6 +85,12 @@ jobs:
           echo "upstream_tag=$upstream_tag" >> "$GITHUB_OUTPUT"
           echo "target_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Initialize upstream dependencies
+        if: steps.sync.outputs.should_release == 'true'
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive --jobs 4
+
       - name: Set up JDK
         if: steps.sync.outputs.should_release == 'true'
         uses: actions/setup-java@v5
@@ -105,8 +111,8 @@ jobs:
         if: steps.sync.outputs.should_release == 'true'
         shell: bash
         run: |
-          ./gradlew :androidApp:assembleRelease --stacktrace
-          apk=$(find androidApp/build/outputs/apk/release -name '*.apk' -print -quit)
+          ./gradlew :app:assembleRelease --stacktrace
+          apk=$(find app/build/outputs/apk/release -name '*.apk' -print -quit)
           test -n "$apk"
           cp "$apk" Navic-unsigned.apk
 
