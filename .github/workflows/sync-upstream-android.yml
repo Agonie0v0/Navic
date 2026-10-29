@@ -116,6 +116,10 @@ jobs:
           test -n "$apk"
           cp "$apk" Navic-unsigned.apk
 
+      - name: Check queue search and selection order
+        if: steps.sync.outputs.should_release == 'true'
+        run: python3 checks/check_queue_search.py
+
       - name: Push merged source
         if: steps.sync.outputs.should_release == 'true'
         env:

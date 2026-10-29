@@ -2,6 +2,10 @@ package paige.navic.ui.screen.queue
 
 import paige.navic.domain.model.*
 import kotlin.time.Duration
+import androidx.paging.PagingSource
+import kotlinx.coroutines.runBlocking
+import paige.navic.database.query.toSqlQuery
+import paige.navic.database.paging.createRandomPagingSourceFactory
 
 private fun song(id: String, title: String, artist: String? = null, album: String? = null) = DomainSong(
 	id = id, title = title, artistName = artist, artistId = "artist", albumTitle = album,
@@ -34,4 +38,24 @@ fun main() {
 	check(filterQueue(remaining.reversed(), "夜曲").single().index == 1)
 	check(queue.size == 4)
 	println("Queue search checks passed (matching, duplicate occurrences, removal and reordering).")
+	val ids = DomainSongListType.Year.toSqlQuery(idsOnly = true).sql
+	check(ids.startsWith("SELECT songId FROM SongEntity"))
+	check(ids.endsWith("ORDER BY COALESCE(year, 0) DESC, LOWER(title) ASC"))
+	check(DomainSongListType.Year.toSqlQuery(reversed = true, idsOnly = true).sql
+		.endsWith("ORDER BY COALESCE(year, 0) ASC, LOWER(title) DESC"))
+	runBlocking {
+		var selectionOrder = emptyList<String>()
+		val allIds = (0..149).map { it.toString() }
+		val factory = createRandomPagingSourceFactory(
+			getIds = { allIds }, getId = { it }, fetchByIds = { it.reversed() },
+			onOrder = { selectionOrder = it }
+		)
+		val source = factory()
+		check(selectionOrder.toSet() == allIds.toSet())
+		val page = source.load(PagingSource.LoadParams.Refresh<Int>(null, 20, false)) as PagingSource.LoadResult.Page<Int, String>
+		check(page.data == selectionOrder.take(20))
+		val nextPage = source.load(PagingSource.LoadParams.Append(20, 20, false)) as PagingSource.LoadResult.Page<Int, String>
+		check(nextPage.data == selectionOrder.drop(20).take(20))
+		println("Selection checks passed (sorted IDs, reversed order, random order and unloaded pages).")
+	}
 }

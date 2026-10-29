@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import subprocess
 import tomllib
+import zipfile
 
 root = Path(__file__).resolve().parents[1]
 cache = Path(os.environ.get("GRADLE_USER_HOME", Path.home() / ".gradle")) / "caches/modules-2/files-2.1"
@@ -27,10 +28,21 @@ model = next((root / "app/build").rglob("paige/navic/domain/model/DomainSong.cla
 if model is None:
     raise SystemExit("Build Android first; DomainSong.class is missing.")
 classes = model.parents[4]
-classpath = os.pathsep.join([str(classes), compiler[1],
-    jar("org.jetbrains.kotlinx", "kotlinx-serialization-core-jvm")])
 out = root / "build/queue-search-check"
 out.mkdir(parents=True, exist_ok=True)
+def android_jar(group, artifact):
+    aar = max((cache / group / artifact).rglob("*.aar"), key=lambda p: p.stat().st_mtime)
+    target = out / (artifact + ".jar")
+    with zipfile.ZipFile(aar) as archive:
+        target.write_bytes(archive.read("classes.jar"))
+    return str(target)
+
+classpath = os.pathsep.join([str(classes), compiler[1],
+    android_jar("androidx.room3", "room3-runtime-android"),
+    android_jar("androidx.sqlite", "sqlite-android"),
+    android_jar("androidx.paging", "paging-common-android"),
+    jar("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
+    jar("org.jetbrains.kotlinx", "kotlinx-serialization-core-jvm")])
 source = root / "app/src/main/kotlin/paige/navic/ui/screen/queue/QueueSearch.kt"
 subprocess.run(["java", "-cp", os.pathsep.join(compiler), "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
     "-no-stdlib", "-no-reflect", "-classpath", classpath, "-d", str(out),

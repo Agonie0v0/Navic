@@ -279,7 +279,7 @@ fun SongListScreen(
 				.padding(top = innerPadding.calculateTopPadding())
 				.background(MaterialTheme.colorScheme.surface),
 			finished = !isLoading,
-			onRefresh = { viewModel.refreshSongs(true) },
+			onRefresh = { finishSelection(); viewModel.refreshSongs(true) },
 			key = state
 		) {
 			LazyColumn(

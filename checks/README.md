@@ -13,6 +13,8 @@ python .github/scripts/check-zh-coverage.py
 The queue check compiles the real filtering function with the Kotlin compiler already
 cached by the Android build. It checks Chinese text, case-insensitive title/artist/album
 matching, empty queries, absent metadata, duplicate occurrences, deletion and reordering.
+It also checks sorted and reversed selection IDs, and verifies that random selection
+uses the same order across loaded and unloaded pages as the paging source.
 It requires Python 3.11+ and the same Java used for Gradle.
 
 Device acceptance (requires a connected Android device and a test music account):
